@@ -16,13 +16,13 @@ test("overlap levels count each lens independently", () => {
 test("convergence happens while the scene is still visible, and reverses", () => {
   assert.equal(convergence(110, 800, 910, 110), 0);
   assert.equal(convergence(-18, 800, 910, 110), 1);
-  assert.equal(convergence(46, 800, 910, 110), 0.5);
+  assert.equal(convergence(62, 800, 910, 110), 0.5);
   assert.equal(convergence(600, 420, 844, 85), 0);
   assert.equal(convergence(180, 420, 844, 85), 1);
 });
 test("final geometry has five circles covering central summit and no time drift", () => {
   const a = lensGeometry(960, 500, 1, 0);
-  assert.equal(overlapCount(960 * 0.53, 500 * 0.52, lensApertures(a)), 5);
+  assert.equal(overlapCount(960 * 0.76, 500 * 0.46, lensApertures(a)), 5);
   assert.deepEqual(a, lensGeometry(960, 500, 1, 100));
   assert.notDeepEqual(
     lensGeometry(960, 500, 0, 0),
@@ -42,4 +42,16 @@ test("summit calibration follows the measured apex through the clip", () => {
   assert.deepEqual(summitAt(18), [830 / 1920, 147 / 1080]);
   assert.deepEqual(summitAt(0.5), [924.5 / 1920, 188 / 1080]);
   assert.deepEqual(summitAt(100), summitAt(18));
+});
+
+test("all five clear apertures coincide completely at the final scroll state", () => {
+  const holes = lensApertures(lensGeometry(1672, 831, 1, 4));
+  for (const hole of holes) {
+    for (let i = 0; i < 3; i++)
+      assert.ok(Math.abs(hole[i] - holes[0][i]) < 1e-6);
+  }
+  assert.equal(
+    overlapCount(holes[0][0] + holes[0][2] * 0.9, holes[0][1], holes),
+    5,
+  );
 });

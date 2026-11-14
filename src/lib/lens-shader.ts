@@ -1,4 +1,3 @@
-import { FOCUS_CENTER } from "./lenses.ts";
 export function fragmentShader(explicitLod: boolean) {
   const sample = explicitLod
     ? "texture2DLodEXT(frame,coordinate,level)"
@@ -10,6 +9,7 @@ uniform vec2 resolution;
 uniform vec2 source;
 uniform vec2 texel;
 uniform vec2 summit;
+uniform vec2 focus;
 uniform vec3 circles[5];
 varying vec2 uv;
 void main(){
@@ -18,7 +18,7 @@ void main(){
  for(int i=0;i<5;i++){float d=distance(p,circles[i].xy);count+=1.0-smoothstep(circles[i].z-.7,circles[i].z+.7,d);}
  vec2 ratio=resolution/source;
  vec2 crop=ratio/max(ratio.x,ratio.y);
- vec2 st=(uv-vec2(${FOCUS_CENTER[0].toFixed(6)},${(1 - FOCUS_CENTER[1]).toFixed(6)}))*crop+vec2(summit.x,1.0-summit.y);
+ vec2 st=(uv-vec2(focus.x,1.0-focus.y))*crop+vec2(summit.x,1.0-summit.y);
  // A shared full-blur frame and its sharp counterpart stay synchronized.
  float level=log2(1.0+32.0*crop.x/(texel.x*resolution.x));
  float baseLevel=log2(max(crop.x/(texel.x*resolution.x),crop.y/(texel.y*resolution.y)));
@@ -30,6 +30,8 @@ void main(){
  color+=${sample}*weight;total+=weight;
  }}
  vec4 sharp=texture2D(frame,clamp(st,vec2(.001),vec2(.999)));
+ color.rgb=pow(max(color.rgb/total,vec3(0.0)),vec3(1.35,1.4,1.4))*total;
+ sharp.rgb=pow(max(sharp.rgb,vec3(0.0)),vec3(1.35,1.4,1.4));
  // Count every opening independently: 0%, 20%, 40%, 60%, 80%, 100% clarity.
  vec4 picture=mix(color/total,sharp,count/5.0);
  if(st.y>.94){vec4 sky=(texture2D(frame,vec2(.2,.995))+texture2D(frame,vec2(.5,.995))+texture2D(frame,vec2(.8,.995)))/3.0;picture=mix(picture,sky,smoothstep(.94,1.04,st.y));}

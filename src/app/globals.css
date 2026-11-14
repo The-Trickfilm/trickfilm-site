@@ -1915,3 +1915,74 @@ html {
 .selected-work .work-heading h2 {
   font-size: clamp(37px, 4vw, 64px);
 }
+
+/* Reference composition: a continuous illuminated field, with no split-panel seam. */
+.hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 105% 160% at 0% 45%,
+    #f5f3ed 0%,
+    #f5f3ed 39%,
+    #f5f3edf5 46%,
+    #f5f3edbd 51%,
+    #f5f3ed40 57%,
+    transparent 65%
+  );
+}
+.mountain {
+  width: 100%;
+}
+@media (min-width: 1001px) {
+  .hero-copy {
+    width: 49%;
+    padding-top: clamp(65px, 5.5vw, 92px);
+  }
+  h1 {
+    font-size: clamp(64px, 5.65vw, 95px);
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+    margin-bottom: 38px;
+  }
+  .hero-bottom > p {
+    font-size: clamp(18px, 1.55vw, 26px);
+    max-width: 710px;
+  }
+  .actions {
+    margin-top: 36px;
+  }
+  .button {
+    padding-left: 34px;
+    padding-right: 34px;
+  }
+  .hero-services {
+    margin-top: 70px;
+  }
+  .header nav {
+    width: 50%;
+  }
+}
+@media (max-width: 1000px) {
+  .hero:before {
+    content: none;
+  }
+  .mountain {
+    width: calc(100% + 13.64%);
+  }
+}
+.hero h1 em {
+  letter-spacing: -0.025em;
+}
+.hero h1 span:nth-of-type(2) {
+  letter-spacing: -0.035em;
+}
+@media (min-width: 1001px) {
+  .actions {
+    margin-top: 28px;
+    line-height: 1.2;
+  }
+}

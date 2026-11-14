@@ -6,7 +6,12 @@ import {
   useSyncExternalStore,
   useId,
 } from "react";
-import { convergence, lensGeometry, lensApertures } from "@/lib/lenses";
+import {
+  convergence,
+  lensGeometry,
+  lensApertures,
+  focusCenter,
+} from "@/lib/lenses";
 
 import { summitAt } from "@/lib/summit";
 import { lensArtwork } from "@/lib/lens-artwork";
@@ -30,9 +35,7 @@ export function Mountain() {
     () => true,
   );
   const pauseRef = useRef(false);
-  useEffect(() => {
-    pauseRef.current = paused;
-  }, [paused]);
+  const videoElement = useRef<HTMLVideoElement | null>(null);
   useEffect(() => {
     const el = canvas.current!,
       host = region.current!;
@@ -95,14 +98,14 @@ export function Mountain() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     const uniforms = Object.fromEntries(
-      ["resolution", "source", "texel", "summit", "circles[0]"].map((n) => [
-        n,
-        gl.getUniformLocation(program, n),
-      ]),
+      ["resolution", "source", "texel", "summit", "focus", "circles[0]"].map(
+        (n) => [n, gl.getUniformLocation(program, n)],
+      ),
     );
     const poster = new Image();
     poster.src = "/media/summit-poster.webp";
     const video = document.createElement("video");
+    videoElement.current = video;
     video.muted = true;
     video.loop = true;
     video.playsInline = true;
@@ -121,7 +124,7 @@ export function Mountain() {
         video.src = mobile
           ? "/media/summit-mobile.mp4"
           : "/media/summit-desktop.mp4";
-        video.play().catch(() => {});
+        if (!pauseRef.current) video.play().catch(() => {});
       }
     };
     motion();
@@ -184,6 +187,10 @@ export function Mountain() {
         const art = lensArtwork[i];
         const scale = radius / (art.width / 2);
         outlinePaths.current[i]?.setAttribute(
+          "opacity",
+          String(1 - progress * 0.78),
+        );
+        outlinePaths.current[i]?.setAttribute(
           "transform",
           `translate(${x - (art.width / 2) * scale} ${y - (art.height / 2) * scale}) scale(${scale})`,
         );
@@ -192,6 +199,12 @@ export function Mountain() {
         image instanceof HTMLVideoElement ? image.currentTime : 0,
       );
       gl.uniform2f(uniforms.summit, peak[0], peak[1]);
+      const anchor = focusCenter(w, h);
+      gl.uniform2f(
+        uniforms.focus,
+        anchor[0],
+        0.3 + (anchor[1] - 0.3) * progress,
+      );
       gl.uniform2f(uniforms.resolution, w, h);
       gl.uniform2f(uniforms.texel, 1 / staging.width, 1 / staging.height);
       gl.uniform2f(
@@ -226,6 +239,7 @@ export function Mountain() {
     id = requestAnimationFrame(draw);
     return () => {
       disposed = true;
+      if (videoElement.current === video) videoElement.current = null;
       document.removeEventListener("visibilitychange", visibility);
       el.removeEventListener("webglcontextlost", contextLost);
       cancelAnimationFrame(id);
@@ -271,6 +285,7 @@ export function Mountain() {
               fr={art.aperture.radius}
             >
               <stop offset="0" stopColor="white" stopOpacity="0.05" />
+              <stop offset="0.96" stopColor="white" stopOpacity="0.05" />
               <stop offset="1" stopColor="white" stopOpacity="0.20" />
             </radialGradient>
           ))}
@@ -291,7 +306,13 @@ export function Mountain() {
         <button
           className="motion-control"
           aria-pressed={paused}
-          onClick={() => setPaused(!paused)}
+          onClick={() => {
+            const next = !paused;
+            pauseRef.current = next;
+            if (next) videoElement.current?.pause();
+            else if (!reduced) videoElement.current?.play().catch(() => {});
+            setPaused(next);
+          }}
         >
           {paused ? "Play motion" : "Pause motion"}
         </button>

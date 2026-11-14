@@ -82,6 +82,7 @@ for (const explicit of [true, false])
           ["source", 512, 512],
           ["texel", 1 / 1024, 1 / 1024],
           ["summit", 0.53, 0.52],
+          ["focus", 0.53, 0.52],
         ] as const)
           gl.uniform2f(gl.getUniformLocation(p, name), x, y);
         const values: number[] = [];

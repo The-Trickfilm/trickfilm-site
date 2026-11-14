@@ -1,3 +1,4 @@
+import { lensArtwork } from "../../src/lib/lens-artwork.ts";
 import { test, expect, type Page } from "@playwright/test";
 async function loadVisibleImages(page: Page) {
   for (const img of await page.locator("img:visible").all()) {
@@ -47,7 +48,8 @@ test("desktop renders WebGL, scroll reverses, pause works, navigation reaches co
   );
   const copy = await page.locator(".hero-copy").boundingBox();
   const media = await page.locator(".mountain").boundingBox();
-  expect(media!.x).toBeGreaterThan(500);
+  expect(media!.x).toBe(0);
+  expect(media!.width).toBe(1672);
   expect(media!.y).toBeLessThan(copy!.y + 100);
   const mountain = page.locator(".mountain");
   await expect(mountain.locator("canvas")).toHaveCSS("opacity", "1");
@@ -88,12 +90,7 @@ test("desktop renders WebGL, scroll reverses, pause works, navigation reaches co
   await expect
     .poll(async () => Number(await mountain.getAttribute("data-progress")))
     .toBe(0);
-  await loadVisibleImages(page);
   await page.screenshot({ path: "/workspace/work/reference-size.png" });
-  await page.screenshot({
-    path: "/workspace/work/desktop.png",
-    fullPage: true,
-  });
   await page.getByRole("link", { name: "Let's solve something" }).click();
   await expect(page.locator("#contact")).toBeInViewport();
   expect(errors).toEqual([]);
@@ -286,7 +283,7 @@ test("lenses float independently, converge in view, then leave naturally with th
   const frozen = await paths.first().getAttribute("transform");
   await page.waitForTimeout(250);
   expect(await paths.first().getAttribute("transform")).toBe(frozen);
-  await page.evaluate(() => window.scrollTo({ top: 200, behavior: "instant" }));
+  await page.evaluate(() => window.scrollTo({ top: 130, behavior: "instant" }));
   await expect
     .poll(async () => Number(await scene.getAttribute("data-progress")))
     .toBe(1);
@@ -298,11 +295,30 @@ test("lenses float independently, converge in view, then leave naturally with th
     expect(box!.y).toBeGreaterThanOrEqual(top);
     expect(box!.y + box!.height).toBeLessThanOrEqual(941);
   }
+  const openings = await paths.evaluateAll(
+    (nodes, artwork) =>
+      nodes.map((node, i) => {
+        const matrix = (node as SVGGraphicsElement).getScreenCTM()!;
+        const p = new DOMPoint(
+          artwork[i].aperture.x,
+          artwork[i].aperture.y,
+        ).matrixTransform(matrix);
+        return [
+          p.x,
+          p.y,
+          artwork[i].aperture.radius * Math.hypot(matrix.a, matrix.b),
+        ];
+      }),
+    lensArtwork,
+  );
+  for (const hole of openings)
+    for (let i = 0; i < 3; i++)
+      expect(Math.abs(hole[i] - openings[0][i])).toBeLessThan(0.1);
   await page.screenshot({ path: "/workspace/work/hero-assembled.png" });
   const joinedY = boxes[0]!.y;
   await page.evaluate(() => window.scrollTo({ top: 350, behavior: "instant" }));
   expect(Number(await scene.getAttribute("data-progress"))).toBe(1);
-  expect((await paths.first().boundingBox())!.y).toBeCloseTo(joinedY - 150, 0);
+  expect((await paths.first().boundingBox())!.y).toBeCloseTo(joinedY - 220, 0);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await expect
     .poll(async () => Number(await scene.getAttribute("data-progress")))

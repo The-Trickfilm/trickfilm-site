@@ -1,5 +1,11 @@
-export const FOCUS_CENTER = [0.53, 0.52] as const;
+export const FOCUS_CENTER = [0.76, 0.46] as const;
 import { lensArtwork } from "./lens-artwork.ts";
+export function focusCenter(width: number, height: number) {
+  return [
+    width / height > 1.4 ? FOCUS_CENTER[0] : 0.53,
+    FOCUS_CENTER[1],
+  ] as const;
+}
 export const centers = [
   [222.48, 122.98],
   [321.98, 195.3],
@@ -20,7 +26,7 @@ export function convergence(
   );
   const progress = Math.max(
     0,
-    Math.min(1, (startTop - sceneTop) / (sceneHeight * 0.16)),
+    Math.min(1, (startTop - sceneTop) / (sceneHeight * 0.12)),
   );
   return progress * progress * (3 - 2 * progress);
 }
@@ -30,28 +36,33 @@ export function lensGeometry(
   progress: number,
   time: number,
 ) {
-  const scale = Math.min((width * 0.78) / 445, (height * 0.5) / 435);
   const rest = [
-    [0.54, 0.31],
-    [0.7, 0.43],
-    [0.66, 0.7],
-    [0.4, 0.71],
-    [0.28, 0.53],
+    [0.735, 0.3],
+    [0.84, 0.43],
+    [0.79, 0.7],
+    [0.65, 0.72],
+    [0.61, 0.52],
   ];
-  return centers.map(([x, y], i) => {
+  const wide = width / height > 1.4;
+  const focus = focusCenter(width, height);
+  const restRadius = Math.min(width * (wide ? 0.15 : 0.3), height * 0.29);
+  const apertureRadius = Math.min(width * 0.25, height * 0.22);
+  return lensArtwork.map((art, i) => {
     const drift = 1 - progress;
-    const targetX = width * FOCUS_CENTER[0] + (x - 222.48) * scale;
-    const targetY = height * FOCUS_CENTER[1] + (y - 217.61) * scale;
-    const restRadius = Math.min(width * 0.26, height * 0.28);
+    const scale = apertureRadius / art.aperture.radius;
+    const targetX = width * focus[0] - (art.aperture.x - art.width / 2) * scale;
+    const targetY =
+      height * focus[1] - (art.aperture.y - art.height / 2) * scale;
     const amplitude = Math.min(width, height) * 0.055;
     return [
       targetX * progress +
-        (width * rest[i][0] + Math.sin(time * 0.38 + i * 1.7) * amplitude) *
+        (width * (wide ? rest[i][0] : (rest[i][0] - 0.5) * 2) +
+          Math.sin(time * 0.38 + i * 1.7) * amplitude) *
           drift,
       targetY * progress +
         (height * rest[i][1] + Math.cos(time * 0.31 + i * 2.1) * amplitude) *
           drift,
-      122.98 * scale * progress + restRadius * drift,
+      (art.width / 2) * scale * progress + restRadius * drift,
     ];
   });
 }
