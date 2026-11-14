@@ -245,8 +245,6 @@ h1 em {
   background: #166d62 url("/media/summit-poster.webp") center/cover;
   overflow: hidden;
   z-index: 0;
-  mask-image: linear-gradient(to right, transparent, black 24%);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 24%);
 }
 .mountain canvas {
   width: 100%;
@@ -502,8 +500,6 @@ footer img {
     width: calc(100% + 13.64%);
     height: 520px;
     margin: 15px -6.82% 0;
-    mask-image: linear-gradient(to bottom, transparent, black 18%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 18%);
   }
   .section {
     padding-top: 65px;
@@ -1749,4 +1745,173 @@ html {
 }
 .mountain[data-ready="true"] .lens-outlines {
   opacity: 1;
+}
+
+/* The scene uses real optical blur, without fading the image into the page. */
+.mountain {
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+.mountain:after {
+  content: none;
+}
+.mountain:before {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  background: url("/media/summit-poster.webp") center/cover;
+  filter: blur(32px);
+  pointer-events: none;
+}
+.mountain canvas {
+  position: relative;
+}
+.mountain[data-ready="true"]:before {
+  visibility: hidden;
+}
+@media (min-width: 1001px) {
+  .hero-copy {
+    width: 49%;
+  }
+  .mountain {
+    width: 50%;
+  }
+}
+
+/* Arrow-driven gallery: the centered project is full color; neighbours recede. */
+.selected-work {
+  overflow: hidden;
+}
+.gallery-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 24px;
+  gap: 20px;
+}
+.gallery-controls p {
+  font-size: 12px;
+  color: #536658;
+  margin: 0;
+}
+.gallery-controls p > span:first-child {
+  color: #183c35;
+}
+.gallery-current-name {
+  margin-left: 24px;
+}
+.gallery-controls > div {
+  display: flex;
+  gap: 10px;
+}
+.gallery-controls button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #aabeb2;
+  border-radius: 50%;
+  background: transparent;
+  color: #234d42;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.gallery-controls button:hover {
+  background: #d9e8df;
+}
+.gallery-controls button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.gallery-controls button svg {
+  transform: rotate(45deg);
+}
+.gallery-controls .arrow-back svg {
+  transform: rotate(225deg);
+}
+.work-gallery {
+  --project-width: clamp(280px, 56vw, 620px);
+  position: relative;
+  display: flex;
+  gap: 38px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  width: 100vw;
+  margin-left: calc(-1 * 4.7vw);
+  padding: 15px calc((100vw - var(--project-width)) / 2) 25px;
+  overscroll-behavior-x: contain;
+}
+.work-gallery::-webkit-scrollbar {
+  display: none;
+}
+.work-gallery .project-card,
+.work-gallery .project-card:nth-child(-n + 2),
+.work-gallery .project-card:last-child {
+  flex: 0 0 var(--project-width);
+  max-width: none;
+  min-width: 0;
+  grid-column: auto;
+  transition:
+    opacity 0.3s,
+    transform 0.35s;
+  transform: scale(0.93);
+  opacity: 0.74;
+}
+.work-gallery .project-card[aria-current="true"] {
+  transform: scale(1);
+  opacity: 1;
+}
+.work-gallery .project-stage {
+  padding: 26px 23px 42px;
+}
+.work-gallery .project-card img {
+  filter: grayscale(1) sepia(1) saturate(1.3) hue-rotate(110deg);
+  transition: filter 0.4s;
+}
+.work-gallery .project-card[aria-current="true"] img {
+  filter: none;
+}
+.work-gallery .project-card h3,
+.work-gallery .project-card:nth-child(-n + 2) h3 {
+  font-size: 25px;
+}
+.work-gallery .project-screen {
+  transform: none;
+}
+.work-gallery .project-card:hover .project-screen {
+  transform: translateY(-3px);
+}
+@media (max-width: 1000px) {
+  .work-gallery {
+    margin-left: -6vw;
+    --project-width: clamp(280px, 62vw, 620px);
+    gap: 24px;
+  }
+}
+@media (max-width: 700px) {
+  .work-gallery {
+    --project-width: 78vw;
+    gap: 16px;
+  }
+  .work-gallery .project-stage {
+    padding: 18px 15px 38px;
+  }
+  .work-gallery .project-card h3,
+  .work-gallery .project-card:nth-child(-n + 2) h3 {
+    font-size: 21px;
+  }
+  .gallery-current-name {
+    display: none;
+  }
+  .gallery-controls {
+    margin-bottom: 12px;
+  }
+}
+
+.selected-work .work-heading {
+  margin-bottom: 45px;
+}
+.selected-work .work-heading h2 {
+  font-size: clamp(37px, 4vw, 64px);
 }

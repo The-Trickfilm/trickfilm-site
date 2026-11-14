@@ -8,51 +8,10 @@ import {
 } from "react";
 import { convergence, lensGeometry, lensApertures } from "@/lib/lenses";
 
+import { summitAt } from "@/lib/summit";
 import { lensArtwork } from "@/lib/lens-artwork";
 
-const gaussianSampling = `
- vec4 color=vec4(0.0);float total=0.0;
- float blur=(5.0-count)/5.0*3.5;
- for(int x=-3;x<=3;x++){for(int y=-3;y<=3;y++){
- float w=exp(-float(x*x+y*y)/4.5);
- color+=texture2D(frame,clamp(st+vec2(float(x),float(y))*blur*.4/resolution*crop,vec2(.001),vec2(.999)))*w;total+=w;
- }}`;
-const pyramidSampling = `
- // Blur radius decreases linearly with the number of overlapping lenses.
- float level=log2(1.0+(5.0-count)/5.0*3.5*crop.x/(texel.x*resolution.x));
- vec2 delta=(exp2(level)-1.0)*texel*.7;
- vec4 color=vec4(0.0);float total=0.0;
- for(int x=-1;x<=1;x++){for(int y=-1;y<=1;y++){
- float w=(x==0?2.0:1.0)*(y==0?2.0:1.0);
- color+=texture2DLodEXT(frame,clamp(st+vec2(float(x),float(y))*delta,vec2(.001),vec2(.999)),level)*w;total+=w;
- }}`;
-function fragmentShader(mipmaps: boolean) {
-  return `${mipmaps ? "#extension GL_EXT_shader_texture_lod : enable\n" : ""}
-precision mediump float;
-uniform sampler2D frame;
-uniform vec2 resolution;
-uniform vec2 source;
-uniform vec2 texel;
-uniform vec3 circles[5];
-varying vec2 uv;
-void main(){
- vec2 p=vec2(uv.x,1.0-uv.y)*resolution;
- float count=0.0;
- for(int i=0;i<5;i++){float d=distance(p,circles[i].xy);count+=1.0-smoothstep(circles[i].z-0.7,circles[i].z+0.7,d);}
- vec2 ratio=resolution/source;
- vec2 crop=ratio/max(ratio.x,ratio.y);
- vec2 st=(uv-.5)*crop+.5;
- // Compose the uploaded clip's stable summit at the final logo center.
- st.x-=.045;
- st.y+=.14;
- ${mipmaps ? pyramidSampling : gaussianSampling}
- // Extend the sky smoothly where the composition needs extra headroom.
- // Averaging the top edge avoids stretching clouds into vertical streaks.
- vec4 picture=color/total;
- if(st.y>.94){vec4 sky=(texture2D(frame,vec2(.2,.995))+texture2D(frame,vec2(.5,.995))+texture2D(frame,vec2(.8,.995)))/3.0;picture=mix(picture,sky,smoothstep(.94,1.04,st.y));}
- gl_FragColor=picture;
-}`;
-}
+import { fragmentShader } from "@/lib/lens-shader";
 const subscribeMotion = (callback: () => void) => {
   const media = matchMedia("(prefers-reduced-motion: reduce)");
   media.addEventListener("change", callback);
@@ -104,8 +63,9 @@ export function Mountain() {
     staging.width = mobile ? 1024 : 2048;
     staging.height = staging.width / 2;
     const stage = staging.getContext("2d", { alpha: false });
-    const mipmaps = !!stage && !!gl.getExtension("EXT_shader_texture_lod");
-    const fs = shader(gl.FRAGMENT_SHADER, fragmentShader(mipmaps));
+    if (!stage) return;
+    const explicitLod = !!gl.getExtension("EXT_shader_texture_lod");
+    const fs = shader(gl.FRAGMENT_SHADER, fragmentShader(explicitLod));
     if (!vs || !fs) return;
     const program = gl.createProgram()!;
     gl.attachShader(program, vs);
@@ -128,14 +88,14 @@ export function Mountain() {
     gl.texParameteri(
       gl.TEXTURE_2D,
       gl.TEXTURE_MIN_FILTER,
-      mipmaps ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
+      gl.LINEAR_MIPMAP_LINEAR,
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     const uniforms = Object.fromEntries(
-      ["resolution", "source", "texel", "circles[0]"].map((n) => [
+      ["resolution", "source", "texel", "summit", "circles[0]"].map((n) => [
         n,
         gl.getUniformLocation(program, n),
       ]),
@@ -150,7 +110,8 @@ export function Mountain() {
     let visible = true,
       id = 0,
       last = 0,
-      disposed = false;
+      disposed = false,
+      motionTime = 0;
     const motion = () => {
       if (media.matches) {
         video.pause();
@@ -167,6 +128,7 @@ export function Mountain() {
     media.addEventListener("change", motion);
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
+      last = performance.now();
       if (!visible) video.pause();
       else if (!media.matches && !pauseRef.current)
         video.play().catch(() => {});
@@ -174,6 +136,7 @@ export function Mountain() {
     observer.observe(host);
     let previousRender = "";
     const visibility = () => {
+      last = performance.now();
       if (document.hidden) video.pause();
     };
     document.addEventListener("visibilitychange", visibility);
@@ -187,7 +150,9 @@ export function Mountain() {
       id = requestAnimationFrame(draw);
       if (!visible || document.hidden || gl.isContextLost() || now - last < 33)
         return;
+      const elapsed = last ? (now - last) / 1000 : 0;
       last = now;
+      if (!pauseRef.current && !media.matches) motionTime += elapsed;
       if (pauseRef.current || media.matches) video.pause();
       else if (video.paused && video.src) video.play().catch(() => {});
       const image = video.readyState >= 2 && !media.matches ? video : poster;
@@ -205,17 +170,15 @@ export function Mountain() {
         gl.viewport(0, 0, w, h);
         outlineSvg.current?.setAttribute("viewBox", `0 0 ${w} ${h}`);
       }
-      const hero = host.closest("section")!.getBoundingClientRect();
-      const progress = media.matches ? 1 : convergence(hero.top, hero.height);
-      const renderKey = `${w},${h},${progress},${video.currentTime},${media.matches || pauseRef.current ? 0 : Math.floor(now / 33)}`;
+      const headerHeight =
+        document.querySelector(".header")?.getBoundingClientRect().height ?? 0;
+      const progress = media.matches
+        ? 1
+        : convergence(rect.top, rect.height, innerHeight, headerHeight);
+      const renderKey = `${w},${h},${progress},${video.currentTime},${motionTime}`;
       if (renderKey === previousRender) return;
       previousRender = renderKey;
-      const circles = lensGeometry(
-        w,
-        h,
-        progress,
-        media.matches || pauseRef.current ? 0 : now / 1000,
-      );
+      const circles = lensGeometry(w, h, progress, motionTime);
       const apertures = lensApertures(circles);
       circles.forEach(([x, y, radius], i) => {
         const art = lensArtwork[i];
@@ -225,6 +188,10 @@ export function Mountain() {
           `translate(${x - (art.width / 2) * scale} ${y - (art.height / 2) * scale}) scale(${scale})`,
         );
       });
+      const peak = summitAt(
+        image instanceof HTMLVideoElement ? image.currentTime : 0,
+      );
+      gl.uniform2f(uniforms.summit, peak[0], peak[1]);
       gl.uniform2f(uniforms.resolution, w, h);
       gl.uniform2f(uniforms.texel, 1 / staging.width, 1 / staging.height);
       gl.uniform2f(
@@ -238,18 +205,16 @@ export function Mountain() {
       );
       gl.uniform3fv(uniforms["circles[0]"], new Float32Array(apertures.flat()));
       try {
-        if (mipmaps && stage) {
-          stage.drawImage(image, 0, 0, staging.width, staging.height);
-        }
+        stage.drawImage(image, 0, 0, staging.width, staging.height);
         gl.texImage2D(
           gl.TEXTURE_2D,
           0,
           gl.RGB,
           gl.RGB,
           gl.UNSIGNED_BYTE,
-          mipmaps && stage ? staging : image,
+          staging,
         );
-        if (mipmaps) gl.generateMipmap(gl.TEXTURE_2D);
+        gl.generateMipmap(gl.TEXTURE_2D);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         el.style.opacity = "1";
         host.dataset.ready = "true";

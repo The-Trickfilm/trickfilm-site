@@ -20,13 +20,13 @@ Use the Vercel Next.js preset. No environment variables, database, or backend se
 
 ## Hero
 
-One detached HTML video decodes a single selected source. Each frame supplies one WebGL texture and its synchronized blur pyramid. A fragment shader counts all five circles at each pixel. Overlaps 0–5 produce clarity values 0%, 20%, 40%, 60%, 80%, 100%; the blur radius decreases linearly. Only a subpixel edge is softened. The focus boundaries use the circular inner openings of the supplied artwork, mapped with the same transforms as the visible rims.
+One detached HTML video decodes a single selected source. Each frame supplies one WebGL texture and its synchronized blur pyramid. A fragment shader counts all five circles at each pixel. Overlaps 0–5 produce clarity values 0%, 20%, 40%, 60%, 80%, 100%; each overlap contributes exactly one fifth of the synchronized sharp frame. Only a subpixel edge is softened. The focus boundaries use the circular inner openings of the supplied artwork, mapped with the same transforms as the visible rims.
 
-Power-of-two staging textures preserve source detail. Explicit-LOD sampling uses a small Gaussian kernel over the synchronized mipmap pyramid; older contexts use a direct Gaussian kernel. Five-circle overlap samples the fully sharp frame. No separately decoded video layers or single sharp-mask approximation are used.
+Power-of-two staging textures preserve source detail. A shared full-blur sample is built from the synchronized mipmap pyramid. The independently counted openings mix in 20%, 40%, 60%, 80%, and 100% of the sharp frame. Both explicit-LOD and standard biased-LOD paths are verified by actual GPU pixel-contrast tests. Five-circle overlap samples the fully sharp frame. No separately decoded video layers or single sharp-mask approximation are used.
 
 The five user-supplied, clockwise SVG paths define the visible tapered rims. They render as native vectors, not uniform shader strokes. Each uses an offset radial gradient from white at 20% opacity on the outer boundary to white at 5% opacity on its inner opening. Original files are preserved unchanged in `public/brand/lenses`; their path data and aperture measurements live in `src/lib/lens-artwork.ts`. Browser checks sample both sides of each SVG opening to validate the focus geometry.
 
-The supplied logo determines final circle positions and radius proportions. The circles drift by a few pixels at rest and converge reversibly with ordinary scrolling. There is no hero pinning or scroll snapping. The summit composition is fixed for the supplied clip, rather than object-tracked.
+The supplied logo determines final circle positions and radius proportions. The circles follow independent, visible floating paths at rest. Convergence is calculated from the scene’s position in the usable viewport, completing while the entire mark is visible. It then exits with the ordinary page scroll; reverse scrolling separates the lenses again. There is no hero pinning or scroll snapping. The summit is aligned with the shared focus point using measured apex coordinates at one-second intervals across the supplied clip, interpolated against the video clock. This follows the source’s camera movement without another video decoder or a runtime tracking service.
 
 Rendering is limited to 30 fps and 1280 pixels wide on desktop, 640 pixels on smaller screens, with a bounded device-pixel ratio. Video pauses outside the viewport and in hidden documents. User pause stops video and drift. Reduced motion uses the static poster and final geometry, without requesting video. A CSS poster remains available without JavaScript or WebGL.
 
@@ -37,7 +37,7 @@ Rendering is limited to 30 fps and 1280 pixels wide on desktop, 640 pixels on sm
 - `public/media/summit-desktop.mp4`: 1920px, 24fps, silent H.264, fast-start.
 - `public/media/summit-mobile.mp4`: 960px, 24fps, silent H.264, fast-start. Smaller viewports request this source only; one decoder remains in use.
 - `public/media/summit-poster.webp`: matching high-resolution static frame.
-- Exports use a monochromatic teal grade while retaining bright snow and shadow detail. No remote media or font requests are required by the homepage.
+- Exports use a monochromatic teal grade while retaining bright snow and shadow detail. No remote media or font requests are required by the homepage. The previous gradient fade is removed: pixels outside every lens use the maximum blurred sample, while increasing overlap restores clarity.
 - The original Mixkit license record in `docs/mixkit-video-license.html` concerns the superseded asset, which is no longer shipped.
 
 ## Portfolio
@@ -50,7 +50,7 @@ The user supplied these five sites as their work. Homepage screenshots were capt
 - https://accesstojusticebc.ca/
 - https://www.stratacouncil.ca/
 
-The gallery uses responsive Next.js Images and links to the actual sites. It describes the organizations without inventing results or detailed delivery scope. Illustrative service concepts are explicitly labelled and separate from this real portfolio.
+The horizontal gallery uses responsive Next.js Images and links to the actual sites. Left/right controls, touch scrolling, and keyboard arrows move between smaller project previews. The centered project appears in its original colors, with neighboring sites in monochrome green. Selection follows the actual scroll position. It describes the organizations without inventing results or detailed delivery scope. Illustrative service concepts are explicitly labelled and separate from this real portfolio.
 
 ## Design and interaction
 
