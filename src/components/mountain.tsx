@@ -10,19 +10,20 @@ uniform vec3 circles[5];
 varying vec2 uv;
 void main(){
  vec2 p=vec2(uv.x,1.0-uv.y)*resolution;
- float count=0.0;
- for(int i=0;i<5;i++){count+=1.0-smoothstep(circles[i].z-0.7,circles[i].z+0.7,distance(p,circles[i].xy));}
+ float count=0.0;float edge=0.0;
+ for(int i=0;i<5;i++){float d=distance(p,circles[i].xy);count+=1.0-smoothstep(circles[i].z-0.7,circles[i].z+0.7,d);edge=max(edge,1.0-smoothstep(.55,1.4,abs(d-circles[i].z)));}
  float blur=(5.0-count)/5.0*6.0;
  vec2 ratio=resolution/source;
  vec2 crop=ratio/max(ratio.x,ratio.y);
  vec2 st=(uv-.5)*crop+.5;
- st.y+=.25; // Keep the summit near the center of the logo, with sky above it.
+ st.x+=.06;
+ st.y+=.18; // Keep the summit near the center of the logo, with sky above it.
  vec4 color=vec4(0.0);float total=0.0;
  for(int x=-3;x<=3;x++){for(int y=-3;y<=3;y++){
  float w=exp(-float(x*x+y*y)/4.5);
  color+=texture2D(frame,clamp(st+vec2(float(x),float(y))*blur*.4/resolution*crop,vec2(.001),vec2(.999)))*w;total+=w;
  }}
- gl_FragColor=color/total;
+ gl_FragColor=mix(color/total,vec4(.9,1.,.98,1.),edge*.8);
 }`;
 const subscribeMotion = (callback: () => void) => {
   const media = matchMedia("(prefers-reduced-motion: reduce)");
@@ -66,7 +67,17 @@ export function Mountain() {
       gl.VERTEX_SHADER,
       "attribute vec2 position;varying vec2 uv;void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}",
     );
-    const fs = shader(gl.FRAGMENT_SHADER, fragment);
+    // A power-of-two texture permits a synchronized blur pyramid from one video frame.
+    // Explicit LOD avoids dozens of widely spaced samples and their ghosting artifacts.
+    const mipmaps = !!gl.getExtension("EXT_shader_texture_lod");
+    const fragmentSource = mipmaps
+      ? "#extension GL_EXT_shader_texture_lod : enable\n" +
+        fragment.replace(
+          / vec4 color=[\s\S]*? gl_FragColor=/,
+          " vec4 color=texture2DLodEXT(frame,clamp(st,vec2(.001),vec2(.999)),log2(1.0+(5.0-count)/5.0*8.0));float total=1.0;\n gl_FragColor=",
+        )
+      : fragment;
+    const fs = shader(gl.FRAGMENT_SHADER, fragmentSource);
     if (!vs || !fs) return;
     const program = gl.createProgram()!;
     gl.attachShader(program, vs);
@@ -86,7 +97,11 @@ export function Mountain() {
     gl.vertexAttribPointer(attribute, 2, gl.FLOAT, false, 0, 0);
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(
+      gl.TEXTURE_2D,
+      gl.TEXTURE_MIN_FILTER,
+      mipmaps ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
+    );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -97,6 +112,10 @@ export function Mountain() {
         gl.getUniformLocation(program, n),
       ]),
     );
+    const staging = document.createElement("canvas");
+    const stage = staging.getContext("2d", { alpha: false });
+    staging.width = 1024;
+    staging.height = 512;
     const poster = new Image();
     poster.src = "/media/mountain-poster.webp";
     const video = document.createElement("video");
@@ -179,14 +198,18 @@ export function Mountain() {
       );
       gl.uniform3fv(uniforms["circles[0]"], new Float32Array(circles.flat()));
       try {
+        if (mipmaps && stage) {
+          stage.drawImage(image, 0, 0, staging.width, staging.height);
+        }
         gl.texImage2D(
           gl.TEXTURE_2D,
           0,
           gl.RGB,
           gl.RGB,
           gl.UNSIGNED_BYTE,
-          image,
+          mipmaps && stage ? staging : image,
         );
+        if (mipmaps) gl.generateMipmap(gl.TEXTURE_2D);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         el.style.opacity = "1";
         host.dataset.ready = "true";

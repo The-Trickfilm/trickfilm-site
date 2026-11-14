@@ -15,7 +15,7 @@ test("scroll convergence clamps and reverses", () => {
 });
 test("final geometry has five circles covering central summit and no time drift", () => {
   const a = lensGeometry(960, 500, 1, 0);
-  assert.equal(overlapCount(960 * 0.53, 500 * 0.48, a), 5);
+  assert.equal(overlapCount(960 * 0.53, 500 * 0.31, a), 5);
   assert.deepEqual(a, lensGeometry(960, 500, 1, 100));
   assert.notDeepEqual(
     lensGeometry(960, 500, 0, 0),

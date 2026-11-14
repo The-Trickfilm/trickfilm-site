@@ -4,11 +4,15 @@ test("desktop renders WebGL, scroll reverses, pause works, navigation reaches co
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.setViewportSize({ width: 1672, height: 941 });
   await page.goto("/");
   await expect(page.locator("h1")).toHaveText(
-    "Trickfilm bringsclarity to complexity.",
+    "Trickfilm brings clarity to complexity.",
   );
+  const copy = await page.locator(".hero-copy").boundingBox();
+  const media = await page.locator(".mountain").boundingBox();
+  expect(media!.x).toBeGreaterThan(500);
+  expect(media!.y).toBeLessThan(copy!.y + 100);
   const mountain = page.locator(".mountain");
   await expect(mountain.locator("canvas")).toHaveCSS("opacity", "1");
   await page.getByRole("button", { name: "Pause motion" }).click();
@@ -23,6 +27,7 @@ test("desktop renders WebGL, scroll reverses, pause works, navigation reaches co
   await expect
     .poll(async () => Number(await mountain.getAttribute("data-progress")))
     .toBe(0);
+  await page.screenshot({ path: "/workspace/work/reference-size.png" });
   await page.screenshot({
     path: "/workspace/work/desktop.png",
     fullPage: true,
@@ -69,4 +74,12 @@ test("WebGL unavailable keeps static fallback", async ({ page }) => {
     /mountain-poster.webp/,
   );
   await expect(page.locator(".mountain canvas")).toHaveCSS("opacity", "0");
+});
+
+test("services menu links to the selected service", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  await page.locator(".services-menu summary").click();
+  await page.getByRole("link", { name: "AI consulting", exact: true }).click();
+  await expect(page.locator("#service-04")).toBeInViewport();
 });

@@ -27,6 +27,39 @@ const services = [
     "Find where AI can make a useful difference, then turn the opportunity into a practical next step.",
   ],
 ];
+function ServiceIcon({ kind }: { kind: string }) {
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {kind === "web" ? (
+        <>
+          <rect x="3" y="4" width="26" height="19" rx="1" />
+          <path d="M16 23v5m-6 0h12" />
+        </>
+      ) : kind === "workflow" ? (
+        <>
+          <circle cx="16" cy="6" r="4" />
+          <circle cx="6" cy="25" r="4" />
+          <circle cx="26" cy="25" r="4" />
+          <path d="m14 10-6 11m10-11 6 11M10 25h12" />
+        </>
+      ) : (
+        <>
+          <path d="m2 10 14-7 14 7-14 7-14-7Zm0 7 14 7 14-7M2 24l14 7 14-7" />
+        </>
+      )}
+    </svg>
+  );
+}
 export default function Home() {
   return (
     <>
@@ -44,8 +77,27 @@ export default function Home() {
           />
         </a>
         <nav aria-label="Main navigation">
-          <a href="#approach">Our approach</a>
-          <a href="#work">What we do</a>
+          <details className="services-menu">
+            <summary>
+              Services <span aria-hidden="true">⌄</span>
+            </summary>
+            <div>
+              {services.map(([n, title]) => (
+                <a key={n} href={`#service-${n}`}>
+                  {title}
+                </a>
+              ))}
+            </div>
+          </details>
+          <a href="#work">Work</a>
+          <a href="#approach">About</a>
+          <span
+            className="nav-upcoming"
+            title="Articles coming soon"
+            aria-label="Insights — coming soon"
+          >
+            Insights
+          </span>
           <a className="nav-contact" href="#contact">
             Let’s talk{" "}
             <span>
@@ -58,12 +110,11 @@ export default function Home() {
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
             <p className="eyebrow">
-              <span className="dot" /> Creativity × technology
+              <span className="dot" /> Creative technology studio
             </p>
             <h1 id="hero-title">
-              Trickfilm brings
-              <br />
-              clarity to <em>complexity.</em>
+              <span>Trickfilm brings</span> <span>clarity to</span>{" "}
+              <em>complexity.</em>
             </h1>
             <div className="hero-bottom">
               <p>
@@ -78,10 +129,32 @@ export default function Home() {
                   </span>
                 </a>
                 <a className="text-link" href="#work">
-                  See our work <span>↓</span>
+                  See our work
                 </a>
               </div>
             </div>
+            <ul className="hero-services" aria-label="Our services">
+              <li>
+                <ServiceIcon kind="web" />
+                <span>Web Design</span>
+              </li>
+              <li>
+                <ServiceIcon kind="workflow" />
+                <span>
+                  Workflow
+                  <br />
+                  Automation
+                </span>
+              </li>
+              <li>
+                <ServiceIcon kind="apps" />
+                <span>
+                  Custom
+                  <br />
+                  Applications
+                </span>
+              </li>
+            </ul>
           </div>
           <Mountain />
           <div className="hero-caption">
@@ -110,13 +183,13 @@ export default function Home() {
         </section>
         <section className="services section" id="work">
           <div className="section-heading">
-            <p className="eyebrow">02 / What we do</p>
+            <p className="eyebrow">02 / Services</p>
             <h2>Ideas into action.</h2>
             <p>Four ways to move your business forward.</p>
           </div>
           <div className="service-grid">
             {services.map(([n, title, heading, body]) => (
-              <article key={n}>
+              <article key={n} id={`service-${n}`}>
                 <div className="service-top">
                   <span>{n}</span>
                   <span aria-hidden="true">

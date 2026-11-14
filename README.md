@@ -16,7 +16,7 @@ Next.js App Router, React, TypeScript, Tailwind CSS, npm lockfile. Deploy on Ver
 
 ## Hero renderer
 
-One detached HTML video supplies frames to one WebGL texture. A fragment shader counts containment in all five circles independently and applies a Gaussian kernel with blur proportional to `(5 - overlaps) / 5`. Thus overlap counts 0–5 produce clarity levels 0%, 20%, 40%, 60%, 80%, 100%; only a subpixel edge is softened. All regions sample the same frame. The supplied vector mark determines the five circular centers and radii; the original tapered paths are preserved in the logo assets.
+One detached HTML video supplies frames to one WebGL texture. A fragment shader counts containment in all five circles independently and selects a proportional blur level from a mipmap pyramid built from that same frame. WebGL explicit-LOD support uses a single texture sample per pixel, with a Gaussian-kernel fallback for older contexts. The five thin outlines use the very same circle uniforms as focus calculation. Thus overlap counts 0–5 produce clarity levels 0%, 20%, 40%, 60%, 80%, 100%; only a subpixel edge is softened. All regions sample the same frame. The supplied vector mark determines the five circular centers and radii; the original tapered paths are preserved in the logo assets.
 
 Rendering is capped at 960 pixels wide and 30 fps, and pauses offscreen or in hidden documents. The video has one decoder and no audio. User pause stops drift and playback; scroll remains reversible. Reduced motion uses the poster, final logo geometry, and no video request. A CSS poster remains visible without JavaScript or WebGL. The summit is composed near the converged logo center; this is a fixed composition, not object tracking.
 
@@ -32,9 +32,13 @@ Local video: 12 seconds, 960px, 24fps, silent H.264, fast-start, monochromatic t
 
 ## Content still needed
 
-- Approved homepage mockup (none supplied; current layout is an original design).
+- The supplied split-hero mockup now guides the layout, bold sans-serif headline, outlined lenses, service icons, and paired buttons. Its mountain landscape differs from the licensed Mixkit video; the approved source footage is retained. The Insights label is marked as coming soon; service links navigate to the matching service.
 - Confirmed contact address or destination. CTA currently reaches an honest contact placeholder; no form submission or contact integration exists.
 - Approved portfolio projects. “See our work” currently reaches the services overview; no client results are invented.
 - Physical iOS/Android and Safari/Firefox verification; automated checks currently target Chromium, not real mobile GPU performance.
 
 This milestone should receive content and device review before production launch.
+
+## Reference alignment revision
+
+The supplied 1672 × 941 mockup guides the split layout, local Inter typography, header proportions, paired buttons, three service icons, teal media treatment, and five outlined lenses. `docs/hero-preview.png` is a browser capture at those dimensions. This is a visual reference implementation, not an exact reproduction of the landscape: the requested Mixkit clip depicts a different mountain. The numerical overlap rule remains authoritative, so only five-circle overlap is fully sharp.
