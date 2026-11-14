@@ -1,3 +1,5 @@
+import { SelectedWork } from "@/components/selected-work";
+import { ServiceExplorer } from "@/components/service-explorer";
 import { Arrow } from "@/components/arrow";
 import Image from "next/image";
 import { Mountain } from "@/components/mountain";
@@ -91,13 +93,6 @@ export default function Home() {
           </details>
           <a href="#work">Work</a>
           <a href="#approach">About</a>
-          <span
-            className="nav-upcoming"
-            title="Articles coming soon"
-            aria-label="Insights — coming soon"
-          >
-            Insights
-          </span>
           <a className="nav-contact" href="#contact">
             Let’s talk{" "}
             <span>
@@ -162,13 +157,22 @@ export default function Home() {
             <span>Scroll for perspective ↓</span>
           </div>
         </section>
+        <SelectedWork />
         <section className="approach section" id="approach">
-          <p className="eyebrow">01 / A fresh perspective</p>
+          <div className="approach-mark">
+            <p className="eyebrow">02 / A fresh perspective</p>
+            <Image
+              src="/brand/trickfilm-symbol.svg"
+              width={200}
+              height={196}
+              alt=""
+            />
+          </div>
           <div>
             <h2>
-              Complex challenges.
+              A fresh perspective
               <br />
-              <span>Thoughtfully simple solutions.</span>
+              <span>changes everything.</span>
             </h2>
             <p className="intro">
               The right solution starts with seeing the whole picture. We bring
@@ -181,34 +185,66 @@ export default function Home() {
             </p>
           </div>
         </section>
-        <section className="services section" id="work">
+        <section className="services section" id="services">
           <div className="section-heading">
-            <p className="eyebrow">02 / Services</p>
-            <h2>Ideas into action.</h2>
-            <p>Four ways to move your business forward.</p>
+            <p className="eyebrow">03 / Services</p>
+            <h2>
+              Good thinking.
+              <br />
+              <span>Working solutions.</span>
+            </h2>
+            <p>
+              Four disciplines. One focus:
+              <br />
+              making your business work better.
+            </p>
           </div>
-          <div className="service-grid">
-            {services.map(([n, title, heading, body]) => (
-              <article key={n} id={`service-${n}`}>
-                <div className="service-top">
-                  <span>{n}</span>
-                  <span aria-hidden="true">
-                    <Arrow />
-                  </span>
-                </div>
-                <p className="service-name">{title}</p>
-                <h3>{heading}</h3>
-                <p>{body}</p>
-              </article>
-            ))}
-          </div>
+          <ServiceExplorer />
           <p className="work-note">
             Every business has a different starting point. Ours is understanding
             yours.
           </p>
         </section>
+        <section className="method section" aria-labelledby="method-title">
+          <div className="method-heading">
+            <p className="eyebrow">
+              04 / From a question to a working solution
+            </p>
+            <h2 id="method-title">
+              The way forward
+              <br />
+              starts with <em>understanding.</em>
+            </h2>
+          </div>
+          <div className="method-steps">
+            <article>
+              <span>01 / Get clear</span>
+              <h3>Start with the real challenge.</h3>
+              <p>
+                Listen to your team. Look at the way work happens. Find the
+                friction before deciding what to build.
+              </p>
+            </article>
+            <article>
+              <span>02 / Make it tangible</span>
+              <h3>Bring the right idea into focus.</h3>
+              <p>
+                Explore a practical direction, make it concrete, and test it
+                against the people and processes it needs to support.
+              </p>
+            </article>
+            <article>
+              <span>03 / Put it to work</span>
+              <h3>Build for the everyday.</h3>
+              <p>
+                Turn the idea into a useful solution. Keep the experience clear,
+                then refine it with what you learn.
+              </p>
+            </article>
+          </div>
+        </section>
         <section className="contact section" id="contact">
-          <p className="eyebrow">03 / Let’s find the way forward</p>
+          <p className="eyebrow">05 / Let’s find the way forward</p>
           <div>
             <h2>
               What could work

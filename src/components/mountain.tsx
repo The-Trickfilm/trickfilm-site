@@ -2,29 +2,49 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { convergence, lensGeometry } from "@/lib/lenses";
 
-const fragment = `precision mediump float;
+const gaussianSampling = `
+ vec4 color=vec4(0.0);float total=0.0;
+ float blur=(5.0-count)/5.0*3.5;
+ for(int x=-3;x<=3;x++){for(int y=-3;y<=3;y++){
+ float w=exp(-float(x*x+y*y)/4.5);
+ color+=texture2D(frame,clamp(st+vec2(float(x),float(y))*blur*.4/resolution*crop,vec2(.001),vec2(.999)))*w;total+=w;
+ }}`;
+const pyramidSampling = `
+ // Blur radius decreases linearly with the number of overlapping lenses.
+ float level=log2(1.0+(5.0-count)/5.0*3.5*crop.x/(texel.x*resolution.x));
+ vec2 delta=(exp2(level)-1.0)*texel*.7;
+ vec4 color=vec4(0.0);float total=0.0;
+ for(int x=-1;x<=1;x++){for(int y=-1;y<=1;y++){
+ float w=(x==0?2.0:1.0)*(y==0?2.0:1.0);
+ color+=texture2DLodEXT(frame,clamp(st+vec2(float(x),float(y))*delta,vec2(.001),vec2(.999)),level)*w;total+=w;
+ }}`;
+function fragmentShader(mipmaps: boolean) {
+  return `${mipmaps ? "#extension GL_EXT_shader_texture_lod : enable\n" : ""}
+precision mediump float;
 uniform sampler2D frame;
 uniform vec2 resolution;
 uniform vec2 source;
+uniform vec2 texel;
 uniform vec3 circles[5];
 varying vec2 uv;
 void main(){
  vec2 p=vec2(uv.x,1.0-uv.y)*resolution;
  float count=0.0;float edge=0.0;
  for(int i=0;i<5;i++){float d=distance(p,circles[i].xy);count+=1.0-smoothstep(circles[i].z-0.7,circles[i].z+0.7,d);edge=max(edge,1.0-smoothstep(.55,1.4,abs(d-circles[i].z)));}
- float blur=(5.0-count)/5.0*6.0;
  vec2 ratio=resolution/source;
  vec2 crop=ratio/max(ratio.x,ratio.y);
  vec2 st=(uv-.5)*crop+.5;
- st.x+=.06;
- st.y+=.18; // Keep the summit near the center of the logo, with sky above it.
- vec4 color=vec4(0.0);float total=0.0;
- for(int x=-3;x<=3;x++){for(int y=-3;y<=3;y++){
- float w=exp(-float(x*x+y*y)/4.5);
- color+=texture2D(frame,clamp(st+vec2(float(x),float(y))*blur*.4/resolution*crop,vec2(.001),vec2(.999)))*w;total+=w;
- }}
- gl_FragColor=mix(color/total,vec4(.9,1.,.98,1.),edge*.8);
+ // Compose the uploaded clip's stable summit at the final logo center.
+ st.x-=.045;
+ st.y+=.14;
+ ${mipmaps ? pyramidSampling : gaussianSampling}
+ // Extend the sky smoothly where the composition needs extra headroom.
+ // Averaging the top edge avoids stretching clouds into vertical streaks.
+ vec4 picture=color/total;
+ if(st.y>.94){vec4 sky=(texture2D(frame,vec2(.2,.995))+texture2D(frame,vec2(.5,.995))+texture2D(frame,vec2(.8,.995)))/3.0;picture=mix(picture,sky,smoothstep(.94,1.04,st.y));}
+ gl_FragColor=mix(picture,vec4(.9,1.,.98,1.),edge*.8);
 }`;
+}
 const subscribeMotion = (callback: () => void) => {
   const media = matchMedia("(prefers-reduced-motion: reduce)");
   media.addEventListener("change", callback);
@@ -47,6 +67,7 @@ export function Mountain() {
     const el = canvas.current!,
       host = region.current!;
     const media = matchMedia("(prefers-reduced-motion: reduce)");
+    const mobile = matchMedia("(max-width: 1000px)").matches;
     const gl = el.getContext("webgl", {
       alpha: false,
       antialias: false,
@@ -67,17 +88,13 @@ export function Mountain() {
       gl.VERTEX_SHADER,
       "attribute vec2 position;varying vec2 uv;void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}",
     );
-    // A power-of-two texture permits a synchronized blur pyramid from one video frame.
-    // Explicit LOD avoids dozens of widely spaced samples and their ghosting artifacts.
-    const mipmaps = !!gl.getExtension("EXT_shader_texture_lod");
-    const fragmentSource = mipmaps
-      ? "#extension GL_EXT_shader_texture_lod : enable\n" +
-        fragment.replace(
-          / vec4 color=[\s\S]*? gl_FragColor=/,
-          " vec4 color=texture2DLodEXT(frame,clamp(st,vec2(.001),vec2(.999)),log2(1.0+(5.0-count)/5.0*8.0));float total=1.0;\n gl_FragColor=",
-        )
-      : fragment;
-    const fs = shader(gl.FRAGMENT_SHADER, fragmentSource);
+    // One decoded video frame supplies the sharp texture and the entire blur pyramid.
+    const staging = document.createElement("canvas");
+    staging.width = mobile ? 1024 : 2048;
+    staging.height = staging.width / 2;
+    const stage = staging.getContext("2d", { alpha: false });
+    const mipmaps = !!stage && !!gl.getExtension("EXT_shader_texture_lod");
+    const fs = shader(gl.FRAGMENT_SHADER, fragmentShader(mipmaps));
     if (!vs || !fs) return;
     const program = gl.createProgram()!;
     gl.attachShader(program, vs);
@@ -107,17 +124,13 @@ export function Mountain() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     const uniforms = Object.fromEntries(
-      ["resolution", "source", "circles[0]"].map((n) => [
+      ["resolution", "source", "texel", "circles[0]"].map((n) => [
         n,
         gl.getUniformLocation(program, n),
       ]),
     );
-    const staging = document.createElement("canvas");
-    const stage = staging.getContext("2d", { alpha: false });
-    staging.width = 1024;
-    staging.height = 512;
     const poster = new Image();
-    poster.src = "/media/mountain-poster.webp";
+    poster.src = "/media/summit-poster.webp";
     const video = document.createElement("video");
     video.muted = true;
     video.loop = true;
@@ -133,7 +146,9 @@ export function Mountain() {
         video.removeAttribute("src");
         video.load();
       } else {
-        video.src = "/media/mountain-teal.mp4";
+        video.src = mobile
+          ? "/media/summit-mobile.mp4"
+          : "/media/summit-desktop.mp4";
         video.play().catch(() => {});
       }
     };
@@ -167,7 +182,10 @@ export function Mountain() {
       const image = video.readyState >= 2 && !media.matches ? video : poster;
       if (image instanceof HTMLImageElement && !image.complete) return;
       const rect = host.getBoundingClientRect();
-      const w = Math.min(960, Math.round(rect.width));
+      const w = Math.min(
+        mobile ? 640 : 1280,
+        Math.round(rect.width * Math.min(devicePixelRatio || 1, 1.5)),
+      );
       const h = Math.round((w * rect.height) / rect.width);
       if (!w || !h) return;
       if (el.width !== w || el.height !== h) {
@@ -187,6 +205,7 @@ export function Mountain() {
         media.matches || pauseRef.current ? 0 : now / 1000,
       );
       gl.uniform2f(uniforms.resolution, w, h);
+      gl.uniform2f(uniforms.texel, 1 / staging.width, 1 / staging.height);
       gl.uniform2f(
         uniforms.source,
         image instanceof HTMLVideoElement

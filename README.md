@@ -1,44 +1,63 @@
 # Trickfilm
 
-First homepage milestone for Trickfilm.com. The supplied GitHub repository was empty at inspection; no existing implementation was replaced.
+Next.js homepage for Trickfilm.com: original brand assets, a mountain hero with overlap-counted focus lenses, selected work, services, approach, and contact.
 
-## Develop and verify
+## Run and verify
 
-Node 24 recommended. `npm ci`, then `npm run dev`.
+Node 24 recommended. Install with `npm ci`; start locally with `npm run dev`.
 
 - `npm run lint`
 - `npm run typecheck`
-- `npm test` — overlap levels, convergence, reverse scroll calculation, final geometry
+- `npm test` — overlap counts, reversible convergence, and final geometry
 - `npm run build`
-- `npm run test:browser` — production server, desktop/mobile, WebGL rendering, scroll reversal, pause, reduced motion, navigation, fallback. The default test config uses `/usr/bin/chromium`; change executablePath for your system.
+- `npm run test:browser` — production server, desktop/mobile, keyboard navigation, service selection, all portfolio links and screenshots, motion control, reduced motion, fallback, and mobile video selection
 
-Next.js App Router, React, TypeScript, Tailwind CSS, npm lockfile. Deploy on Vercel with the Next.js preset; no environment variables or backend services required. No deployment was performed.
+Browser checks use `/usr/bin/chromium`; update `executablePath` in `playwright.config.ts` for another machine. `PLAYWRIGHT_BASE_URL` can target a deployed instance instead of starting the local production server.
 
-## Hero renderer
+## Deployment
 
-One detached HTML video supplies frames to one WebGL texture. A fragment shader counts containment in all five circles independently and selects a proportional blur level from a mipmap pyramid built from that same frame. WebGL explicit-LOD support uses a single texture sample per pixel, with a Gaussian-kernel fallback for older contexts. The five thin outlines use the very same circle uniforms as focus calculation. Thus overlap counts 0–5 produce clarity levels 0%, 20%, 40%, 60%, 80%, 100%; only a subpixel edge is softened. All regions sample the same frame. The supplied vector mark determines the five circular centers and radii; the original tapered paths are preserved in the logo assets.
+Use the Vercel Next.js preset. No environment variables, database, or backend services are required for this milestone. The review branch is `feat/trickfilm-homepage`.
 
-Rendering is capped at 960 pixels wide and 30 fps, and pauses offscreen or in hidden documents. The video has one decoder and no audio. User pause stops drift and playback; scroll remains reversible. Reduced motion uses the poster, final logo geometry, and no video request. A CSS poster remains visible without JavaScript or WebGL. The summit is composed near the converged logo center; this is a fixed composition, not object tracking.
+## Hero
 
-## Assets and license
+One detached HTML video decodes a single selected source. Each frame supplies one WebGL texture and its synchronized blur pyramid. A fragment shader counts all five circles at each pixel. Overlaps 0–5 produce clarity values 0%, 20%, 40%, 60%, 80%, 100%; the blur radius decreases linearly. Only a subpixel edge is softened. The outlines use the exact same geometry as the focus calculation.
 
-Original user-provided symbol and full wordmark are in `public/brand`, unchanged.
+Power-of-two staging textures preserve source detail. Explicit-LOD sampling uses a small Gaussian kernel over the synchronized mipmap pyramid; older contexts use a direct Gaussian kernel. Five-circle overlap samples the fully sharp frame. No separately decoded video layers or single sharp-mask approximation are used.
 
-Mountain: https://mixkit.co/free-stock-video/flying-over-a-monumental-rocky-mountain-with-visible-snow-and-51689/
+The supplied SVG determines final circle positions and radius proportions. The circles drift by a few pixels at rest and converge reversibly with ordinary scrolling. There is no hero pinning or scroll snapping. The summit composition is fixed for the supplied clip, rather than object-tracked.
 
-Verified 2026-11-14: the asset page explicitly identifies **Mixkit Stock Video Free License**. https://mixkit.co/license/#videoFree and https://mixkit.co/license/modal/videoFree/ permit commercial projects and downloading, copying, and modifying the footage. Terms: https://mixkit.co/terms/. The license text inspected is recorded in `docs/mixkit-video-license.html`.
+Rendering is limited to 30 fps and 1280 pixels wide on desktop, 640 pixels on smaller screens, with a bounded device-pixel ratio. Video pauses outside the viewport and in hidden documents. User pause stops video and drift. Reduced motion uses the static poster and final geometry, without requesting video. A CSS poster remains available without JavaScript or WebGL.
 
-Local video: 12 seconds, 960px, 24fps, silent H.264, fast-start, monochromatic turquoise. Source downloaded from the asset page's published content URL. Poster extracted from the local optimized video. Original source remains outside the repository. No remote media is loaded by the homepage.
+## Assets
 
-## Content still needed
+- Original user-supplied SVG symbol and wordmark are unchanged in `public/brand`.
+- Current video master: user upload `277097.mp4`, 1920 × 1080, approximately 18 seconds. The user explicitly selected it to replace the earlier Mixkit footage. Original uploads remain outside the repository.
+- `public/media/summit-desktop.mp4`: 1920px, 24fps, silent H.264, fast-start.
+- `public/media/summit-mobile.mp4`: 960px, 24fps, silent H.264, fast-start. Smaller viewports request this source only; one decoder remains in use.
+- `public/media/summit-poster.webp`: matching high-resolution static frame.
+- Exports use a monochromatic teal grade while retaining bright snow and shadow detail. No remote media or font requests are required by the homepage.
+- The original Mixkit license record in `docs/mixkit-video-license.html` concerns the superseded asset, which is no longer shipped.
 
-- The supplied split-hero mockup now guides the layout, bold sans-serif headline, outlined lenses, service icons, and paired buttons. Its mountain landscape differs from the licensed Mixkit video; the approved source footage is retained. The Insights label is marked as coming soon; service links navigate to the matching service.
-- Confirmed contact address or destination. CTA currently reaches an honest contact placeholder; no form submission or contact integration exists.
-- Approved portfolio projects. “See our work” currently reaches the services overview; no client results are invented.
-- Physical iOS/Android and Safari/Firefox verification; automated checks currently target Chromium, not real mobile GPU performance.
+## Portfolio
 
-This milestone should receive content and device review before production launch.
+The user supplied these five sites as their work. Homepage screenshots were captured on 2026-11-14, reviewed, and optimized into local WebP files under `public/work`:
 
-## Reference alignment revision
+- https://gowermodernlaw.com/
+- https://nvfc.ca/
+- https://www.streamworksdesigns.com/
+- https://accesstojusticebc.ca/
+- https://www.stratacouncil.ca/
 
-The supplied 1672 × 941 mockup guides the split layout, local Inter typography, header proportions, paired buttons, three service icons, teal media treatment, and five outlined lenses. `docs/hero-preview.png` is a browser capture at those dimensions. This is a visual reference implementation, not an exact reproduction of the landscape: the requested Mixkit clip depicts a different mountain. The numerical overlap rule remains authoritative, so only five-circle overlap is fully sharp.
+The gallery uses responsive Next.js Images and links to the actual sites. It describes the organizations without inventing results or detailed delivery scope. Illustrative service concepts are explicitly labelled and separate from this real portfolio.
+
+## Design and interaction
+
+The approved split-hero reference guides the hero composition. LocalPixel was inspected as a quality reference for hierarchy, restrained motion, readable business language, and consistency; its assets and code are not reused.
+
+The service explorer supports click, arrow keys, Home/End, and direct service links. Selected work remains server-rendered and accessible without JavaScript. Transitions are brief and disabled for reduced motion. Navigation omits unavailable Insights content. Browser captures are saved under `docs` for review.
+
+## Remaining work
+
+- Confirm a contact email or destination. The CTA currently reaches an honest contact placeholder; no form integration is claimed.
+- Confirm detailed project scope before writing case studies or publishing quantified results.
+- Physical iOS/Android and Safari/Firefox verification. Chromium checks exercise a simulated mobile viewport; they do not establish performance on real mobile GPUs.
