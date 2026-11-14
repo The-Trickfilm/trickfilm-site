@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { convergence, lensGeometry, overlapCount } from "../src/lib/lenses.ts";
+import {
+  convergence,
+  lensGeometry,
+  lensApertures,
+  overlapCount,
+} from "../src/lib/lenses.ts";
 test("overlap levels count each lens independently", () => {
   const circles = Array.from({ length: 5 }, (_, i) => [i * 20, 0, 95]);
   for (let n = 0; n <= 5; n++) {
@@ -15,7 +20,7 @@ test("scroll convergence clamps and reverses", () => {
 });
 test("final geometry has five circles covering central summit and no time drift", () => {
   const a = lensGeometry(960, 500, 1, 0);
-  assert.equal(overlapCount(960 * 0.53, 500 * 0.31, a), 5);
+  assert.equal(overlapCount(960 * 0.53, 500 * 0.31, lensApertures(a)), 5);
   assert.deepEqual(a, lensGeometry(960, 500, 1, 100));
   assert.notDeepEqual(
     lensGeometry(960, 500, 0, 0),

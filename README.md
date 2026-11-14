@@ -20,11 +20,13 @@ Use the Vercel Next.js preset. No environment variables, database, or backend se
 
 ## Hero
 
-One detached HTML video decodes a single selected source. Each frame supplies one WebGL texture and its synchronized blur pyramid. A fragment shader counts all five circles at each pixel. Overlaps 0–5 produce clarity values 0%, 20%, 40%, 60%, 80%, 100%; the blur radius decreases linearly. Only a subpixel edge is softened. The outlines use the exact same geometry as the focus calculation.
+One detached HTML video decodes a single selected source. Each frame supplies one WebGL texture and its synchronized blur pyramid. A fragment shader counts all five circles at each pixel. Overlaps 0–5 produce clarity values 0%, 20%, 40%, 60%, 80%, 100%; the blur radius decreases linearly. Only a subpixel edge is softened. The focus boundaries use the circular inner openings of the supplied artwork, mapped with the same transforms as the visible rims.
 
 Power-of-two staging textures preserve source detail. Explicit-LOD sampling uses a small Gaussian kernel over the synchronized mipmap pyramid; older contexts use a direct Gaussian kernel. Five-circle overlap samples the fully sharp frame. No separately decoded video layers or single sharp-mask approximation are used.
 
-The supplied SVG determines final circle positions and radius proportions. The circles drift by a few pixels at rest and converge reversibly with ordinary scrolling. There is no hero pinning or scroll snapping. The summit composition is fixed for the supplied clip, rather than object-tracked.
+The five user-supplied, clockwise SVG paths define the visible tapered rims. They render as native vectors, not uniform shader strokes. Each uses an offset radial gradient from white at 20% opacity on the outer boundary to white at 5% opacity on its inner opening. Original files are preserved unchanged in `public/brand/lenses`; their path data and aperture measurements live in `src/lib/lens-artwork.ts`. Browser checks sample both sides of each SVG opening to validate the focus geometry.
+
+The supplied logo determines final circle positions and radius proportions. The circles drift by a few pixels at rest and converge reversibly with ordinary scrolling. There is no hero pinning or scroll snapping. The summit composition is fixed for the supplied clip, rather than object-tracked.
 
 Rendering is limited to 30 fps and 1280 pixels wide on desktop, 640 pixels on smaller screens, with a bounded device-pixel ratio. Video pauses outside the viewport and in hidden documents. User pause stops video and drift. Reduced motion uses the static poster and final geometry, without requesting video. A CSS poster remains available without JavaScript or WebGL.
 

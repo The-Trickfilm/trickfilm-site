@@ -1,3 +1,4 @@
+import { lensArtwork } from "./lens-artwork.ts";
 export const centers = [
   [222.48, 122.98],
   [321.98, 195.3],
@@ -15,7 +16,7 @@ export function lensGeometry(
   progress: number,
   time: number,
 ) {
-  const scale = Math.min((width * 0.78) / 445, (height * 0.60) / 435);
+  const scale = Math.min((width * 0.78) / 445, (height * 0.6) / 435);
   const rest = [
     [0.54, 0.31],
     [0.7, 0.43],
@@ -40,4 +41,17 @@ export function lensGeometry(
 export function overlapCount(x: number, y: number, circles: number[][]) {
   return circles.filter(([cx, cy, r]) => (x - cx) ** 2 + (y - cy) ** 2 <= r * r)
     .length;
+}
+
+/** Map the artwork's inset, offset openings with the same transforms as its paths. */
+export function lensApertures(outlines: number[][]) {
+  return outlines.map(([x, y, radius], i) => {
+    const art = lensArtwork[i];
+    const scale = radius / (art.width / 2);
+    return [
+      x + (art.aperture.x - art.width / 2) * scale,
+      y + (art.aperture.y - art.height / 2) * scale,
+      art.aperture.radius * scale,
+    ];
+  });
 }

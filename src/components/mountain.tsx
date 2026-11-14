@@ -1,6 +1,14 @@
 "use client";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { convergence, lensGeometry } from "@/lib/lenses";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  useId,
+} from "react";
+import { convergence, lensGeometry, lensApertures } from "@/lib/lenses";
+
+import { lensArtwork } from "@/lib/lens-artwork";
 
 const gaussianSampling = `
  vec4 color=vec4(0.0);float total=0.0;
@@ -29,8 +37,8 @@ uniform vec3 circles[5];
 varying vec2 uv;
 void main(){
  vec2 p=vec2(uv.x,1.0-uv.y)*resolution;
- float count=0.0;float edge=0.0;
- for(int i=0;i<5;i++){float d=distance(p,circles[i].xy);count+=1.0-smoothstep(circles[i].z-0.7,circles[i].z+0.7,d);edge=max(edge,1.0-smoothstep(.55,1.4,abs(d-circles[i].z)));}
+ float count=0.0;
+ for(int i=0;i<5;i++){float d=distance(p,circles[i].xy);count+=1.0-smoothstep(circles[i].z-0.7,circles[i].z+0.7,d);}
  vec2 ratio=resolution/source;
  vec2 crop=ratio/max(ratio.x,ratio.y);
  vec2 st=(uv-.5)*crop+.5;
@@ -42,7 +50,7 @@ void main(){
  // Averaging the top edge avoids stretching clouds into vertical streaks.
  vec4 picture=color/total;
  if(st.y>.94){vec4 sky=(texture2D(frame,vec2(.2,.995))+texture2D(frame,vec2(.5,.995))+texture2D(frame,vec2(.8,.995)))/3.0;picture=mix(picture,sky,smoothstep(.94,1.04,st.y));}
- gl_FragColor=mix(picture,vec4(.9,1.,.98,1.),edge*.8);
+ gl_FragColor=picture;
 }`;
 }
 const subscribeMotion = (callback: () => void) => {
@@ -52,6 +60,9 @@ const subscribeMotion = (callback: () => void) => {
 };
 export function Mountain() {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const outlineSvg = useRef<SVGSVGElement>(null);
+  const outlinePaths = useRef<(SVGPathElement | null)[]>([]);
+  const gradientId = `trickfilm-lens-${useId().replaceAll(":", "")}`;
   const region = useRef<HTMLDivElement>(null);
   const [paused, setPaused] = useState(false);
   const reduced = useSyncExternalStore(
@@ -192,6 +203,7 @@ export function Mountain() {
         el.width = w;
         el.height = h;
         gl.viewport(0, 0, w, h);
+        outlineSvg.current?.setAttribute("viewBox", `0 0 ${w} ${h}`);
       }
       const hero = host.closest("section")!.getBoundingClientRect();
       const progress = media.matches ? 1 : convergence(hero.top, hero.height);
@@ -204,6 +216,15 @@ export function Mountain() {
         progress,
         media.matches || pauseRef.current ? 0 : now / 1000,
       );
+      const apertures = lensApertures(circles);
+      circles.forEach(([x, y, radius], i) => {
+        const art = lensArtwork[i];
+        const scale = radius / (art.width / 2);
+        outlinePaths.current[i]?.setAttribute(
+          "transform",
+          `translate(${x - (art.width / 2) * scale} ${y - (art.height / 2) * scale}) scale(${scale})`,
+        );
+      });
       gl.uniform2f(uniforms.resolution, w, h);
       gl.uniform2f(uniforms.texel, 1 / staging.width, 1 / staging.height);
       gl.uniform2f(
@@ -215,7 +236,7 @@ export function Mountain() {
           ? image.videoHeight
           : image.naturalHeight,
       );
-      gl.uniform3fv(uniforms["circles[0]"], new Float32Array(circles.flat()));
+      gl.uniform3fv(uniforms["circles[0]"], new Float32Array(apertures.flat()));
       try {
         if (mipmaps && stage) {
           stage.drawImage(image, 0, 0, staging.width, staging.height);
@@ -263,6 +284,44 @@ export function Mountain() {
       aria-label="A turquoise mountain coming into focus through five overlapping lenses"
     >
       <canvas ref={canvas} aria-hidden="true" />
+      <svg
+        ref={outlineSvg}
+        className="lens-outlines"
+        viewBox="0 0 445 435"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <defs>
+          {lensArtwork.map((art, i) => (
+            <radialGradient
+              key={art.name}
+              id={`${gradientId}-${i}`}
+              gradientUnits="userSpaceOnUse"
+              cx={art.width / 2}
+              cy={art.height / 2}
+              r={art.width / 2}
+              fx={art.aperture.x}
+              fy={art.aperture.y}
+              fr={art.aperture.radius}
+            >
+              <stop offset="0" stopColor="white" stopOpacity="0.05" />
+              <stop offset="1" stopColor="white" stopOpacity="0.20" />
+            </radialGradient>
+          ))}
+        </defs>
+        {lensArtwork.map((art, i) => (
+          <path
+            key={art.name}
+            data-lens={art.name}
+            ref={(node) => {
+              outlinePaths.current[i] = node;
+            }}
+            d={art.path}
+            fill={`url(#${gradientId}-${i})`}
+          />
+        ))}
+      </svg>
       {!reduced && (
         <button
           className="motion-control"

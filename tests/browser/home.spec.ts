@@ -216,3 +216,44 @@ test("mobile motion uses only the optimized uploaded mobile video", async ({
   await expect.poll(() => sources.size).toBe(1);
   expect([...sources]).toEqual(["/media/summit-mobile.mp4"]);
 });
+
+test("native lens paths preserve the supplied tapered openings", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect(page.locator(".mountain canvas")).toHaveCSS("opacity", "1");
+  await expect(page.locator(".lens-outlines")).toHaveCSS("opacity", "1");
+  const paths = page.locator(".lens-outlines path[data-lens]");
+  await expect(paths).toHaveCount(5);
+  const apertures = [
+    { x: 122.98, y: 134.09, radius: 107.61 },
+    { x: 112.455, y: 126.445, radius: 107.61 },
+    { x: 116.47, y: 114.01, radius: 107.61 },
+    { x: 129.52, y: 114.01, radius: 107.61 },
+    { x: 133.575, y: 126.445, radius: 107.61 },
+  ];
+  for (let i = 0; i < 5; i++) {
+    const aligned = await paths.nth(i).evaluate((node, hole) => {
+      const path = node as SVGGeometryElement;
+      for (let j = 0; j < 16; j++) {
+        const angle = (j * Math.PI) / 8;
+        const inside = new DOMPoint(
+          hole.x + Math.cos(angle) * (hole.radius - 0.25),
+          hole.y + Math.sin(angle) * (hole.radius - 0.25),
+        );
+        const border = new DOMPoint(
+          hole.x + Math.cos(angle) * (hole.radius + 0.25),
+          hole.y + Math.sin(angle) * (hole.radius + 0.25),
+        );
+        if (path.isPointInFill(inside) || !path.isPointInFill(border))
+          return false;
+      }
+      return true;
+    }, apertures[i]);
+    expect(aligned).toBe(true);
+  }
+  await page
+    .locator(".mountain")
+    .screenshot({ path: "/workspace/work/lens-artwork.png" });
+});

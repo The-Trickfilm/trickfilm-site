@@ -1735,3 +1735,18 @@ html {
     font-size: 14px;
   }
 }
+
+/* Native vector paths retain the supplied mark's tapered, offset contours. */
+.lens-outlines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  overflow: hidden;
+}
+.mountain[data-ready="true"] .lens-outlines {
+  opacity: 1;
+}
