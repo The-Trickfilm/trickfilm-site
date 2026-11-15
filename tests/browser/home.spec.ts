@@ -1,7 +1,14 @@
 import { test, expect, type Page } from "@playwright/test";
 async function loadVisibleImages(page: Page) {
   for (const img of await page.locator("img:visible").all()) {
-    await img.scrollIntoViewIfNeeded();
+    if (await img.evaluate((el) => !!el.closest(".service-art"))) {
+      await img.evaluate((el) =>
+        window.scrollTo({
+          top: el.getBoundingClientRect().top + scrollY - 100,
+          behavior: "instant",
+        }),
+      );
+    } else await img.scrollIntoViewIfNeeded();
     await expect
       .poll(() =>
         img.evaluate(
@@ -18,11 +25,9 @@ async function loadVisibleImages(page: Page) {
     "true",
   );
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  await page.waitForFunction(
-    () =>
-      Number(
-        document.querySelector(".mountain")?.getAttribute("data-progress"),
-      ) === (matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 0),
+  await expect(page.locator(".pixel-mountain")).toHaveAttribute(
+    "data-phase",
+    "clear",
   );
 }
 
@@ -36,37 +41,20 @@ test("mobile fits viewport and reduced motion avoids video download", async ({
     if (r.url().endsWith(".mp4")) videoRequests++;
   });
   await page.goto("/");
-  await expect(page.locator(".mountain canvas")).toHaveCSS("opacity", "1");
-  expect(videoRequests).toBe(0);
-  await expect(page.getByRole("button", { name: "Pause motion" })).toHaveCount(
-    0,
+  await expect(page.locator(".pixel-mountain canvas")).toHaveCSS(
+    "opacity",
+    "1",
   );
+  expect(videoRequests).toBe(0);
+  await expect(
+    page.getByRole("button", { name: "Replay image focus animation" }),
+  ).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     390,
   );
   await loadVisibleImages(page);
   await page.screenshot({ path: "/workspace/work/mobile.png", fullPage: true });
 });
-test("WebGL unavailable keeps static fallback", async ({ page }) => {
-  await page.addInitScript(() => {
-    const get = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (
-      this: HTMLCanvasElement,
-      type: string,
-      ...args: unknown[]
-    ) {
-      if (type === "webgl") return null;
-      return Reflect.apply(get, this, [type, ...args]);
-    } as typeof get;
-  });
-  await page.goto("/");
-  await expect(page.locator(".mountain")).toHaveCSS(
-    "background-image",
-    /mountain-still.webp/,
-  );
-  await expect(page.locator(".mountain canvas")).toHaveCSS("opacity", "0");
-});
-
 test("services menu links to the selected service", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
@@ -138,47 +126,6 @@ test("selected work shows all five supplied sites with loaded local screenshots"
     .screenshot({ path: "/workspace/work/selected-work.png" });
 });
 
-test("native lens paths preserve the supplied tapered openings", async ({
-  page,
-}) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await expect(page.locator(".mountain canvas")).toHaveCSS("opacity", "1");
-  await expect(page.locator(".lens-outlines")).toHaveCSS("opacity", "1");
-  const paths = page.locator(".lens-outlines path[data-lens]");
-  await expect(paths).toHaveCount(5);
-  const apertures = [
-    { x: 122.98, y: 134.09, radius: 107.61 },
-    { x: 112.455, y: 126.445, radius: 107.61 },
-    { x: 116.47, y: 114.01, radius: 107.61 },
-    { x: 129.52, y: 114.01, radius: 107.61 },
-    { x: 133.575, y: 126.445, radius: 107.61 },
-  ];
-  for (let i = 0; i < 5; i++) {
-    const aligned = await paths.nth(i).evaluate((node, hole) => {
-      const path = node as SVGGeometryElement;
-      for (let j = 0; j < 16; j++) {
-        const angle = (j * Math.PI) / 8;
-        const inside = new DOMPoint(
-          hole.x + Math.cos(angle) * (hole.radius - 0.25),
-          hole.y + Math.sin(angle) * (hole.radius - 0.25),
-        );
-        const border = new DOMPoint(
-          hole.x + Math.cos(angle) * (hole.radius + 0.25),
-          hole.y + Math.sin(angle) * (hole.radius + 0.25),
-        );
-        if (path.isPointInFill(inside) || !path.isPointInFill(border))
-          return false;
-      }
-      return true;
-    }, apertures[i]);
-    expect(aligned).toBe(true);
-  }
-  await page
-    .locator(".mountain")
-    .screenshot({ path: "/workspace/work/lens-artwork.png" });
-});
-
 test("gallery arrows center the full-color project and keep neighbours monochrome", async ({
   page,
 }) => {
@@ -202,7 +149,7 @@ test("gallery arrows center the full-color project and keep neighbours monochrom
   await expect
     .poll(() => cards.first().getAttribute("aria-current"))
     .toBe("true");
-  await cards.first().focus();
+  await cards.first().evaluate((el) => el.focus({ preventScroll: true }));
   const scrollY = await page.evaluate(() => window.scrollY);
   await cards.first().press("ArrowRight");
   await expect(cards.nth(1)).toBeFocused();

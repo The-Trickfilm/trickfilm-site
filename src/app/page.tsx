@@ -2,7 +2,8 @@ import { SelectedWork } from "@/components/selected-work";
 import { ServiceExplorer } from "@/components/service-explorer";
 import { Arrow } from "@/components/arrow";
 import Image from "next/image";
-import { Mountain } from "@/components/mountain";
+import { PixelMountain } from "@/components/pixel-mountain";
+import { FocusText } from "@/components/focus-text";
 const services = [
   [
     "01",
@@ -29,39 +30,6 @@ const services = [
     "Find where AI can make a useful difference, then turn the opportunity into a practical next step.",
   ],
 ];
-function ServiceIcon({ kind }: { kind: string }) {
-  return (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 32 32"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {kind === "web" ? (
-        <>
-          <rect x="3" y="4" width="26" height="19" rx="1" />
-          <path d="M16 23v5m-6 0h12" />
-        </>
-      ) : kind === "workflow" ? (
-        <>
-          <circle cx="16" cy="6" r="4" />
-          <circle cx="6" cy="25" r="4" />
-          <circle cx="26" cy="25" r="4" />
-          <path d="m14 10-6 11m10-11 6 11M10 25h12" />
-        </>
-      ) : (
-        <>
-          <path d="m2 10 14-7 14 7-14 7-14-7Zm0 7 14 7 14-7M2 24l14 7 14-7" />
-        </>
-      )}
-    </svg>
-  );
-}
 export default function Home() {
   return (
     <>
@@ -102,67 +70,53 @@ export default function Home() {
         </nav>
       </header>
       <main id="main">
-        <section className="hero-scroll" aria-labelledby="hero-title">
-          <div className="hero">
-            <div className="hero-copy">
-              <p className="eyebrow">
-                <span className="dot" /> Creative technology studio
-              </p>
-              <h1 id="hero-title">
-                <span>Trickfilm brings</span> <span>clarity to</span>{" "}
-                <em>complexity.</em>
-              </h1>
-              <div className="hero-bottom">
-                <p>
-                  We apply creativity and technology to focus on your business
-                  challenges — turning them into working solutions.
-                </p>
-                <div className="actions">
-                  <a className="button" href="#contact">
-                    Let&apos;s solve something{" "}
-                    <span>
-                      <Arrow />
-                    </span>
-                  </a>
-                  <a className="text-link" href="#work">
-                    See our work
-                  </a>
-                </div>
-              </div>
-              <ul className="hero-services" aria-label="Our services">
-                <li>
-                  <ServiceIcon kind="web" />
-                  <span>Web Design</span>
-                </li>
-                <li>
-                  <ServiceIcon kind="workflow" />
-                  <span>
-                    Workflow
-                    <br />
-                    Automation
-                  </span>
-                </li>
-                <li>
-                  <ServiceIcon kind="apps" />
-                  <span>
-                    Custom
-                    <br />
-                    Applications
-                  </span>
-                </li>
-              </ul>
-            </div>
-            <Mountain />
-            <div className="hero-caption">
-              <span>Clear thinking. Creative doing.</span>
-              <span>Scroll for perspective ↓</span>
+        <section className="hero" aria-labelledby="hero-title">
+          <PixelMountain />
+          <div className="hero-copy">
+            <p className="eyebrow">Independent creative technology studio</p>
+            <h1 id="hero-title">
+              Trickfilm brings
+              <br />
+              clarity to <em>complexity.</em>
+            </h1>
+          </div>
+          <div className="hero-bottom">
+            <p>
+              We apply creativity and technology to focus on your business
+              challenges — turning them into working solutions.
+            </p>
+            <div className="actions">
+              <a className="button" href="#contact">
+                Let&apos;s solve something <Arrow />
+              </a>
+              <a className="text-link" href="#work">
+                See our work <Arrow />
+              </a>
             </div>
           </div>
+          <div className="hero-caption">
+            <span>Creativity × technology</span>
+            <a href="#perspective">Scroll for clarity ↓</a>
+          </div>
+        </section>
+        <section
+          className="perspective section"
+          id="perspective"
+          aria-labelledby="perspective-title"
+        >
+          <p className="eyebrow">01 / A clearer perspective</p>
+          <FocusText
+            id="perspective-title"
+            text="Complex challenges. Clear thinking. The right idea, brought into focus."
+          />
+          <p className="perspective-note">
+            A better website. A smoother workflow. A new way of working.
+          </p>
         </section>
         <SelectedWork />
         <section className="approach section" id="approach">
           <div className="approach-mark">
-            <p className="eyebrow">02 / A fresh perspective</p>
+            <p className="eyebrow">03 / About Trickfilm</p>
             <Image
               src="/brand/trickfilm-symbol.svg"
               width={200}
@@ -171,11 +125,7 @@ export default function Home() {
             />
           </div>
           <div>
-            <h2>
-              A fresh perspective
-              <br />
-              <span>changes everything.</span>
-            </h2>
+            <FocusText text="A fresh perspective changes everything." />
             <p className="intro">
               The right solution starts with seeing the whole picture. We bring
               curious minds, creative thinking, and technical know-how to the
@@ -189,12 +139,8 @@ export default function Home() {
         </section>
         <section className="services section" id="services">
           <div className="section-heading">
-            <p className="eyebrow">03 / Services</p>
-            <h2>
-              Good thinking.
-              <br />
-              <span>Working solutions.</span>
-            </h2>
+            <p className="eyebrow">04 / Services</p>
+            <FocusText text="Good thinking. Working solutions." />
             <p>
               Four disciplines. One focus:
               <br />
@@ -210,13 +156,12 @@ export default function Home() {
         <section className="method section" aria-labelledby="method-title">
           <div className="method-heading">
             <p className="eyebrow">
-              04 / From a question to a working solution
+              05 / From a question to a working solution
             </p>
-            <h2 id="method-title">
-              The way forward
-              <br />
-              starts with <em>understanding.</em>
-            </h2>
+            <FocusText
+              id="method-title"
+              text="The way forward starts with understanding."
+            />
           </div>
           <div className="method-steps">
             <article>
@@ -246,13 +191,9 @@ export default function Home() {
           </div>
         </section>
         <section className="contact section" id="contact">
-          <p className="eyebrow">05 / Let’s find the way forward</p>
+          <p className="eyebrow">06 / Let’s find the way forward</p>
           <div>
-            <h2>
-              What could work
-              <br />
-              <em>better for you?</em>
-            </h2>
+            <FocusText text="What could work better for you?" />
             <p>
               A challenge, an idea, or a question.
               <br />

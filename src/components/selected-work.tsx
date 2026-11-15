@@ -2,6 +2,7 @@
 import { useRef, useState, useId } from "react";
 import Image from "next/image";
 import { Arrow } from "./arrow";
+import { FocusText } from "./focus-text";
 const projects = [
   {
     name: "Gower Modern Law",
@@ -79,12 +80,11 @@ export function SelectedWork() {
       aria-labelledby="work-title"
     >
       <div className="work-heading">
-        <p className="eyebrow">01 / Selected work</p>
-        <h2 id="work-title">
-          Different businesses.
-          <br />
-          <span>Distinctive solutions.</span>
-        </h2>
+        <p className="eyebrow">02 / Selected work</p>
+        <FocusText
+          id="work-title"
+          text="Different businesses. Distinctive solutions."
+        />
         <p>
           Selected websites by Trickfilm.
           <br />
