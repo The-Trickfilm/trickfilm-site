@@ -1,234 +1,245 @@
-import { HeaderSurface } from "@/components/header-surface";
-import { SelectedWork } from "@/components/selected-work";
-import { ServiceExplorer } from "@/components/service-explorer";
-import { Arrow } from "@/components/arrow";
 import Image from "next/image";
-import { PixelMountain } from "@/components/pixel-mountain";
-import { FocusText } from "@/components/focus-text";
+import {
+  websiteProjects,
+  applicationProject,
+  CONTACT_EMAIL,
+} from "@/lib/projects";
+import { ProjectPanel } from "@/components/project-panel";
+import { BrandingGallery } from "@/components/branding-gallery";
+import { PageMotion } from "@/components/page-motion";
+import { Arrow } from "@/components/arrow";
 const services = [
-  [
-    "01",
-    "Web design",
-    "A clearer presence.",
-    "Thoughtful websites that make your business easier to understand, explore, and choose.",
-  ],
-  [
-    "02",
-    "Workflow automation",
-    "Less friction. More flow.",
-    "Connect the tools you use, simplify repetitive tasks, and give your team time back.",
-  ],
-  [
-    "03",
-    "Custom applications",
-    "Built around your business.",
-    "Practical software shaped around your people, processes, and the way you work.",
-  ],
-  [
-    "04",
-    "AI consulting",
-    "Possibility, with purpose.",
-    "Find where AI can make a useful difference, then turn the opportunity into a practical next step.",
-  ],
+  {
+    name: "Design & Branding",
+    copy: "Distinctive identities and thoughtful design, from the first idea to the final detail.",
+    items: ["Visual identity", "Logo design", "Creative direction"],
+  },
+  {
+    name: "Websites & Marketing",
+    copy: "Websites that look right, tell your story, and make the next step clear.",
+    items: [
+      "Website design & development",
+      "Content & digital campaigns",
+      "Ongoing improvements",
+    ],
+  },
+  {
+    name: "Applications & Automation",
+    copy: "Practical tools and connected workflows, built around the way your business works.",
+    items: [
+      "Custom business applications",
+      "Workflow automation",
+      "Practical AI consulting",
+    ],
+  },
 ];
 export default function Home() {
   return (
     <>
-      <link rel="preload" as="image" href="/media/mountain-still.webp" />
-      <noscript>
-        <style>{`.hero[data-intro="pending"] .hero-copy,.hero[data-intro="pending"] .hero-bottom{opacity:1}`}</style>
-      </noscript>
-      <a className="skip" href="#main">
+      <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className="header" data-surface="dark">
-        <a href="#" aria-label="Trickfilm home">
-          <Image
-            src="/brand/trickfilm-logo.svg"
-            width={200}
-            height={45}
-            alt="Trickfilm"
-            priority
-          />
-        </a>
-        <nav aria-label="Main navigation">
-          <details className="services-menu">
-            <summary>
-              Services <span aria-hidden="true">⌄</span>
-            </summary>
-            <div>
-              {services.map(([n, title]) => (
-                <a key={n} href={`#service-${n}`}>
-                  {title}
-                </a>
-              ))}
-            </div>
-          </details>
-          <a href="#work">Work</a>
-          <a href="#approach">About</a>
-          <a className="nav-contact" href="#contact">
-            Let’s talk{" "}
-            <span>
-              <Arrow />
-            </span>
-          </a>
-        </nav>
-      </header>
-      <HeaderSurface />
+      <PageMotion />
       <main id="main">
-        <section
-          className="hero"
-          aria-labelledby="hero-title"
-          data-intro="pending"
-        >
-          <PixelMountain />
-          <div className="hero-copy">
-            <p className="eyebrow">Independent creative technology studio</p>
-            <h1 id="hero-title">
-              Trickfilm brings
-              <br />
-              clarity to <em>complexity.</em>
-            </h1>
-          </div>
-          <div className="hero-bottom">
-            <p>
-              We apply creativity and technology to focus on your business
-              challenges — turning them into working solutions.
-            </p>
-            <div className="actions">
-              <a className="button" href="#contact">
-                Let&apos;s solve something <Arrow />
-              </a>
-              <a className="text-link" href="#work">
-                See our work <Arrow />
+        <section className="hero" id="intro" aria-labelledby="hero-heading">
+          <header className="topbar">
+            <a href="#intro" aria-label="Trickfilm home">
+              <Image
+                src="/brand/trickfilm-symbol.svg"
+                width={52}
+                height={51}
+                alt="Trickfilm"
+                priority
+              />
+            </a>
+            <p>Independent creative studio.</p>
+          </header>
+          <div className="hero-layout">
+            <nav className="hero-navigation" aria-label="Main navigation">
+              <a href="#work">Work</a>
+              <a href="#about">About</a>
+              <a href="#services">Services</a>
+              <a href="#contact">Contact</a>
+            </nav>
+            <div className="hero-introduction">
+              <h1 id="hero-heading">
+                Good ideas.
+                <br />
+                Beautifully executed.
+              </h1>
+              <p>
+                We bring together design, technology, and a little ingenuity to
+                help businesses look better, work smarter, and solve problems in
+                new ways.
+              </p>
+              <a href="#work" className="explore-link">
+                <span className="diamond">
+                  <span aria-hidden="true">↓</span>
+                </span>
+                <span>Explore our work</span>
               </a>
             </div>
           </div>
-          <div className="hero-caption">
-            <span>Creativity × technology</span>
-            <a href="#perspective">Scroll for clarity ↓</a>
+          <div className="hero-wordmark">
+            <Image
+              src="/brand/trickfilm-logo.svg"
+              width={2000}
+              height={451}
+              alt="Trickfilm"
+              priority
+            />
           </div>
         </section>
         <section
-          className="perspective section"
-          id="perspective"
-          aria-labelledby="perspective-title"
+          id="work"
+          className="work-section"
+          aria-labelledby="work-heading"
         >
-          <p className="eyebrow">01 / A clearer perspective</p>
-          <FocusText
-            id="perspective-title"
-            text="Complex challenges. Clear thinking. The right idea, brought into focus."
-          />
-          <p className="perspective-note">
-            A better website. A smoother workflow. A new way of working.
-          </p>
-        </section>
-        <SelectedWork />
-        <SelectedWork category="logos" />
-        <section className="approach section" id="approach">
-          <div className="approach-mark">
-            <p className="eyebrow">04 / About Trickfilm</p>
-            <Image
-              src="/brand/trickfilm-symbol.svg"
-              width={200}
-              height={196}
-              alt=""
-            />
-          </div>
-          <div>
-            <FocusText text="A fresh perspective changes everything." />
-            <p className="intro">
-              The right solution starts with seeing the whole picture. We bring
-              curious minds, creative thinking, and technical know-how to the
-              things holding your business back.
-            </p>
-            <p className="small-copy">
-              From a better website to a smoother workflow, we turn “there must
-              be a better way” into something you can use.
-            </p>
+          <h2 id="work-heading" className="sr-only">
+            Selected websites
+          </h2>
+          <div className="project-stack">
+            {websiteProjects.map((project) => (
+              <ProjectPanel key={project.slug} project={project} />
+            ))}
           </div>
         </section>
-        <section className="services section" id="services">
-          <div className="section-heading">
-            <p className="eyebrow">05 / Services</p>
-            <FocusText text="Good thinking. Working solutions." />
-            <p>
-              Four disciplines. One focus:
-              <br />
-              making your business work better.
-            </p>
+        <section
+          id="branding"
+          className="branding section-content"
+          aria-labelledby="branding-heading"
+        >
+          <div className="section-introduction">
+            <p className="eyebrow">(Identity)</p>
+            <div>
+              <h2 id="branding-heading">
+                Made to be
+                <br />
+                remembered.
+              </h2>
+              <p>Selected logos and visual identities.</p>
+            </div>
           </div>
-          <ServiceExplorer />
-          <p className="work-note">
-            Every business has a different starting point. Ours is understanding
-            yours.
-          </p>
+          <BrandingGallery />
         </section>
-        <section className="method section" aria-labelledby="method-title">
-          <div className="method-heading">
-            <p className="eyebrow">
-              06 / From a question to a working solution
-            </p>
-            <FocusText
-              id="method-title"
-              text="The way forward starts with understanding."
-            />
+        <section
+          id="applications"
+          className="application-section"
+          aria-labelledby="applications-heading"
+        >
+          <div className="section-introduction section-content">
+            <p className="eyebrow">(Creative technology)</p>
+            <div>
+              <h2 id="applications-heading">
+                Ideas that
+                <br />
+                do more.
+              </h2>
+              <p>Applications, connected workflows, and useful tools.</p>
+            </div>
           </div>
-          <div className="method-steps">
-            <article>
-              <span>01 / Get clear</span>
-              <h3>Start with the real challenge.</h3>
-              <p>
-                Listen to your team. Look at the way work happens. Find the
-                friction before deciding what to build.
+          <ProjectPanel project={applicationProject} application />
+        </section>
+        <section
+          id="services"
+          className="services section-content"
+          aria-labelledby="services-heading"
+        >
+          <div className="section-introduction">
+            <p className="eyebrow">(Services)</p>
+            <h2 id="services-heading">
+              A little ingenuity.
+              <br />A lot of possibility.
+            </h2>
+          </div>
+          <div className="service-list">
+            {services.map((service, i) => (
+              <article className="service-row" key={service.name} data-reveal>
+                <span className="service-index" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <div>
+                  <h3>{service.name}</h3>
+                  <p>{service.copy}</p>
+                  <ul>
+                    {service.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section
+          id="about"
+          className="about section-content"
+          aria-labelledby="about-heading"
+        >
+          <div className="section-introduction">
+            <p className="eyebrow">(About Trickfilm)</p>
+            <div>
+              <h2 id="about-heading">
+                Creativity. Ingenuity.
+                <br />
+                Technology.
+              </h2>
+              <p className="about-copy">
+                An independent creative studio making businesses look better,
+                work smarter, and do more.
               </p>
-            </article>
-            <article>
-              <span>02 / Make it tangible</span>
-              <h3>Bring the right idea into focus.</h3>
               <p>
-                Explore a practical direction, make it concrete, and test it
-                against the people and processes it needs to support.
+                From a new identity to a better way of working, we bring design
+                and technology together to turn good ideas into working
+                solutions.
               </p>
-            </article>
-            <article>
-              <span>03 / Put it to work</span>
-              <h3>Build for the everyday.</h3>
-              <p>
-                Turn the idea into a useful solution. Keep the experience clear,
-                then refine it with what you learn.
-              </p>
-            </article>
+              <a href={`mailto:${CONTACT_EMAIL}`} className="text-link">
+                Let’s make something good <Arrow />
+              </a>
+            </div>
           </div>
         </section>
-        <section className="contact section" id="contact">
-          <p className="eyebrow">07 / Let’s find the way forward</p>
-          <div>
-            <FocusText text="What could work better for you?" />
-            <p>
-              A challenge, an idea, or a question.
-              <br />
-              That’s a good place to start.
-            </p>
-            <p className="contact-note">Contact details are coming soon.</p>
+        <section
+          id="contact"
+          className="contact-panel"
+          aria-labelledby="contact-heading"
+        >
+          <p className="eyebrow">(Let’s connect)</p>
+          <h2 id="contact-heading">
+            Have something
+            <br />
+            in mind?
+          </h2>
+          <a className="contact-email" href={`mailto:${CONTACT_EMAIL}`}>
+            {CONTACT_EMAIL}
+            <Arrow />
+          </a>
+          <div className="contact-bottom">
+            <p>Good ideas start with a conversation.</p>
+            <a href="#intro">Back to top ↑</a>
           </div>
-          <Image
-            src="/brand/trickfilm-symbol.svg"
-            width={240}
-            height={235}
-            alt=""
-          />
         </section>
       </main>
-      <footer>
-        <Image
-          src="/brand/trickfilm-logo.svg"
-          width={160}
-          height={36}
-          alt="Trickfilm"
-        />
-        <p>Creativity and technology. Working together.</p>
-        <span>© 2026 Trickfilm</span>
+      <footer className="footer">
+        <div className="footer-links">
+          <a href="#work">Websites</a>
+          <a href="#branding">Identity</a>
+          <a href="#applications">Creative technology</a>
+          <a href="#services">Services</a>
+          <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
+        </div>
+        <div className="footer-wordmark">
+          <Image
+            src="/brand/trickfilm-logo.svg"
+            width={2000}
+            height={451}
+            alt="Trickfilm"
+          />
+        </div>
+        <div className="footer-bottom">
+          <span>© Trickfilm</span>
+          <p>Independent creative studio.</p>
+        </div>
       </footer>
     </>
   );
