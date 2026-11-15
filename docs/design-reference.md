@@ -19,3 +19,7 @@ The home mark returns to the intro; native anchors retain keyboard navigation. E
 ## Margins, services, and contact
 
 Desktop project surfaces now have a 64px inset at a 1440px viewport (responsive 32–80px range), with 20px mobile edges. Services match the walkthrough's fixed visual / scrolling description treatment: a sticky turquoise number changes as each service crosses the viewport midpoint. Smaller/shorter screens and reduced-motion users get a standard list. The contact section now has a labeled, validated form with Mailtrap delivery behind a server route and a direct email fallback. Credentials and a verified sending domain are required before live delivery can be confirmed.
+
+## Compact identity carousel
+
+The expanded grid is replaced with a compact, continuously looping horizontal logo rail: five visible items at desktop width, three on tablet, two on mobile. Original artwork, colors, and names are retained. Arrows, Pause/Play, touch scrolling, hover/focus pauses, and the existing large preview provide control. Reduced-motion users get manual scrolling; no-JavaScript users get the original list and image links. Repeated visual copies are excluded from screen-reader navigation and keyboard tab order.

@@ -414,10 +414,92 @@ summary:focus-visible {
   max-width: 650px;
   margin-top: 30px;
 }
-.identity-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 48px 28px;
+.identity-carousel {
+  min-width: 0;
+}
+.identity-viewport {
+  container-type: inline-size;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  padding: 10px 0;
+}
+.identity-viewport::-webkit-scrollbar {
+  display: none;
+}
+.identity-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+}
+.identity-set {
+  display: flex;
+  gap: 20px;
+}
+.identity-track:not([data-loop-ready]) [data-clone] {
+  display: none;
+}
+.identity-set .identity-card {
+  flex: 0 0 calc((100cqw - 80px) / 5);
+  width: calc((100cqw - 80px) / 5);
+}
+.identity-carousel:has([data-loop-ready]) .identity-carousel-controls {
+  display: flex;
+}
+.identity-carousel-controls {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-top: 26px;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  font-size: 14px;
+}
+.identity-carousel-controls p span {
+  color: var(--muted);
+  margin-left: 10px;
+}
+.identity-carousel-controls > div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.identity-carousel-controls button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  font-size: 20px;
+  transition: background 0.2s;
+}
+.identity-carousel-controls button:hover {
+  background: var(--teal);
+}
+.identity-carousel-controls .carousel-pause {
+  width: auto;
+  border: 0;
+  border-radius: 0;
+  padding-inline: 16px;
+  font-size: 14px;
+}
+.identity-carousel .identity-card:focus-visible .identity-image {
+  outline: 2px solid #277b76;
+  outline-offset: -4px;
+}
+.identity-carousel .identity-caption {
+  padding-top: 12px;
+  gap: 8px;
+  min-height: 48px;
+}
+.identity-carousel .identity-caption h3 {
+  font-size: 14px;
+}
+.identity-carousel .identity-caption svg {
+  width: 12px;
+  height: 12px;
 }
 .identity-card {
   min-width: 0;
@@ -459,33 +541,6 @@ summary:focus-visible {
   width: 15px;
   height: 15px;
   flex-shrink: 0;
-}
-.more-identities {
-  margin-top: 64px;
-}
-.more-identities summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  list-style: none;
-  padding: 25px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  font-size: 18px;
-  cursor: pointer;
-}
-.more-identities summary::-webkit-details-marker {
-  display: none;
-}
-.summary-plus {
-  font-size: 30px;
-  font-weight: 400;
-}
-.more-identities[open] .summary-plus {
-  transform: rotate(45deg);
-}
-.more-identities .identity-grid {
-  padding-top: 48px;
 }
 .identity-dialog {
   position: fixed;
@@ -1144,9 +1199,6 @@ fieldset:disabled .contact-submit {
   .section-introduction h2 {
     font-size: 48px;
   }
-  .identity-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .service-row {
     gap: 40px;
   }
@@ -1155,6 +1207,32 @@ fieldset:disabled .contact-submit {
   }
   .case-stage {
     padding: 80px 10%;
+  }
+}
+@media (min-width: 701px) and (max-width: 1100px) {
+  .identity-set .identity-card {
+    flex-basis: calc((100cqw - 40px) / 3);
+    width: calc((100cqw - 40px) / 3);
+  }
+}
+@media (max-width: 700px) {
+  .identity-set .identity-card {
+    flex-basis: calc((100cqw - 20px) / 2);
+    width: calc((100cqw - 20px) / 2);
+  }
+  .identity-carousel-controls {
+    align-items: flex-start;
+    font-size: 12px;
+  }
+  .identity-carousel-controls p {
+    max-width: 100px;
+    line-height: 1.5;
+  }
+  .identity-carousel-controls p span {
+    margin-left: 0;
+  }
+  .identity-carousel-controls .carousel-pause {
+    padding-inline: 6px;
   }
 }
 @media (min-width: 701px) and (max-width: 1100px) {
@@ -1343,9 +1421,6 @@ fieldset:disabled .contact-submit {
     line-height: 1.2;
     margin-top: 25px;
   }
-  .identity-grid {
-    gap: 30px 16px;
-  }
   .identity-image {
     border-radius: 12px;
   }
@@ -1359,16 +1434,6 @@ fieldset:disabled .contact-submit {
   .identity-caption svg {
     width: 12px;
     height: 12px;
-  }
-  .more-identities {
-    margin-top: 40px;
-  }
-  .more-identities summary {
-    font-size: 16px;
-    padding: 20px 0;
-  }
-  .more-identities .identity-grid {
-    padding-top: 32px;
   }
   .identity-dialog {
     width: calc(100% - 24px);

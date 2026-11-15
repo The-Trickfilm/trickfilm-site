@@ -19,7 +19,8 @@ test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
     expect(response.status()).toBe(200);
     expect(await response.text()).toContain("View");
   }
-  const first = page.locator(".identity-card").first();
+  const first = page.locator("[data-original] .identity-card").first();
+  await page.locator(".identity-viewport").hover();
   await first.click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
@@ -31,8 +32,7 @@ test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(first).toBeFocused();
-  await page.locator("summary").click();
-  await expect(page.locator(".identity-card:visible")).toHaveCount(18);
+  await expect(page.locator("[data-original] .identity-card")).toHaveCount(18);
   expect(errors).toEqual([]);
   await page.goto("/work/not-a-project");
   await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
@@ -67,8 +67,8 @@ test("content works without JavaScript and with reduced motion", async ({
   const page = await context.newPage();
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await page.locator("summary").click();
-  await expect(page.locator(".identity-card:visible")).toHaveCount(18);
+  await expect(page.locator("[data-original] .identity-card")).toHaveCount(18);
+  await expect(page.locator("[data-clone]").first()).not.toBeVisible();
   expect(
     await page.locator(".identity-card").first().getAttribute("href"),
   ).toMatch(/\.webp$/);
@@ -239,4 +239,146 @@ test("contact validates, retains failed messages, and acknowledges accepted deli
     "your message has been sent",
   );
   await expect(form.getByLabel("Your name")).toHaveValue("");
+});
+
+test("logo carousel shows five desktop cards, wraps both ways, and pauses", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const rail = page.locator(".identity-viewport");
+  await rail.scrollIntoViewIfNeeded();
+  await expect(page.locator(".identity-track")).toHaveAttribute(
+    "data-loop-ready",
+    "true",
+  );
+  const dimensions = await rail.evaluate((el) => {
+    const card = el.querySelector(".identity-card")!;
+    return {
+      viewport: el.clientWidth,
+      card: card.getBoundingClientRect().width,
+    };
+  });
+  expect(
+    Math.abs(dimensions.viewport - (dimensions.card * 5 + 80)),
+  ).toBeLessThan(2);
+  const start = await rail.evaluate((el) => el.scrollLeft);
+  await expect
+    .poll(() => rail.evaluate((el) => el.scrollLeft))
+    .toBeGreaterThan(start + 5);
+  await page
+    .getByRole("button", { name: "Pause logo carousel", exact: true })
+    .click();
+  const stopped = await rail.evaluate((el) => el.scrollLeft);
+  await page.waitForTimeout(200);
+  expect(
+    Math.abs((await rail.evaluate((el) => el.scrollLeft)) - stopped),
+  ).toBeLessThan(1);
+  const period = await page
+    .locator("[data-original]")
+    .evaluate((el) => el.getBoundingClientRect().width + 20);
+  await rail.evaluate((el, p) => {
+    el.scrollLeft = p * 2 + 15;
+  }, period);
+  await expect
+    .poll(() => rail.evaluate((el) => el.scrollLeft))
+    .toBeLessThan(period + 30);
+  await rail.evaluate((el, p) => {
+    el.scrollLeft = p - 15;
+  }, period);
+  await expect
+    .poll(() => rail.evaluate((el) => el.scrollLeft))
+    .toBeGreaterThan(period * 2 - 30);
+  await page.getByRole("button", { name: "Scroll logos right" }).click();
+  await expect
+    .poll(async () =>
+      Math.abs(
+        (await rail.evaluate((el) => el.scrollLeft)) -
+          (period + dimensions.card + 20 - 15),
+      ),
+    )
+    .toBeLessThan(2);
+  expect(
+    await page
+      .locator("[data-clone] a")
+      .evaluateAll((els) =>
+        els.every((el) => (el as HTMLElement).tabIndex === -1),
+      ),
+  ).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(async () =>
+      rail.evaluate(
+        (el) =>
+          Math.round(
+            el.querySelector(".identity-card")!.getBoundingClientRect().width *
+              2 +
+              20,
+          ) - el.clientWidth,
+      ),
+    )
+    .toBe(0);
+});
+
+test("reduced-motion carousel is manual and still previews all logos", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const rail = page.locator(".identity-viewport");
+  await rail.scrollIntoViewIfNeeded();
+  await expect(
+    page.getByRole("button", { name: "Pause logo carousel", exact: true }),
+  ).toHaveCount(0);
+  const before = await rail.evaluate((el) => el.scrollLeft);
+  await page.waitForTimeout(200);
+  expect(await rail.evaluate((el) => el.scrollLeft)).toBe(before);
+  await page.getByRole("button", { name: "Scroll logos right" }).click();
+  await expect
+    .poll(() => rail.evaluate((el) => el.scrollLeft))
+    .toBeGreaterThan(before + 50);
+  const first = page.locator("[data-original] .identity-card").first();
+  await first.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator(".dialog-controls > p")).toHaveText("18 / 18");
+  await page.keyboard.press("Escape");
+  await expect(first).toBeFocused();
+});
+
+test("automatic logo motion crosses the loop seam and stops on hover", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const rail = page.locator(".identity-viewport");
+  await rail.scrollIntoViewIfNeeded();
+  await expect(page.locator(".identity-track")).toHaveAttribute(
+    "data-loop-ready",
+    "true",
+  );
+  const size = await page
+    .locator("[data-original]")
+    .evaluate((el) => el.getBoundingClientRect().width + 20);
+  await rail.evaluate((el, p) => {
+    el.scrollLeft = p * 2 - 4;
+  }, size);
+  await expect
+    .poll(() => rail.evaluate((el) => el.scrollLeft))
+    .toBeLessThan(size + 40);
+  const after = await rail.evaluate((el) => el.scrollLeft);
+  await expect
+    .poll(() => rail.evaluate((el) => el.scrollLeft))
+    .toBeGreaterThan(after + 5);
+  await rail.hover();
+  const stopped = await rail.evaluate((el) => el.scrollLeft);
+  await page.waitForTimeout(200);
+  expect(
+    Math.abs((await rail.evaluate((el) => el.scrollLeft)) - stopped),
+  ).toBeLessThan(1);
+  await page.mouse.move(0, 0);
+  await expect
+    .poll(() => rail.evaluate((el) => el.scrollLeft))
+    .toBeGreaterThan(stopped + 5);
 });

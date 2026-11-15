@@ -11,7 +11,7 @@ Validation: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, th
 ## Content and assets
 
 - `src/lib/projects.ts`: five supplied website projects and StrataCouncil.ca application; confirmed contact jeremy@trickfilm.com.
-- `src/lib/logo-projects.ts`: 18 supplied logo images, including variants. Six featured identities expand to all 18; accessible native dialog supports arrow keys and Escape.
+- `src/lib/logo-projects.ts`: 18 supplied logo images, including variants. A seamless horizontal carousel shows about five at once on desktop, three on tablet, and two on mobile. All 18 open in an accessible native dialog with arrow keys and Escape.
 - `public/brand`: original Trickfilm SVG artwork, unchanged.
 - `public/work`: existing website screenshots and supplied logo exports, retained.
 - `public/work/applications`: captures of StrataCouncil.ca's public product previews. Its public footer identifies it as a Trickfilm product. These are not authenticated application screenshots.
@@ -22,7 +22,7 @@ Project pages deliberately omit unsupported results, durations, testimonials, an
 
 Agentic (https://agentic.framer.website/) is the visual reference: oversized navigation, compact introduction, prominent wordmark, rounded full-width portfolio panels, restrained typography and motion. Original implementation, actual Trickfilm assets, and original CSS laptop frames; no proprietary template assets or source copied. Prior mountain/pixel/lens implementation is removed and remains available in Git history.
 
-Content remains visible without JavaScript. Reduced motion disables entrance animations, rotating accents, and desktop panel stacking. Small or short screens use normal project flow. Logo links and the native expand control remain usable without JavaScript.
+Content remains visible without JavaScript. Reduced motion disables entrance animations, rotating accents, and desktop panel stacking. Small or short screens use normal project flow. Without JavaScript, the logos remain a native horizontally scrolling list with direct image links.
 
 ## Deployment
 
@@ -37,3 +37,7 @@ Success is returned only after Mailtrap acknowledges acceptance. Missing configu
 ## Services scrolling
 
 On large screens, the service label and number stay in a sticky left column while the three descriptions scroll naturally at right. An IntersectionObserver changes the decorative number at the viewport midpoint, including on reverse scrolling. Mobile, short screens, and reduced-motion users receive an ordinary list. No wheel interception or automatic scrolling.
+
+## Logo carousel
+
+The logo rail repeats the supplied catalog on either side of the accessible original set, rebasing native scroll position at matching boundaries. Clones are hidden from assistive technology and removed from keyboard tab order. Gentle autoplay pauses on hover, keyboard focus, preview opening, or the explicit Pause control; it runs only while the carousel is visible. Reduced motion disables autoplay. Arrow controls, native horizontal trackpad scrolling, and touch swipes remain available. Card widths show five desktop / three tablet / two mobile logos, and resizing preserves progress through the loop.
