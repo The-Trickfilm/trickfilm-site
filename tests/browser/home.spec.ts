@@ -107,7 +107,7 @@ test("desktop project surfaces overlap and release after the final project", asy
       ?.closest(".project-panel")
       ?.getAttribute("href"),
   );
-  expect(covering).toContain("gower-modern-law");
+  expect(covering).toContain("north-vancouver-fc");
   await page.locator("#branding").scrollIntoViewIfNeeded();
   expect((await cards.last().boundingBox())!.y).toBeLessThan(24);
   await expect(
@@ -167,18 +167,26 @@ test("services keep their visual in place and change it with the scrolling copy"
   const rows = page.locator("[data-service]");
   for (let i = 0; i < 3; i++) {
     await rows.nth(i).evaluate((el) => {
-      const y = el.getBoundingClientRect().top + scrollY;
+      const y =
+        el.getBoundingClientRect().top +
+        scrollY +
+        el.getBoundingClientRect().height / 2 -
+        innerHeight / 2;
       scrollTo({ top: y, behavior: "instant" });
     });
     await expect(page.locator('.service-glyph[data-active="true"]')).toHaveText(
       String(i + 1),
     );
     const box = (await page.locator(".services-stage").boundingBox())!;
-    expect(Math.abs(box.y)).toBeLessThan(2);
+    expect(Math.abs(box.y - (1000 - box.height) / 2)).toBeLessThan(2);
   }
   await rows.first().evaluate((el) =>
     scrollTo({
-      top: el.getBoundingClientRect().top + scrollY,
+      top:
+        el.getBoundingClientRect().top +
+        scrollY +
+        el.getBoundingClientRect().height / 2 -
+        innerHeight / 2,
       behavior: "instant",
     }),
   );
@@ -187,7 +195,7 @@ test("services keep their visual in place and change it with the scrolling copy"
   );
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator(".services-stage")).not.toBeVisible();
-  await expect(rows.first().getByRole("heading")).toBeVisible();
+  await expect(rows.first().getByRole("heading", { level: 3 })).toBeVisible();
 });
 
 test("contact validates, retains failed messages, and acknowledges accepted delivery", async ({
@@ -381,4 +389,59 @@ test("automatic logo motion crosses the loop seam and stops on hover", async ({
   await expect
     .poll(() => rail.evaluate((el) => el.scrollLeft))
     .toBeGreaterThan(stopped + 5);
+});
+
+test("service flower follows scroll while the numeral stays upright", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const first = page.locator('[data-service="0"]');
+  const start = await first.evaluate(
+    (el) =>
+      el.getBoundingClientRect().top +
+      scrollY +
+      el.getBoundingClientRect().height / 2 -
+      innerHeight / 2,
+  );
+  await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }), start);
+  const flower = page.locator(".services-flower");
+  await expect
+    .poll(() =>
+      flower.evaluate((el) => getComputedStyle(el, "::before").transform),
+    )
+    .not.toBe("none");
+  const before = await flower.evaluate(
+    (el) => getComputedStyle(el, "::before").transform,
+  );
+  await page.evaluate(
+    (y) => scrollTo({ top: y + 100, behavior: "instant" }),
+    start,
+  );
+  await expect
+    .poll(() =>
+      flower.evaluate((el) => getComputedStyle(el, "::before").transform),
+    )
+    .not.toBe(before);
+  expect(
+    await page
+      .locator('.service-glyph[data-active="true"] > span')
+      .evaluate((el) => getComputedStyle(el).transform),
+  ).toBe("none");
+  await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }), start);
+  await expect
+    .poll(() =>
+      flower.evaluate((el) => getComputedStyle(el, "::before").transform),
+    )
+    .toBe(before);
+  expect(
+    await first.evaluate((el) => el.getBoundingClientRect().height),
+  ).toBeLessThan(550);
+  expect(await page.locator(".flower-accent").count()).toBe(7);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect
+    .poll(() =>
+      flower.evaluate((el) => getComputedStyle(el, "::before").transform),
+    )
+    .toBe("none");
 });

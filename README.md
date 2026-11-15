@@ -41,3 +41,7 @@ On large screens, the service label and number stay in a sticky left column whil
 ## Logo carousel
 
 The logo rail repeats the supplied catalog on either side of the accessible original set, rebasing native scroll position at matching boundaries. Clones are hidden from assistive technology and removed from keyboard tab order. Gentle autoplay pauses on hover, keyboard focus, preview opening, or the explicit Pause control; it runs only while the carousel is visible. Reduced motion disables autoplay. Arrow controls, native horizontal trackpad scrolling, and touch swipes remain available. Card widths show five desktop / three tablet / two mobile logos, and resizing preserves progress through the loop.
+
+## Flower accents
+
+`public/brand/flower.svg` is the exact user-supplied flower artwork. CSS masks reuse its silhouette for the hero and project CTAs, keeping arrow icons upright. In Services, a separate flower layer rotates with scroll progress while the number layer remains upright. Rows use approximately 46% of viewport height (clamped to 360–480px), and the shorter sticky visual stays centered through all services. Mobile uses compact flower-backed numbers. Reduced motion disables rotation.

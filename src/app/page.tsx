@@ -75,7 +75,7 @@ export default function Home() {
                 new ways.
               </p>
               <a href="#work" className="explore-link">
-                <span className="diamond">
+                <span className="flower-accent">
                   <span aria-hidden="true">↓</span>
                 </span>
                 <span>Explore our work</span>
@@ -147,13 +147,6 @@ export default function Home() {
           className="services section-content"
           aria-labelledby="services-heading"
         >
-          <div className="section-introduction" data-reveal>
-            <p className="eyebrow">(Services)</p>
-            <h2 id="services-heading">
-              A little ingenuity.
-              <br />A lot of possibility.
-            </h2>
-          </div>
           <ServicesScroll services={services} />
         </section>
         <section
