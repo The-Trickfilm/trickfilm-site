@@ -1663,3 +1663,421 @@ fieldset:disabled .contact-submit {
     opacity: 1;
   }
 }
+
+/* Shared page grid: a contained frame, a padded inner grid, and consistent columns. */
+:root {
+  --gutter: clamp(32px, 6vw, 128px);
+  --card-pad: clamp(40px, 5.5vw, 100px);
+  --frame-width: min(1280px, calc(100vw - var(--gutter) * 2));
+  --inner-width: min(1080px, calc(var(--frame-width) - var(--card-pad) * 2));
+  --content: calc((100vw - var(--inner-width)) / 2);
+  --frame-inset: calc((var(--frame-width) - var(--inner-width)) / 2);
+  --section-pad: clamp(48px, 6.4svh, 80px);
+  --grid-gap: 48px;
+}
+.hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--grid-gap);
+  width: 100%;
+  max-width: none;
+  padding: 160px var(--content) 48px;
+  margin: 0;
+}
+.hero-navigation {
+  min-width: 0;
+}
+.hero-navigation a {
+  font-size: clamp(56px, 5.5vw, 80px);
+}
+.hero-introduction {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 40px;
+}
+.hero-introduction > p {
+  line-height: 1.12;
+}
+.hero-wordmark {
+  width: var(--inner-width);
+  margin-bottom: var(--section-pad);
+}
+.home-mark {
+  left: calc(var(--content) - 12px);
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+}
+.home-mark img {
+  width: 52px;
+  height: 51px;
+}
+.topbar {
+  inset: 64px var(--content) auto;
+}
+.section-content {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--section-pad) var(--content);
+}
+.section-introduction {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--grid-gap);
+  margin-bottom: 64px;
+}
+.section-introduction h2 {
+  font-size: clamp(40px, 3.8vw, 56px);
+}
+.section-introduction > div > p {
+  max-width: 100%;
+}
+.project-stack {
+  display: block;
+  padding-block: var(--section-pad);
+}
+.project-panel {
+  width: var(--frame-width);
+  margin-inline: auto;
+  padding: var(--frame-inset);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--grid-gap);
+}
+.project-stack .project-panel {
+  height: calc(100svh - var(--section-pad) * 2);
+  min-height: 540px;
+  max-height: none;
+  aspect-ratio: auto;
+  top: var(--section-pad);
+  margin-bottom: calc(var(--section-pad) * 2);
+}
+.project-stack .project-panel:last-child {
+  margin-bottom: 0;
+}
+.project-info,
+.project-visual {
+  padding: 0;
+  min-width: 0;
+}
+.project-info h3 {
+  font-size: clamp(36px, 3.6vw, 56px);
+  max-width: 100%;
+}
+.project-facts {
+  max-width: 100%;
+}
+.project-facts dd {
+  max-width: 220px;
+}
+.application-section {
+  min-height: 100svh;
+  padding-block: var(--section-pad);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+}
+.application-section > .section-content {
+  min-height: 0;
+  padding-block: 0;
+  margin-bottom: 0;
+}
+.application-section .project-panel {
+  height: auto;
+  min-height: 520px;
+  aspect-ratio: 2.1;
+}
+.services {
+  padding-block: 0;
+}
+.services-story {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--grid-gap);
+}
+.service-row > div {
+  max-width: 100%;
+}
+.service-row h3 {
+  font-size: clamp(30px, 2.8vw, 40px);
+}
+.about .section-introduction {
+  margin-bottom: 0;
+}
+.about .about-copy {
+  font-size: 28px;
+  line-height: 1.18;
+}
+.contact-panel {
+  width: var(--frame-width);
+  margin-inline: auto;
+  min-height: 100svh;
+  padding: var(--section-pad) var(--frame-inset);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+.contact-layout {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--grid-gap);
+}
+.contact-introduction h2 {
+  font-size: 56px;
+  line-height: 1.02;
+  margin-top: 32px;
+}
+.contact-direct {
+  margin-top: 24px;
+  font-size: 18px;
+}
+.contact-form {
+  width: 100%;
+  max-width: 480px;
+}
+.contact-fields {
+  gap: 24px 20px;
+}
+.contact-fields input,
+.contact-fields textarea {
+  padding-block: 12px;
+  font-size: 18px;
+}
+.contact-fields textarea {
+  height: 112px;
+  min-height: 112px;
+}
+.contact-submit {
+  padding: 14px 24px;
+  min-height: 52px;
+  margin-top: 24px;
+  font-size: 16px;
+}
+.contact-status {
+  min-height: 32px;
+  padding-top: 12px;
+  font-size: 14px;
+}
+.contact-bottom {
+  padding-top: 24px;
+}
+.home-footer {
+  width: var(--frame-width);
+  margin: 24px auto 48px;
+  padding: 40px var(--frame-inset) 32px;
+  border-radius: var(--radius);
+}
+.home-footer .footer-links {
+  margin: 0 0 48px;
+  max-width: none;
+}
+.home-footer .footer-wordmark {
+  padding-bottom: 0;
+}
+.home-footer .footer-bottom {
+  margin-top: 24px;
+}
+@media (max-width: 1100px) {
+  :root {
+    --grid-gap: 36px;
+  }
+  .hero-layout {
+    padding-top: 150px;
+  }
+  .hero-navigation a {
+    font-size: 60px;
+  }
+  .contact-introduction h2 {
+    font-size: 48px;
+  }
+}
+@media (max-width: 900px) {
+  .hero-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding-top: 160px;
+  }
+  .hero-introduction {
+    margin-top: 0;
+    max-width: 460px;
+  }
+  .project-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 32px;
+  }
+  .project-stack .project-panel {
+    height: auto;
+    min-height: 0;
+  }
+  .application-section .project-panel {
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+  .services-story {
+    display: block;
+  }
+  .section-introduction,
+  .contact-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  .contact-form {
+    max-width: 100%;
+  }
+  .contact-introduction h2 {
+    margin-top: 24px;
+  }
+  .home-mark {
+    top: 28px;
+  }
+  .topbar {
+    inset: 48px var(--content) auto;
+  }
+}
+@media (max-width: 700px) {
+  :root {
+    --gutter: 24px;
+    --card-pad: 28px;
+    --content: 24px;
+    --frame-inset: 28px;
+    --inner-width: calc(100vw - 48px);
+    --radius: 28px;
+    --grid-gap: 28px;
+  }
+  .hero-layout {
+    padding-top: 150px;
+    gap: 40px;
+    padding-bottom: 40px;
+  }
+  .hero-navigation a {
+    font-size: 48px;
+  }
+  .hero-introduction > p {
+    font-size: 20px;
+  }
+  .hero-wordmark {
+    margin-bottom: 32px;
+  }
+  .home-mark {
+    left: 12px;
+    top: 12px;
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+  }
+  .home-mark img {
+    width: 42px;
+    height: 41px;
+  }
+  .topbar {
+    inset: 30px 24px auto;
+  }
+  .section-introduction {
+    margin-bottom: 40px;
+  }
+  .section-introduction h2 {
+    font-size: 40px;
+  }
+  .project-stack {
+    padding-block: 24px;
+  }
+  .project-stack .project-panel {
+    margin-bottom: 32px;
+  }
+  .project-info h3 {
+    font-size: 36px;
+  }
+  .project-visual {
+    padding-inline: 6px;
+  }
+  .project-facts {
+    font-size: 13px;
+  }
+  .project-facts > div {
+    gap: 16px;
+  }
+  .project-facts dd {
+    max-width: 170px;
+  }
+  .services {
+    padding-block: 32px;
+  }
+  .about .about-copy {
+    font-size: 25px;
+  }
+  .contact-panel {
+    padding-block: 56px;
+  }
+  .contact-introduction h2 {
+    font-size: 44px;
+  }
+  .contact-fields {
+    gap: 22px;
+  }
+  .contact-direct {
+    font-size: 16px;
+    gap: 10px;
+  }
+  .contact-submit {
+    width: 100%;
+  }
+  .contact-bottom {
+    flex-direction: column;
+    gap: 16px;
+    font-size: 12px;
+  }
+  .home-footer {
+    margin-bottom: 24px;
+  }
+  .home-footer .footer-links {
+    margin-bottom: 32px;
+    font-size: 12px;
+  }
+  .footer-bottom {
+    font-size: 10px;
+    margin-inline: 0;
+  }
+}
+
+/* Case-study pages share the same horizontal grid as the homepage. */
+.topbar.case-topbar {
+  max-width: none;
+  padding: 32px var(--content);
+}
+.case-stage {
+  width: var(--frame-width);
+  margin-inline: auto;
+  padding: var(--frame-inset);
+}
+.case-description {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--grid-gap);
+}
+.case-next {
+  width: var(--frame-width);
+  margin-inline: auto;
+  padding: 48px var(--frame-inset);
+}
+@media (max-width: 900px) {
+  .case-description {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .project-panel {
+    padding-top: 64px;
+  }
+  .contact-panel {
+    padding-top: 88px;
+    padding-bottom: 56px;
+  }
+  .services {
+    padding-top: 96px;
+    padding-bottom: 48px;
+  }
+}

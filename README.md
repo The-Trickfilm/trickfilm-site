@@ -51,3 +51,9 @@ The logo rail repeats the supplied catalog on either side of the accessible orig
 Services are Web design, Branding, Graphic Design, Workflow Automation, and Business Process Design. The section title stays in the desktop visual column; every service uses the same heading style. Copy opacity follows distance from the viewport center in either scroll direction. Reduced-motion and no-JavaScript views retain fully visible copy.
 
 The numeral is SVG text positioned using the loaded font's visible ink bounds, removing font-bearing and line-box offsets. The flower's original path and color are preserved in `flower-centered.svg`; only the viewBox adds a square presentation frame centered on its alpha centroid, so rotation stays centered on the upright number. `flower.svg` remains the unchanged upload.
+
+## Shared layout grid
+
+The page frame is capped at 1280px; its padded inner grid is capped at 1080px. Hero, portfolio, section introductions, services, About, contact, and project detail pages share the same horizontal guides and column ratio. Contact fields are capped at 480px, with smaller inputs/textarea and a compact separate footer. Main section frames use a minimum of one viewport; work and services remain natural scrolling sequences, and mobile content can grow without clipping.
+
+Service opacity and active numbering use the actual flower center as the alignment target. The pending five-service implementation and numeral centering are included on this branch; an unmerged preview does not alter the production site.

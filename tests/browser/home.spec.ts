@@ -47,6 +47,12 @@ for (const width of [390, 768, 1440])
     await page.goto("/");
     await expect(page.locator(".hero-wordmark img")).toBeVisible();
     await page.locator("#contact").scrollIntoViewIfNeeded();
+    if (width === 390)
+      expect(
+        await page
+          .locator("#contact")
+          .evaluate((el) => parseFloat(getComputedStyle(el).paddingTop)),
+      ).toBeGreaterThanOrEqual(88);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -90,7 +96,7 @@ test("desktop project surfaces overlap and release after the final project", asy
   );
   await expect
     .poll(async () => Math.round((await cards.first().boundingBox())!.y))
-    .toBe(24);
+    .toBe(64);
   const secondStart = await cards
     .nth(1)
     .evaluate((el) => el.getBoundingClientRect().top + scrollY);
@@ -536,4 +542,49 @@ test("five service headings stay consistent while copy fades through focus", asy
       rows.first().evaluate((el) => Number(getComputedStyle(el).opacity)),
     )
     .toBeLessThan(0.1);
+});
+
+test("page frames share a contained grid and full-height main sections", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  for (const id of ["intro", "branding", "applications", "about", "contact"])
+    expect(
+      (await page.locator(`#${id}`).boundingBox())!.height,
+      id,
+    ).toBeGreaterThanOrEqual(999);
+  const positions = await page.evaluate(() =>
+    [
+      ".project-info",
+      ".services-stage",
+      "#about .eyebrow",
+      ".contact-introduction",
+    ].map(
+      (selector) =>
+        document.querySelector(selector)!.getBoundingClientRect().left,
+    ),
+  );
+  expect(Math.max(...positions) - Math.min(...positions)).toBeLessThan(2);
+  const columns = await page.evaluate(() =>
+    [
+      ".project-visual",
+      ".service-copy",
+      "#about .section-introduction > div",
+      ".contact-form",
+    ].map(
+      (selector) =>
+        document.querySelector(selector)!.getBoundingClientRect().left,
+    ),
+  );
+  expect(Math.max(...columns) - Math.min(...columns)).toBeLessThan(2);
+  const card = (await page
+    .locator(".project-stack .project-panel")
+    .first()
+    .boundingBox())!;
+  expect(card.x).toBeGreaterThan(80);
+  expect(card.width).toBeLessThanOrEqual(1280);
+  expect(
+    (await page.locator(".contact-form").boundingBox())!.width,
+  ).toBeLessThanOrEqual(480);
 });

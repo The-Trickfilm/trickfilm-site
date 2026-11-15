@@ -21,13 +21,18 @@ export function ServicesScroll({ services }: { services: Service[] }) {
       const element = root.current;
       if (!element) return;
       const rect = element.getBoundingClientRect();
+      const symbol = element.querySelector<HTMLElement>(".service-symbols");
+      const symbolBounds = symbol?.getBoundingClientRect();
+      const focusY = symbolBounds?.height
+        ? symbolBounds.top + symbolBounds.height / 2
+        : innerHeight / 2;
       let closest = 0,
         nearest = Infinity;
       rows.forEach((row, index) => {
         const bounds = row.getBoundingClientRect();
-        const distance = Math.abs(
-          bounds.top + bounds.height / 2 - innerHeight / 2,
-        );
+        const copy = row.querySelector<HTMLElement>(".service-copy")!;
+        const content = copy.getBoundingClientRect();
+        const distance = Math.abs(content.top + content.height / 2 - focusY);
         if (distance < nearest) {
           nearest = distance;
           closest = index;
@@ -45,7 +50,7 @@ export function ServicesScroll({ services }: { services: Service[] }) {
 
       const progress = Math.max(
         0,
-        Math.min(1, (innerHeight / 2 - rect.top) / rect.height),
+        Math.min(1, (focusY - rect.top) / rect.height),
       );
       element.style.setProperty(
         "--service-turn",

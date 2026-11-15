@@ -39,3 +39,9 @@ The revised service list is Web design; Branding; Graphic Design; Workflow Autom
 Numerals use visible glyph bounds for centering, independent of font side bearings and baseline. A square presentation viewBox centers the original flower's alpha centroid without changing its path, keeping the rotation centered on the number. The original uploaded SVG remains intact.
 
 Rendered centering check: the white ink bounds of digits 1–5 were measured from 240px screenshots. Their centers were within 1px of the flower's rotation center on both axes. See `docs/service-numerals.webp`. Mobile fades each flower together with its service copy; desktop keeps the single flower visible while descriptions crossfade.
+
+## Shared-grid pass
+
+The layout now uses a contained 1280px frame with a padded 1080px inner grid, shared 5/7 content columns, and matching gutters across the homepage and project detail pages. Contact is capped at 480px and its footer spacing is reduced. Hero, Identity, Applications, About, and Contact each measured exactly 1000px high in the reviewed 1440×1000 desktop rendering. Work cards use full-screen scenes with inset cards; longer work and services sequences continue naturally. Mobile content may grow beyond one viewport to avoid clipping.
+
+The fade target is the flower's actual center, with service-copy center measured independently of the surrounding row. This keeps the five requested services aligned to the graphic at the beginning and end of the scroll region as well.
