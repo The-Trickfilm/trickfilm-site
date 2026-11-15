@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ServiceNumber } from "./service-number";
 
 type Service = { name: string; copy: string; items: string[] };
 
@@ -9,18 +10,10 @@ export function ServicesScroll({ services }: { services: Service[] }) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting)
-            setActive(Number((entry.target as HTMLElement).dataset.service));
-        }
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
+    const rows = Array.from(
+      root.current?.querySelectorAll<HTMLElement>("[data-service]") || [],
     );
-    root.current
-      ?.querySelectorAll("[data-service]")
-      .forEach((row) => observer.observe(row));
+    let previousActive = -1;
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
     const updateRotation = () => {
@@ -28,6 +21,28 @@ export function ServicesScroll({ services }: { services: Service[] }) {
       const element = root.current;
       if (!element) return;
       const rect = element.getBoundingClientRect();
+      let closest = 0,
+        nearest = Infinity;
+      rows.forEach((row, index) => {
+        const bounds = row.getBoundingClientRect();
+        const distance = Math.abs(
+          bounds.top + bounds.height / 2 - innerHeight / 2,
+        );
+        if (distance < nearest) {
+          nearest = distance;
+          closest = index;
+        }
+        const opacity = Math.max(
+          0,
+          1 - Math.max(0, distance - 80) / (bounds.height * 0.7),
+        );
+        row.style.setProperty("--service-opacity", String(opacity));
+      });
+      if (closest !== previousActive) {
+        previousActive = closest;
+        setActive(closest);
+      }
+
       const progress = Math.max(
         0,
         Math.min(1, (innerHeight / 2 - rect.top) / rect.height),
@@ -45,7 +60,6 @@ export function ServicesScroll({ services }: { services: Service[] }) {
     window.addEventListener("resize", schedule);
     media.addEventListener("change", schedule);
     return () => {
-      observer.disconnect();
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
@@ -55,9 +69,13 @@ export function ServicesScroll({ services }: { services: Service[] }) {
 
   return (
     <div className="services-story" ref={root}>
-      <div className="services-stage" aria-hidden="true">
+      <div className="services-stage">
         <p className="eyebrow">(Services)</p>
-        <div className="service-symbols">
+        <h2 className="services-title" id="services-heading">
+          A little ingenuity.
+          <br />A lot of possibility.
+        </h2>
+        <div className="service-symbols" aria-hidden="true">
           <span className="services-flower" />
           {services.map((service, i) => (
             <div
@@ -65,11 +83,11 @@ export function ServicesScroll({ services }: { services: Service[] }) {
               data-active={active === i}
               key={service.name}
             >
-              <span>{i + 1}</span>
+              <ServiceNumber number={i + 1} />
             </div>
           ))}
         </div>
-        <p className="service-progress">
+        <p className="service-progress" aria-hidden="true">
           0{active + 1} / 0{services.length}
         </p>
       </div>
@@ -78,15 +96,11 @@ export function ServicesScroll({ services }: { services: Service[] }) {
           <article className="service-row" key={service.name} data-service={i}>
             <span className="service-mobile-index" aria-hidden="true">
               <span className="service-mobile-flower" />
-              <span className="service-mobile-number">{i + 1}</span>
+              <span className="service-mobile-number">
+                <ServiceNumber number={i + 1} />
+              </span>
             </span>
-            <div>
-              {i === 0 && (
-                <h2 className="services-title" id="services-heading">
-                  A little ingenuity.
-                  <br />A lot of possibility.
-                </h2>
-              )}
+            <div className="service-copy">
               <h3>{service.name}</h3>
               <p>{service.copy}</p>
               <ul>

@@ -31,3 +31,11 @@ The separate services introduction is removed; “A little ingenuity. A lot of p
 ## Flower and service spacing refinement
 
 The user-supplied solid flower replaces every square accent in the hero, project CTAs, and service counters. The original SVG is stored unchanged. Services rotate only the flower mask with scroll progress; numerals remain upright, and reverse scrolling reverses rotation. Service rows are now roughly 46svh rather than 100svh, with a matching shorter sticky stage, removing about half the distance between descriptions. Mobile numbers also use the flower; reduced-motion shapes remain static.
+
+## Five focused services and centered numerals
+
+The revised service list is Web design; Branding; Graphic Design; Workflow Automation; Business Process Design. The section title remains consistent in the left sticky column and all five service headings use the same hierarchy. Descriptions fade continuously as they approach and leave the center focus area; reduced motion and no-JavaScript retain the text in full.
+
+Numerals use visible glyph bounds for centering, independent of font side bearings and baseline. A square presentation viewBox centers the original flower's alpha centroid without changing its path, keeping the rotation centered on the number. The original uploaded SVG remains intact.
+
+Rendered centering check: the white ink bounds of digits 1–5 were measured from 240px screenshots. Their centers were within 1px of the flower's rotation center on both axes. See `docs/service-numerals.webp`. Mobile fades each flower together with its service copy; desktop keeps the single flower visible while descriptions crossfade.
