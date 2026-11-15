@@ -180,7 +180,7 @@ nav > a:not(.nav-contact),
   content: "";
   position: absolute;
   inset: 0;
-  background: #0009;
+  background: #0002;
   pointer-events: none;
 }
 .pixel-mountain canvas {

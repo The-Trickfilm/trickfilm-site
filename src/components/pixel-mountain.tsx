@@ -1,12 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { STILL_IMAGE } from "@/lib/still-image";
-import {
-  revealPixel,
-  revealDistance,
-  REVEAL_DURATION,
-  tileSeed,
-} from "@/lib/pixel-reveal";
+import { REVEAL_DURATION } from "@/lib/pixel-reveal";
+import { createPixelField } from "@/lib/pixel-field";
 
 export function PixelMountain() {
   const canvas = useRef<HTMLCanvasElement>(null),
@@ -19,20 +15,12 @@ export function PixelMountain() {
   useEffect(() => {
     const el = canvas.current!,
       root = host.current!,
-      ctx = el.getContext("2d", { alpha: false });
-    const hero = root.closest<HTMLElement>(".hero")!;
-    if (!ctx) {
-      hero.dataset.intro = "clear";
-      root.dataset.phase = "fallback";
-      return;
-    }
+      hero = root.closest<HTMLElement>(".hero")!;
     const photo = new Image(),
       media = matchMedia("(prefers-reduced-motion: reduce)");
-    const sharp = document.createElement("canvas"),
-      mask = document.createElement("canvas");
-    const sc = sharp.getContext("2d")!,
-      mc = mask.getContext("2d")!;
-    let maskPixels: ImageData, seeds: Float32Array, distances: Float32Array;
+    let field: ReturnType<typeof createPixelField> = null;
+    const pointer = [0.5, 0.5, 0],
+      target = [0.5, 0.5, 0];
     let id = 0,
       start = 0,
       elapsed = 0,
@@ -52,7 +40,7 @@ export function PixelMountain() {
         last = now;
         return;
       }
-      if (!forceRender && now - last < (elapsed < REVEAL_DURATION ? 15 : 33)) {
+      if (!forceRender && now - last < 15) {
         id = requestAnimationFrame(paint);
         return;
       }
@@ -71,111 +59,18 @@ export function PixelMountain() {
         ),
         h = Math.round((w * bounds.height) / bounds.width);
       if (!w || !h) return;
-      if (el.width !== w || el.height !== h) {
-        el.width = w;
-        el.height = h;
-        sharp.width = w;
-        sharp.height = h;
-        const scale = Math.max(w / photo.naturalWidth, h / photo.naturalHeight),
-          sw = w / scale,
-          sh = h / scale;
-        sc.filter = "grayscale(1) contrast(1.2)";
-        sc.drawImage(
-          photo,
-          (photo.naturalWidth - sw) * 0.58,
-          (photo.naturalHeight - sh) * 0.3,
-          sw,
-          sh,
-          0,
-          0,
-          w,
-          h,
-        );
-        sc.filter = "none";
-        sc.globalCompositeOperation = "multiply";
-        sc.fillStyle = "#1f8875";
-        sc.fillRect(0, 0, w, h);
-        sc.globalCompositeOperation = "source-over";
-        // Each mask cell covers exactly 10 CSS pixels; excess is clipped at the edges.
-        mask.width = Math.ceil(bounds.width / 10);
-        mask.height = Math.ceil(bounds.height / 10);
-
-        maskPixels = mc.createImageData(mask.width, mask.height);
-        seeds = new Float32Array(mask.width * mask.height);
-        distances = new Float32Array(seeds.length);
-        for (let i = 0; i < seeds.length; i++) {
-          seeds[i] = tileSeed(i % mask.width, Math.floor(i / mask.width));
-          distances[i] = revealDistance(
-            ((i % mask.width) + 0.5) / mask.width,
-            (Math.floor(i / mask.width) + 0.5) / mask.height,
-          );
-          maskPixels.data.set([0, 0, 0, 255], i * 4);
-        }
-      }
-      ctx!.imageSmoothingEnabled = true;
-      const progress = Math.min(1, elapsed / REVEAL_DURATION);
-      const ambient = media.matches
-        ? 0
-        : Math.max(0, elapsed - REVEAL_DURATION);
-      const enter = Math.min(1, ambient / 2.5);
-      const scale =
-        1 +
-        0.035 * Math.pow(1 - progress, 3) +
-        (media.matches
-          ? 0
-          : enter * (0.022 + 0.006 * Math.sin(ambient * 0.26)));
-      const driftX = media.matches
-        ? 0
-        : Math.sin(ambient * 0.18) * w * 0.004 * enter;
-      const driftY = media.matches
-        ? 0
-        : Math.sin(ambient * 0.13) * h * 0.003 * enter;
-      ctx!.drawImage(
-        sharp,
-        (w - w * scale) * 0.52 + driftX,
-        (h - h * scale) * 0.47 + driftY,
-        w * scale,
-        h * scale,
-      );
-      if (elapsed < REVEAL_DURATION) {
-        for (let i = 0; i < seeds.length; i++)
-          maskPixels.data[i * 4 + 3] = revealPixel(
-            elapsed,
-            distances[i],
-            seeds[i],
-          )
-            ? 0
-            : 255;
-        mc.putImageData(maskPixels, 0, 0);
-        ctx!.imageSmoothingEnabled = false;
-        ctx!.drawImage(
-          mask,
-          0,
-          0,
-          (mask.width * 10 * w) / bounds.width,
-          (mask.height * 10 * h) / bounds.height,
-        );
-      }
-      if (elapsed >= REVEAL_DURATION && !media.matches) {
-        // A low-contrast, spatially coherent current gives the raster a quiet flow.
-        for (let i = 0; i < seeds.length; i++) {
-          const x = (i % mask.width) / mask.width,
-            y = Math.floor(i / mask.width) / mask.height;
-          const wave =
-            Math.sin(x * 8 + y * 5 - ambient * 0.45) +
-            Math.cos(x * 4 - y * 9 + ambient * 0.31);
-          maskPixels.data[i * 4 + 3] = Math.round((wave + 2) * 7 * enter);
-        }
-        mc.putImageData(maskPixels, 0, 0);
-        ctx!.imageSmoothingEnabled = false;
-        ctx!.drawImage(
-          mask,
-          0,
-          0,
-          (mask.width * 10 * w) / bounds.width,
-          (mask.height * 10 * h) / bounds.height,
-        );
-      }
+      for (let i = 0; i < 3; i++)
+        pointer[i] += (target[i] - pointer[i]) * 0.075;
+      field?.render({
+        width: w,
+        height: h,
+        cssWidth: bounds.width,
+        cssHeight: bounds.height,
+        time: elapsed,
+        intro: Math.min(1, elapsed / REVEAL_DURATION),
+        reduced: media.matches,
+        pointer,
+      });
       if (elapsed >= REVEAL_DURATION) hero.dataset.intro = "clear";
       el.style.opacity = "1";
       root.dataset.phase = elapsed >= REVEAL_DURATION ? "clear" : "resolving";
@@ -228,6 +123,12 @@ export function PixelMountain() {
     document.addEventListener("visibilitychange", visibility);
     media.addEventListener("change", restart);
     photo.onload = () => {
+      field = createPixelField(el, photo);
+      if (!field) {
+        hero.dataset.intro = "clear";
+        root.dataset.phase = "fallback";
+        return;
+      }
       loaded = true;
       setAvailable(!media.matches);
       restart();
@@ -236,6 +137,27 @@ export function PixelMountain() {
       hero.dataset.intro = "clear";
       root.dataset.phase = "fallback";
     };
+    const move = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
+      const r = hero.getBoundingClientRect();
+      target[0] = (event.clientX - r.left) / r.width;
+      target[1] = (event.clientY - r.top) / r.height;
+      target[2] = 1;
+    };
+    const leave = () => {
+      target[2] = 0;
+    };
+    hero.addEventListener("pointermove", move);
+    hero.addEventListener("pointerleave", leave);
+    const lost = () => {
+      loaded = false;
+      cancelAnimationFrame(id);
+      el.style.opacity = "0";
+      root.dataset.phase = "fallback";
+      hero.dataset.intro = "clear";
+      setAvailable(false);
+    };
+    el.addEventListener("webglcontextlost", lost);
     photo.src = STILL_IMAGE.src;
     return () => {
       disposed = true;
@@ -245,6 +167,10 @@ export function PixelMountain() {
       resize.disconnect();
       replay.current = null;
       pauseMotion.current = null;
+      el.removeEventListener("webglcontextlost", lost);
+      field?.dispose();
+      hero.removeEventListener("pointermove", move);
+      hero.removeEventListener("pointerleave", leave);
       document.removeEventListener("visibilitychange", visibility);
       media.removeEventListener("change", restart);
     };
@@ -255,7 +181,7 @@ export function PixelMountain() {
       ref={host}
       data-phase="loading"
       role="group"
-      aria-label="A pixelated mountain photograph resolving into a clear turquoise landscape"
+      aria-label="A mountain constructed from a flowing field of turquoise pixels"
     >
       <noscript>
         <div className="mountain-no-script" />
