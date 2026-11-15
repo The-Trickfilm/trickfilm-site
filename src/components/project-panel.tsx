@@ -31,7 +31,7 @@ export function ProjectPanel({
           )}
         </h3>
         <span className="project-cta">
-          <span className="diamond">
+          <span className="flower-accent">
             <Arrow />
           </span>
           <span>View project</span>

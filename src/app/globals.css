@@ -173,28 +173,30 @@ summary:focus-visible {
   margin-top: 48px;
   font-size: 15px;
 }
-.diamond {
+.flower-accent {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  transform: rotate(45deg);
-  background: var(--teal);
+  width: 48px;
+  height: 48px;
   color: var(--ink);
   flex-shrink: 0;
-  transition:
-    transform 0.35s,
-    background 0.3s;
 }
-.diamond > svg,
-.diamond > span {
-  transform: rotate(-45deg);
+.flower-accent::before,
+.services-flower::before,
+.service-mobile-flower::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--flower-color, var(--teal));
+  mask: url("/brand/flower.svg") center / contain no-repeat;
+}
+.flower-accent > svg,
+.flower-accent > span {
+  position: relative;
+  z-index: 1;
   font-size: 26px;
   line-height: 1;
-}
-.explore-link:hover .diamond {
-  transform: rotate(45deg) translate(2px, 2px);
-  background: #81d5cb;
 }
 .hero-wordmark {
   width: calc(100% - var(--gutter) * 2);
@@ -276,23 +278,22 @@ summary:focus-visible {
   margin-top: 32px;
   font-size: 16px;
 }
-.project-cta .diamond {
-  width: 24px;
-  height: 24px;
-  background: currentColor;
-  color: inherit;
+.project-cta .flower-accent {
+  width: 36px;
+  height: 36px;
+  --flower-color: #fff;
 }
-.project-cta .diamond svg {
+.project-cta .flower-accent svg {
   color: var(--ink);
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
-.tone-teal .project-cta .diamond,
-.tone-paper .project-cta .diamond {
-  background: var(--ink);
+.tone-teal .project-cta .flower-accent,
+.tone-paper .project-cta .flower-accent {
+  --flower-color: var(--ink);
 }
-.tone-teal .project-cta .diamond svg,
-.tone-paper .project-cta .diamond svg {
+.tone-teal .project-cta .flower-accent svg,
+.tone-paper .project-cta .flower-accent svg {
   color: #fff;
 }
 .project-facts {
@@ -621,6 +622,7 @@ summary:focus-visible {
 }
 /* The label and rotating number stay put as each service passes through. */
 .services-story {
+  --service-step: clamp(360px, 46svh, 480px);
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 50px;
@@ -628,12 +630,11 @@ summary:focus-visible {
 }
 .services-stage {
   position: sticky;
-  top: 0;
-  height: 100svh;
+  top: calc((100svh - var(--service-step)) / 2);
+  height: var(--service-step);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding-block: 160px 110px;
   align-self: start;
 }
 .service-symbols {
@@ -641,45 +642,41 @@ summary:focus-visible {
   height: 240px;
   width: 240px;
 }
+.services-flower {
+  position: absolute;
+  inset: 0;
+}
+.services-flower::before,
+.service-mobile-flower::before {
+  transform: rotate(var(--service-turn, 0deg));
+}
 .service-glyph {
   position: absolute;
-  inset: 20px;
+  inset: 0;
   display: grid;
   place-items: center;
-  background: var(--teal);
   opacity: 0;
-  transform: rotate(-25deg) scale(0.8);
-  transition:
-    opacity 0.35s,
-    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.2s;
 }
 .service-glyph[data-active="true"] {
   opacity: 1;
-  transform: rotate(12deg) scale(1);
-}
-.service-glyph:nth-child(2)[data-active="true"] {
-  transform: rotate(-10deg) scale(1);
-}
-.service-glyph:nth-child(3)[data-active="true"] {
-  transform: rotate(20deg) scale(1);
 }
 .service-glyph span {
   color: #fff;
-  font-size: 240px;
-  line-height: 0.8;
+  font-size: 140px;
+  line-height: 1;
   font-weight: 500;
-  letter-spacing: -0.08em;
-  transform: translateX(-5px);
+  letter-spacing: -0.06em;
 }
 .service-progress {
   font-size: 13px;
   color: var(--muted);
 }
 .service-row {
-  min-height: 100svh;
+  min-height: var(--service-step);
   display: flex;
   align-items: center;
-  padding: 120px 0;
+  padding: 40px 0;
 }
 .service-row > div {
   width: 100%;
@@ -687,6 +684,13 @@ summary:focus-visible {
 }
 .service-mobile-index {
   display: none;
+}
+.service-mobile-flower {
+  position: absolute;
+  inset: 0;
+}
+.service-mobile-number {
+  position: relative;
 }
 .service-row h3 {
   font-size: 40px;
@@ -1043,31 +1047,25 @@ fieldset:disabled .contact-submit {
     transform: translateY(0);
   }
 }
-.explore-link .diamond {
-  animation: diamond-turn 14s linear infinite;
+.explore-link .flower-accent::before {
+  animation: flower-turn 14s linear infinite;
 }
-.project-cta .diamond {
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+.explore-link:hover .flower-accent::before {
+  animation-play-state: paused;
 }
-.project-panel:hover .project-cta .diamond {
-  transform: rotate(135deg);
+.project-cta .flower-accent::before {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.project-panel:hover .project-cta .diamond svg {
-  transform: rotate(-135deg);
+.project-panel:hover .project-cta .flower-accent::before {
+  transform: rotate(180deg);
 }
-.project-cta .diamond svg {
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes diamond-turn {
+@keyframes flower-turn {
   from {
-    transform: rotate(45deg);
+    transform: rotate(0);
   }
   to {
-    transform: rotate(405deg);
+    transform: rotate(360deg);
   }
-}
-.explore-link:hover .diamond {
-  animation-play-state: paused;
 }
 .home-footer {
   margin: 0 var(--gutter) 24px;
@@ -1123,9 +1121,13 @@ fieldset:disabled .contact-submit {
     gap: 30px;
   }
   .service-mobile-index {
-    display: block;
-    font-size: 48px;
-    color: #277b76;
+    display: grid;
+    place-items: center;
+    position: relative;
+    width: 64px;
+    height: 64px;
+    font-size: 32px;
+    color: #fff;
     align-self: start;
   }
 }
@@ -1342,7 +1344,7 @@ fieldset:disabled .contact-submit {
     gap: 26px;
     font-size: 14px;
   }
-  .diamond {
+  .flower-accent {
     width: 38px;
     height: 38px;
   }
@@ -1460,7 +1462,7 @@ fieldset:disabled .contact-submit {
     padding-top: 20px;
   }
   .service-row {
-    grid-template-columns: 50px 1fr;
+    grid-template-columns: 64px minmax(0, 1fr);
     gap: 20px;
     min-height: 0;
     padding: 40px 0;
@@ -1597,5 +1599,12 @@ fieldset:disabled .contact-submit {
   *:after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .services-flower::before,
+  .service-mobile-flower::before {
+    transform: none;
   }
 }

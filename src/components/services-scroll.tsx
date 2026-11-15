@@ -21,7 +21,36 @@ export function ServicesScroll({ services }: { services: Service[] }) {
     root.current
       ?.querySelectorAll("[data-service]")
       .forEach((row) => observer.observe(row));
-    return () => observer.disconnect();
+    const media = matchMedia("(prefers-reduced-motion: reduce)");
+    let frame = 0;
+    const updateRotation = () => {
+      frame = 0;
+      const element = root.current;
+      if (!element) return;
+      const rect = element.getBoundingClientRect();
+      const progress = Math.max(
+        0,
+        Math.min(1, (innerHeight / 2 - rect.top) / rect.height),
+      );
+      element.style.setProperty(
+        "--service-turn",
+        `${media.matches ? 0 : progress * 540}deg`,
+      );
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(updateRotation);
+    };
+    updateRotation();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    media.addEventListener("change", schedule);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      media.removeEventListener("change", schedule);
+    };
   }, []);
 
   return (
@@ -29,6 +58,7 @@ export function ServicesScroll({ services }: { services: Service[] }) {
       <div className="services-stage" aria-hidden="true">
         <p className="eyebrow">(Services)</p>
         <div className="service-symbols">
+          <span className="services-flower" />
           {services.map((service, i) => (
             <div
               className="service-glyph"
@@ -47,7 +77,8 @@ export function ServicesScroll({ services }: { services: Service[] }) {
         {services.map((service, i) => (
           <article className="service-row" key={service.name} data-service={i}>
             <span className="service-mobile-index" aria-hidden="true">
-              0{i + 1}
+              <span className="service-mobile-flower" />
+              <span className="service-mobile-number">{i + 1}</span>
             </span>
             <div>
               {i === 0 && (

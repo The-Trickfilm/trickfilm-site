@@ -27,3 +27,7 @@ The expanded grid is replaced with a compact, continuously looping horizontal lo
 ## Services and work density
 
 The separate services introduction is removed; “A little ingenuity. A lot of possibility.” now sits above the first description within the scrolling service content. Website order: Gower Modern Law, North Vancouver FC, Streamworks Designs, Access to Justice BC, StrataCouncil.ca. Work panels are shorter (680px at a 1000px-tall desktop viewport, formerly 952px), with tighter internal spacing and the existing overlap preserved. StrataCouncil.ca can wrap between “Strata” and “Council.ca” while keeping both parts intact. Mobile cards also have reduced padding and gaps.
+
+## Flower and service spacing refinement
+
+The user-supplied solid flower replaces every square accent in the hero, project CTAs, and service counters. The original SVG is stored unchanged. Services rotate only the flower mask with scroll progress; numerals remain upright, and reverse scrolling reverses rotation. Service rows are now roughly 46svh rather than 100svh, with a matching shorter sticky stage, removing about half the distance between descriptions. Mobile numbers also use the flower; reduced-motion shapes remain static.

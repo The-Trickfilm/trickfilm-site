@@ -75,7 +75,7 @@ export default function Home() {
                 new ways.
               </p>
               <a href="#work" className="explore-link">
-                <span className="diamond">
+                <span className="flower-accent">
                   <span aria-hidden="true">↓</span>
                 </span>
                 <span>Explore our work</span>
