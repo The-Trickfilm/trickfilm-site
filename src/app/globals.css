@@ -105,7 +105,7 @@ summary:focus-visible {
   inset: 64px 80px auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 .topbar a {
   display: flex;
@@ -560,10 +560,12 @@ summary:focus-visible {
   gap: 50px;
   padding: 64px 0;
   border-top: 1px solid var(--line);
-  min-height: 350px;
+  min-height: 480px;
+  align-items: center;
 }
 .service-index {
-  font-size: 120px;
+  color: var(--teal);
+  font-size: 180px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.06em;
@@ -618,7 +620,7 @@ summary:focus-visible {
 .contact-panel {
   margin: 0 var(--gutter);
   padding: 100px clamp(48px, 7.5vw, 108px) 64px;
-  border-radius: var(--radius);
+  border-radius: var(--radius) var(--radius) 0 0;
   background: var(--ink);
   color: #fff;
 }
@@ -688,7 +690,8 @@ summary:focus-visible {
   color: #737373;
 }
 /* Case studies use the same margins, typography and product framing as the homepage. */
-.case-topbar {
+.topbar.case-topbar {
+  justify-content: space-between;
   position: relative;
   inset: auto;
   max-width: 1440px;
@@ -782,6 +785,125 @@ summary:focus-visible {
   height: 40px;
   flex-shrink: 0;
 }
+/* The uploaded Agentic walkthrough: fixed home mark, staggered opening,
+   overlapping project surfaces, and one continuous dark closing section. */
+.home-mark {
+  position: fixed;
+  z-index: 50;
+  top: 48px;
+  left: 64px;
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  background: #fff;
+  transition:
+    box-shadow 0.3s,
+    transform 0.3s;
+}
+.home-mark img {
+  width: 52px;
+  height: 51px;
+  display: block;
+}
+.home-mark:hover {
+  transform: rotate(-8deg);
+  box-shadow: 0 4px 24px #0000000d;
+}
+.hero-navigation a {
+  animation: introduction-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.hero-navigation a:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.hero-navigation a:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.hero-navigation a:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.hero-introduction h1 {
+  animation: introduction-in 0.8s 0.24s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.hero-introduction > p {
+  animation: introduction-in 0.8s 0.34s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.explore-link {
+  animation: introduction-in 0.8s 0.44s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+@keyframes introduction-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.explore-link .diamond {
+  animation: diamond-turn 14s linear infinite;
+}
+.project-cta .diamond {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.project-panel:hover .project-cta .diamond {
+  transform: rotate(135deg);
+}
+.project-panel:hover .project-cta .diamond svg {
+  transform: rotate(-135deg);
+}
+.project-cta .diamond svg {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes diamond-turn {
+  from {
+    transform: rotate(45deg);
+  }
+  to {
+    transform: rotate(405deg);
+  }
+}
+.explore-link:hover .diamond {
+  animation-play-state: paused;
+}
+.home-footer {
+  margin: 0 var(--gutter) 24px;
+  padding-top: 64px;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.home-footer .footer-links {
+  margin-bottom: 140px;
+}
+.home-footer .footer-bottom {
+  color: #c1c1c1;
+}
+.home-footer .footer-wordmark {
+  padding-bottom: 16px;
+}
+@media (min-width: 901px) and (min-height: 740px) and (prefers-reduced-motion: no-preference) {
+  .project-stack {
+    display: block;
+  }
+  .project-stack .project-panel {
+    position: sticky;
+    top: 24px;
+    height: calc(100svh - 48px);
+    min-height: 640px;
+    max-height: 1100px;
+    aspect-ratio: auto;
+    margin-bottom: 48px;
+  }
+  .project-stack .project-panel:last-child {
+    margin-bottom: 0;
+  }
+  .project-stack .project-panel:focus-visible {
+    z-index: 10;
+  }
+}
 @media (min-width: 1800px) {
   .hero-layout {
     max-width: 1440px;
@@ -819,6 +941,10 @@ summary:focus-visible {
   }
   .hero-introduction > p {
     font-size: 22px;
+  }
+  .home-mark {
+    top: 32px;
+    left: 32px;
   }
   .topbar {
     inset: 48px 48px auto;
@@ -902,6 +1028,23 @@ summary:focus-visible {
   }
   html {
     scroll-padding-top: 16px;
+  }
+  .home-mark {
+    top: 12px;
+    left: 12px;
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+  }
+  .home-mark img {
+    width: 42px;
+    height: 41px;
+  }
+  .home-footer {
+    padding-top: 44px;
+  }
+  .home-footer .footer-links {
+    margin-bottom: 80px;
   }
   .topbar {
     inset: 24px 24px auto;
@@ -1156,6 +1299,7 @@ summary:focus-visible {
     padding: 65px 24px 50px;
   }
   .case-hero h1 {
+    overflow-wrap: anywhere;
     font-size: 56px;
     margin: 26px 0 42px;
   }

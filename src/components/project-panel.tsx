@@ -14,9 +14,8 @@ export function ProjectPanel({
       href={`/work/${project.slug}`}
       className={`project-panel tone-${project.tone}`}
       aria-label={`View ${project.name} ${application ? "application" : "website"} project`}
-      data-reveal
     >
-      <div className="project-info">
+      <div className="project-info" data-reveal>
         <p className="eyebrow">
           ({application ? "Creative technology" : "Work"})
         </p>
@@ -42,7 +41,7 @@ export function ProjectPanel({
           </div>
         </dl>
       </div>
-      <div className="project-visual">
+      <div className="project-visual" data-reveal>
         <div className="laptop">
           <div className="laptop-lid">
             <span className="camera" />

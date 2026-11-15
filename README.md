@@ -22,7 +22,7 @@ Project pages deliberately omit unsupported results, durations, testimonials, an
 
 Agentic (https://agentic.framer.website/) is the visual reference: oversized navigation, compact introduction, prominent wordmark, rounded full-width portfolio panels, restrained typography and motion. Original implementation, actual Trickfilm assets, and original CSS laptop frames; no proprietary template assets or source copied. Prior mountain/pixel/lens implementation is removed and remains available in Git history.
 
-Content remains visible without JavaScript. Reduced motion disables entrance animations. Logo links and the native expand control remain usable without JavaScript.
+Content remains visible without JavaScript. Reduced motion disables entrance animations, rotating accents, and desktop panel stacking. Small or short screens use normal project flow. Logo links and the native expand control remain usable without JavaScript.
 
 ## Deployment
 

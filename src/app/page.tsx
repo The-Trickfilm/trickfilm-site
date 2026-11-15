@@ -40,18 +40,18 @@ export default function Home() {
         Skip to content
       </a>
       <PageMotion />
+      <a className="home-mark" href="#intro" aria-label="Trickfilm home">
+        <Image
+          src="/brand/trickfilm-symbol.svg"
+          width={52}
+          height={51}
+          alt=""
+          priority
+        />
+      </a>
       <main id="main">
         <section className="hero" id="intro" aria-labelledby="hero-heading">
           <header className="topbar">
-            <a href="#intro" aria-label="Trickfilm home">
-              <Image
-                src="/brand/trickfilm-symbol.svg"
-                width={52}
-                height={51}
-                alt="Trickfilm"
-                priority
-              />
-            </a>
             <p>Independent creative studio.</p>
           </header>
           <div className="hero-layout">
@@ -109,7 +109,7 @@ export default function Home() {
           className="branding section-content"
           aria-labelledby="branding-heading"
         >
-          <div className="section-introduction">
+          <div className="section-introduction" data-reveal>
             <p className="eyebrow">(Identity)</p>
             <div>
               <h2 id="branding-heading">
@@ -127,7 +127,7 @@ export default function Home() {
           className="application-section"
           aria-labelledby="applications-heading"
         >
-          <div className="section-introduction section-content">
+          <div className="section-introduction section-content" data-reveal>
             <p className="eyebrow">(Creative technology)</p>
             <div>
               <h2 id="applications-heading">
@@ -145,7 +145,7 @@ export default function Home() {
           className="services section-content"
           aria-labelledby="services-heading"
         >
-          <div className="section-introduction">
+          <div className="section-introduction" data-reveal>
             <p className="eyebrow">(Services)</p>
             <h2 id="services-heading">
               A little ingenuity.
@@ -176,7 +176,7 @@ export default function Home() {
           className="about section-content"
           aria-labelledby="about-heading"
         >
-          <div className="section-introduction">
+          <div className="section-introduction" data-reveal>
             <p className="eyebrow">(About Trickfilm)</p>
             <div>
               <h2 id="about-heading">
@@ -220,7 +220,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-      <footer className="footer">
+      <footer className="footer home-footer">
         <div className="footer-links">
           <a href="#work">Websites</a>
           <a href="#branding">Identity</a>
