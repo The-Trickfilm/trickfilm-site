@@ -31,7 +31,7 @@ Rendering is capped at 30fps and 1280px wide on desktop, 640px on smaller screen
 ## Assets
 
 - Original user-supplied SVG symbol, wordmark and five separate lens files remain unchanged in `public/brand`.
-- `public/media/mountain-still.webp` is TEMPORARILY copied from the previous mountain poster. The newly shown photograph is visible inline in chat but has not been made available as a downloadable workspace file. Replace this asset and calibrate `src/lib/still-image.ts` once its JPG/PNG is attached.
+- `public/media/mountain-still.webp` is the user-supplied Siguniang photograph from `lin2015-siguniang-mountain-8568913.jpg.zip`, optimized from 6000 × 4000 to 2400 × 1600. Its summit is calibrated in `src/lib/still-image.ts`. The same uniform teal treatment applies to sharp and blurred samples; no horizontal fade is used.
 - Previous optimized video files remain in `public/media` for a later iteration. The current homepage does not request or decode them.
 - Local portfolio screenshots and fonts avoid remote dependencies.
 

@@ -1,6 +1,6 @@
-// Temporary still until the newly shown photograph is attached as a downloadable file.
+// User-supplied Siguniang photograph; apex calibrated in the 1920 × 1280 preview.
 export const STILL_IMAGE = {
   src: "/media/mountain-still.webp",
-  summit: [928 / 1920, 189 / 1080],
-  temporary: true,
+  summit: [841 / 1920, 161 / 1280],
+  temporary: false,
 } as const;
