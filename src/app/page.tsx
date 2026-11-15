@@ -8,6 +8,8 @@ import { ProjectPanel } from "@/components/project-panel";
 import { BrandingGallery } from "@/components/branding-gallery";
 import { PageMotion } from "@/components/page-motion";
 import { Arrow } from "@/components/arrow";
+import { ServicesScroll } from "@/components/services-scroll";
+import { ContactForm } from "@/components/contact-form";
 const services = [
   {
     name: "Design & Branding",
@@ -152,24 +154,7 @@ export default function Home() {
               <br />A lot of possibility.
             </h2>
           </div>
-          <div className="service-list">
-            {services.map((service, i) => (
-              <article className="service-row" key={service.name} data-reveal>
-                <span className="service-index" aria-hidden="true">
-                  {i + 1}
-                </span>
-                <div>
-                  <h3>{service.name}</h3>
-                  <p>{service.copy}</p>
-                  <ul>
-                    {service.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </article>
-            ))}
-          </div>
+          <ServicesScroll services={services} />
         </section>
         <section
           id="about"
@@ -204,16 +189,21 @@ export default function Home() {
           className="contact-panel"
           aria-labelledby="contact-heading"
         >
-          <p className="eyebrow">(Let’s connect)</p>
-          <h2 id="contact-heading">
-            Have something
-            <br />
-            in mind?
-          </h2>
-          <a className="contact-email" href={`mailto:${CONTACT_EMAIL}`}>
-            {CONTACT_EMAIL}
-            <Arrow />
-          </a>
+          <div className="contact-layout">
+            <div className="contact-introduction">
+              <p className="eyebrow">(Let’s connect)</p>
+              <h2 id="contact-heading">
+                Have something
+                <br />
+                in mind?
+              </h2>
+              <a className="contact-direct" href={`mailto:${CONTACT_EMAIL}`}>
+                {CONTACT_EMAIL}
+                <Arrow />
+              </a>
+            </div>
+            <ContactForm />
+          </div>
           <div className="contact-bottom">
             <p>Good ideas start with a conversation.</p>
             <a href="#intro">Back to top ↑</a>
