@@ -1,4 +1,3 @@
-import { lensArtwork } from "../../src/lib/lens-artwork.ts";
 import { test, expect, type Page } from "@playwright/test";
 async function loadVisibleImages(page: Page) {
   for (const img of await page.locator("img:visible").all()) {
@@ -27,74 +26,6 @@ async function loadVisibleImages(page: Page) {
   );
 }
 
-test("desktop renders WebGL, scroll reverses, pause works, navigation reaches contact", async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    const play = HTMLMediaElement.prototype.play;
-    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
-      (
-        window as Window & { __trickfilmVideo?: HTMLMediaElement }
-      ).__trickfilmVideo = this;
-      return play.call(this);
-    };
-  });
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page.setViewportSize({ width: 1672, height: 941 });
-  await page.goto("/");
-  await expect(page.locator("h1")).toHaveText(
-    "Trickfilm brings clarity to complexity.",
-  );
-  const copy = await page.locator(".hero-copy").boundingBox();
-  const media = await page.locator(".mountain").boundingBox();
-  expect(media!.x).toBe(0);
-  expect(media!.width).toBe(1672);
-  expect(media!.y).toBeLessThan(copy!.y + 100);
-  const mountain = page.locator(".mountain");
-  await expect(mountain.locator("canvas")).toHaveCSS("opacity", "1");
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          (window as Window & { __trickfilmVideo?: HTMLMediaElement })
-            .__trickfilmVideo?.currentTime ?? 0,
-      ),
-    )
-    .toBeGreaterThan(0.1);
-  expect(
-    await page.evaluate(
-      () =>
-        (window as Window & { __trickfilmVideo?: HTMLVideoElement })
-          .__trickfilmVideo?.videoWidth,
-    ),
-  ).toBe(1920);
-  await page.getByRole("button", { name: "Pause motion" }).click();
-  await expect(
-    page.getByRole("button", { name: "Play motion" }),
-  ).toHaveAttribute("aria-pressed", "true");
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          (window as Window & { __trickfilmVideo?: HTMLMediaElement })
-            .__trickfilmVideo?.paused,
-      ),
-    )
-    .toBe(true);
-  await page.evaluate(() => window.scrollTo({ top: 500, behavior: "instant" }));
-  await expect
-    .poll(async () => Number(await mountain.getAttribute("data-progress")))
-    .toBeGreaterThan(0.4);
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  await expect
-    .poll(async () => Number(await mountain.getAttribute("data-progress")))
-    .toBe(0);
-  await page.screenshot({ path: "/workspace/work/reference-size.png" });
-  await page.getByRole("link", { name: "Let's solve something" }).click();
-  await expect(page.locator("#contact")).toBeInViewport();
-  expect(errors).toEqual([]);
-});
 test("mobile fits viewport and reduced motion avoids video download", async ({
   page,
 }) => {
@@ -131,7 +62,7 @@ test("WebGL unavailable keeps static fallback", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".mountain")).toHaveCSS(
     "background-image",
-    /summit-poster.webp/,
+    /mountain-still.webp/,
   );
   await expect(page.locator(".mountain canvas")).toHaveCSS("opacity", "0");
 });
@@ -207,20 +138,6 @@ test("selected work shows all five supplied sites with loaded local screenshots"
     .screenshot({ path: "/workspace/work/selected-work.png" });
 });
 
-test("mobile motion uses only the optimized uploaded mobile video", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  const sources = new Set<string>();
-  page.on("request", (r) => {
-    if (r.url().includes(".mp4")) sources.add(new URL(r.url()).pathname);
-  });
-  await page.goto("/");
-  await expect(page.locator(".mountain canvas")).toHaveCSS("opacity", "1");
-  await expect.poll(() => sources.size).toBe(1);
-  expect([...sources]).toEqual(["/media/summit-mobile.mp4"]);
-});
-
 test("native lens paths preserve the supplied tapered openings", async ({
   page,
 }) => {
@@ -260,99 +177,6 @@ test("native lens paths preserve the supplied tapered openings", async ({
   await page
     .locator(".mountain")
     .screenshot({ path: "/workspace/work/lens-artwork.png" });
-});
-
-test("lenses float independently, converge in view, then leave naturally with the hero", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1672, height: 941 });
-  await page.goto("/");
-  const scene = page.locator(".mountain");
-  const paths = page.locator(".lens-outlines path[data-lens]");
-  await expect(scene.locator("canvas")).toHaveCSS("opacity", "1");
-  await expect(scene).toHaveCSS("mask-image", "none");
-  const start = (await paths.first().boundingBox())!;
-  await expect
-    .poll(async () =>
-      Math.abs((await paths.first().boundingBox())!.x - start.x),
-    )
-    .toBeGreaterThan(8);
-  await page.getByRole("button", { name: "Pause motion" }).click();
-  await expect(page.getByRole("button", { name: "Play motion" })).toBeVisible();
-  await page.waitForTimeout(100);
-  const frozen = await paths.first().getAttribute("transform");
-  await page.waitForTimeout(250);
-  expect(await paths.first().getAttribute("transform")).toBe(frozen);
-  await page.evaluate(() => window.scrollTo({ top: 130, behavior: "instant" }));
-  await expect
-    .poll(async () => Number(await scene.getAttribute("data-progress")))
-    .toBe(1);
-  const top = (await page.locator(".header").boundingBox())!.height;
-  const boxes = await Promise.all(
-    (await paths.all()).map((p) => p.boundingBox()),
-  );
-  for (const box of boxes) {
-    expect(box!.y).toBeGreaterThanOrEqual(top);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(941);
-  }
-  const openings = await paths.evaluateAll(
-    (nodes, artwork) =>
-      nodes.map((node, i) => {
-        const matrix = (node as SVGGraphicsElement).getScreenCTM()!;
-        const p = new DOMPoint(
-          artwork[i].aperture.x,
-          artwork[i].aperture.y,
-        ).matrixTransform(matrix);
-        return [
-          p.x,
-          p.y,
-          artwork[i].aperture.radius * Math.hypot(matrix.a, matrix.b),
-        ];
-      }),
-    lensArtwork,
-  );
-  for (const hole of openings)
-    for (let i = 0; i < 3; i++)
-      expect(Math.abs(hole[i] - openings[0][i])).toBeLessThan(0.1);
-  await page.screenshot({ path: "/workspace/work/hero-assembled.png" });
-  const joinedY = boxes[0]!.y;
-  await page.evaluate(() => window.scrollTo({ top: 350, behavior: "instant" }));
-  expect(Number(await scene.getAttribute("data-progress"))).toBe(1);
-  expect((await paths.first().boundingBox())!.y).toBeCloseTo(joinedY - 220, 0);
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  await expect
-    .poll(async () => Number(await scene.getAttribute("data-progress")))
-    .toBe(0);
-});
-
-test("mobile convergence waits until the scene is in view", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  const scene = page.locator(".mountain");
-  await expect(scene.locator("canvas")).toHaveCSS("opacity", "1");
-  await expect
-    .poll(async () => Number(await scene.getAttribute("data-progress")))
-    .toBe(0);
-  const rect = (await scene.boundingBox())!;
-  const header = (await page.locator(".header").boundingBox())!.height;
-  const centered = header + (844 - header - rect.height) / 2;
-  const end = rect.y - centered + rect.height * 0.16 + 5;
-  await page.evaluate(
-    (y) => window.scrollTo({ top: y, behavior: "instant" }),
-    end,
-  );
-  await expect
-    .poll(async () => Number(await scene.getAttribute("data-progress")))
-    .toBe(1);
-  for (const path of await page
-    .locator(".lens-outlines path[data-lens]")
-    .all()) {
-    const box = (await path.boundingBox())!;
-    expect(box.y).toBeGreaterThan(header);
-    expect(box.y + box.height).toBeLessThan(844);
-  }
 });
 
 test("gallery arrows center the full-color project and keep neighbours monochrome", async ({

@@ -13,12 +13,12 @@ test("overlap levels count each lens independently", () => {
     assert.equal(overlapCount(-100 + n * 20, 0, circles), n);
   }
 });
-test("convergence happens while the scene is still visible, and reverses", () => {
-  assert.equal(convergence(110, 800, 910, 110), 0);
-  assert.equal(convergence(-18, 800, 910, 110), 1);
-  assert.equal(convergence(62, 800, 910, 110), 0.5);
-  assert.equal(convergence(600, 420, 844, 85), 0);
-  assert.equal(convergence(180, 420, 844, 85), 1);
+test("assembly consumes scroll before the sticky hero is released, and reverses", () => {
+  assert.equal(convergence(110, 831, 941, 110), 0);
+  assert.equal(convergence(-190, 831, 941, 110), 0.5);
+  assert.equal(convergence(-490, 831, 941, 110), 1);
+  assert.equal(convergence(-800, 831, 941, 110), 1);
+  assert.equal(convergence(85 - 844 * 0.65, 759, 844, 85), 1);
 });
 test("final geometry has five circles covering central summit and no time drift", () => {
   const a = lensGeometry(960, 500, 1, 0);

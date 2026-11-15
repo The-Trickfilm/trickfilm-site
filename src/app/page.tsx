@@ -102,59 +102,61 @@ export default function Home() {
         </nav>
       </header>
       <main id="main">
-        <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-copy">
-            <p className="eyebrow">
-              <span className="dot" /> Creative technology studio
-            </p>
-            <h1 id="hero-title">
-              <span>Trickfilm brings</span> <span>clarity to</span>{" "}
-              <em>complexity.</em>
-            </h1>
-            <div className="hero-bottom">
-              <p>
-                We apply creativity and technology to focus on your business
-                challenges — turning them into working solutions.
+        <section className="hero-scroll" aria-labelledby="hero-title">
+          <div className="hero">
+            <div className="hero-copy">
+              <p className="eyebrow">
+                <span className="dot" /> Creative technology studio
               </p>
-              <div className="actions">
-                <a className="button" href="#contact">
-                  Let&apos;s solve something{" "}
-                  <span>
-                    <Arrow />
-                  </span>
-                </a>
-                <a className="text-link" href="#work">
-                  See our work
-                </a>
+              <h1 id="hero-title">
+                <span>Trickfilm brings</span> <span>clarity to</span>{" "}
+                <em>complexity.</em>
+              </h1>
+              <div className="hero-bottom">
+                <p>
+                  We apply creativity and technology to focus on your business
+                  challenges — turning them into working solutions.
+                </p>
+                <div className="actions">
+                  <a className="button" href="#contact">
+                    Let&apos;s solve something{" "}
+                    <span>
+                      <Arrow />
+                    </span>
+                  </a>
+                  <a className="text-link" href="#work">
+                    See our work
+                  </a>
+                </div>
               </div>
+              <ul className="hero-services" aria-label="Our services">
+                <li>
+                  <ServiceIcon kind="web" />
+                  <span>Web Design</span>
+                </li>
+                <li>
+                  <ServiceIcon kind="workflow" />
+                  <span>
+                    Workflow
+                    <br />
+                    Automation
+                  </span>
+                </li>
+                <li>
+                  <ServiceIcon kind="apps" />
+                  <span>
+                    Custom
+                    <br />
+                    Applications
+                  </span>
+                </li>
+              </ul>
             </div>
-            <ul className="hero-services" aria-label="Our services">
-              <li>
-                <ServiceIcon kind="web" />
-                <span>Web Design</span>
-              </li>
-              <li>
-                <ServiceIcon kind="workflow" />
-                <span>
-                  Workflow
-                  <br />
-                  Automation
-                </span>
-              </li>
-              <li>
-                <ServiceIcon kind="apps" />
-                <span>
-                  Custom
-                  <br />
-                  Applications
-                </span>
-              </li>
-            </ul>
-          </div>
-          <Mountain />
-          <div className="hero-caption">
-            <span>Clear thinking. Creative doing.</span>
-            <span>Scroll for perspective ↓</span>
+            <Mountain />
+            <div className="hero-caption">
+              <span>Clear thinking. Creative doing.</span>
+              <span>Scroll for perspective ↓</span>
+            </div>
           </div>
         </section>
         <SelectedWork />

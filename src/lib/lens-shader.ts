@@ -30,11 +30,15 @@ void main(){
  color+=${sample}*weight;total+=weight;
  }}
  vec4 sharp=texture2D(frame,clamp(st,vec2(.001),vec2(.999)));
- color.rgb=pow(max(color.rgb/total,vec3(0.0)),vec3(1.35,1.4,1.4))*total;
- sharp.rgb=pow(max(sharp.rgb,vec3(0.0)),vec3(1.35,1.4,1.4));
+ // A uniform teal treatment; no side fades or opacity masks.
+ vec3 dark=vec3(.012,.09,.085),light=vec3(.94,.98,.96);
+ float blurredLuma=dot(color.rgb/total,vec3(.2126,.7152,.0722));
+ float sharpLuma=dot(sharp.rgb,vec3(.2126,.7152,.0722));
+ color.rgb=mix(dark,light,blurredLuma)*.65*total;
+ sharp.rgb=mix(dark,light,sharpLuma)*.65;
  // Count every opening independently: 0%, 20%, 40%, 60%, 80%, 100% clarity.
  vec4 picture=mix(color/total,sharp,count/5.0);
- if(st.y>.94){vec4 sky=(texture2D(frame,vec2(.2,.995))+texture2D(frame,vec2(.5,.995))+texture2D(frame,vec2(.8,.995)))/3.0;picture=mix(picture,sky,smoothstep(.94,1.04,st.y));}
+
  gl_FragColor=picture;
 }`;
 }

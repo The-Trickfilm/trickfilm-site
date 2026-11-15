@@ -3,7 +3,7 @@ import { lensArtwork } from "./lens-artwork.ts";
 export function focusCenter(width: number, height: number) {
   return [
     width / height > 1.4 ? FOCUS_CENTER[0] : 0.53,
-    FOCUS_CENTER[1],
+    width / height > 1.4 ? FOCUS_CENTER[1] : 0.7,
   ] as const;
 }
 export const centers = [
@@ -13,20 +13,19 @@ export const centers = [
   [160.98, 312.24],
   [122.98, 195.3],
 ];
-/** Converge while the scene is centered in the usable viewport, before its exit. */
+/** Scroll is spent assembling the lenses before the sticky hero is released. */
 export function convergence(
-  sceneTop: number,
-  sceneHeight: number,
+  sectionTop: number,
+  _sceneHeight: number,
   viewportHeight: number,
   headerHeight = 0,
 ) {
-  const startTop = Math.max(
-    headerHeight,
-    (viewportHeight + headerHeight - sceneHeight) / 2,
-  );
   const progress = Math.max(
     0,
-    Math.min(1, (startTop - sceneTop) / (sceneHeight * 0.12)),
+    Math.min(
+      1,
+      (headerHeight - sectionTop) / Math.min(viewportHeight * 0.65, 600),
+    ),
   );
   return progress * progress * (3 - 2 * progress);
 }
@@ -60,7 +59,8 @@ export function lensGeometry(
           Math.sin(time * 0.38 + i * 1.7) * amplitude) *
           drift,
       targetY * progress +
-        (height * rest[i][1] + Math.cos(time * 0.31 + i * 2.1) * amplitude) *
+        (height * (wide ? rest[i][1] : 0.56 + rest[i][1] * 0.34) +
+          Math.cos(time * 0.31 + i * 2.1) * amplitude) *
           drift,
       (art.width / 2) * scale * progress + restRadius * drift,
     ];

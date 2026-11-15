@@ -13,7 +13,7 @@ import {
   focusCenter,
 } from "@/lib/lenses";
 
-import { summitAt } from "@/lib/summit";
+import { STILL_IMAGE } from "@/lib/still-image";
 import { lensArtwork } from "@/lib/lens-artwork";
 
 import { fragmentShader } from "@/lib/lens-shader";
@@ -35,7 +35,6 @@ export function Mountain() {
     () => true,
   );
   const pauseRef = useRef(false);
-  const videoElement = useRef<HTMLVideoElement | null>(null);
   useEffect(() => {
     const el = canvas.current!,
       host = region.current!;
@@ -61,7 +60,7 @@ export function Mountain() {
       gl.VERTEX_SHADER,
       "attribute vec2 position;varying vec2 uv;void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}",
     );
-    // One decoded video frame supplies the sharp texture and the entire blur pyramid.
+    // One still texture supplies every overlap level; the blur pyramid is generated once.
     const staging = document.createElement("canvas");
     staging.width = mobile ? 1024 : 2048;
     staging.height = staging.width / 2;
@@ -102,48 +101,40 @@ export function Mountain() {
         (n) => [n, gl.getUniformLocation(program, n)],
       ),
     );
-    const poster = new Image();
-    poster.src = "/media/summit-poster.webp";
-    const video = document.createElement("video");
-    videoElement.current = video;
-    video.muted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.preload = "none";
-    let visible = true,
+
+    const photo = new Image();
+    photo.src = STILL_IMAGE.src;
+    let ready = false,
+      visible = true,
+      disposed = false,
       id = 0,
       last = 0,
-      disposed = false,
-      motionTime = 0;
-    const motion = () => {
-      if (media.matches) {
-        video.pause();
-        video.removeAttribute("src");
-        video.load();
-      } else {
-        video.src = mobile
-          ? "/media/summit-mobile.mp4"
-          : "/media/summit-desktop.mp4";
-        if (!pauseRef.current) video.play().catch(() => {});
-      }
+      motionTime = 0,
+      previousRender = "";
+    photo.onload = () => {
+      stage.drawImage(photo, 0, 0, staging.width, staging.height);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGB,
+        gl.RGB,
+        gl.UNSIGNED_BYTE,
+        staging,
+      );
+      gl.generateMipmap(gl.TEXTURE_2D);
+      ready = true;
     };
-    motion();
-    media.addEventListener("change", motion);
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       last = performance.now();
-      if (!visible) video.pause();
-      else if (!media.matches && !pauseRef.current)
-        video.play().catch(() => {});
     });
     observer.observe(host);
-    let previousRender = "";
     const visibility = () => {
       last = performance.now();
-      if (document.hidden) video.pause();
     };
     document.addEventListener("visibilitychange", visibility);
     const contextLost = () => {
+      ready = false;
       el.style.opacity = "0";
       host.dataset.ready = "false";
     };
@@ -151,21 +142,23 @@ export function Mountain() {
     const draw = (now: number) => {
       if (disposed) return;
       id = requestAnimationFrame(draw);
-      if (!visible || document.hidden || gl.isContextLost() || now - last < 33)
+      if (
+        !ready ||
+        !visible ||
+        document.hidden ||
+        gl.isContextLost() ||
+        now - last < 33
+      )
         return;
       const elapsed = last ? (now - last) / 1000 : 0;
       last = now;
       if (!pauseRef.current && !media.matches) motionTime += elapsed;
-      if (pauseRef.current || media.matches) video.pause();
-      else if (video.paused && video.src) video.play().catch(() => {});
-      const image = video.readyState >= 2 && !media.matches ? video : poster;
-      if (image instanceof HTMLImageElement && !image.complete) return;
       const rect = host.getBoundingClientRect();
       const w = Math.min(
-        mobile ? 640 : 1280,
-        Math.round(rect.width * Math.min(devicePixelRatio || 1, 1.5)),
-      );
-      const h = Math.round((w * rect.height) / rect.width);
+          mobile ? 640 : 1280,
+          Math.round(rect.width * Math.min(devicePixelRatio || 1, 1.5)),
+        ),
+        h = Math.round((w * rect.height) / rect.width);
       if (!w || !h) return;
       if (el.width !== w || el.height !== h) {
         el.width = w;
@@ -173,81 +166,52 @@ export function Mountain() {
         gl.viewport(0, 0, w, h);
         outlineSvg.current?.setAttribute("viewBox", `0 0 ${w} ${h}`);
       }
+      const section = host.closest(".hero-scroll")!.getBoundingClientRect();
       const headerHeight =
         document.querySelector(".header")?.getBoundingClientRect().height ?? 0;
       const progress = media.matches
         ? 1
-        : convergence(rect.top, rect.height, innerHeight, headerHeight);
-      const renderKey = `${w},${h},${progress},${video.currentTime},${motionTime}`;
+        : convergence(section.top, h, innerHeight, headerHeight);
+      const renderKey = `${w},${h},${progress},${motionTime}`;
       if (renderKey === previousRender) return;
       previousRender = renderKey;
       const circles = lensGeometry(w, h, progress, motionTime);
       const apertures = lensApertures(circles);
       circles.forEach(([x, y, radius], i) => {
-        const art = lensArtwork[i];
-        const scale = radius / (art.width / 2);
-        outlinePaths.current[i]?.setAttribute(
-          "opacity",
-          String(1 - progress * 0.78),
-        );
-        outlinePaths.current[i]?.setAttribute(
+        const art = lensArtwork[i],
+          scale = radius / (art.width / 2);
+        const path = outlinePaths.current[i];
+        path?.setAttribute("opacity", String(1 - progress * 0.78));
+        path?.setAttribute(
           "transform",
           `translate(${x - (art.width / 2) * scale} ${y - (art.height / 2) * scale}) scale(${scale})`,
         );
       });
-      const peak = summitAt(
-        image instanceof HTMLVideoElement ? image.currentTime : 0,
-      );
-      gl.uniform2f(uniforms.summit, peak[0], peak[1]);
       const anchor = focusCenter(w, h);
-      gl.uniform2f(
-        uniforms.focus,
-        anchor[0],
-        0.3 + (anchor[1] - 0.3) * progress,
-      );
       gl.uniform2f(uniforms.resolution, w, h);
+      gl.uniform2f(uniforms.source, photo.naturalWidth, photo.naturalHeight);
       gl.uniform2f(uniforms.texel, 1 / staging.width, 1 / staging.height);
       gl.uniform2f(
-        uniforms.source,
-        image instanceof HTMLVideoElement
-          ? image.videoWidth
-          : image.naturalWidth,
-        image instanceof HTMLVideoElement
-          ? image.videoHeight
-          : image.naturalHeight,
+        uniforms.summit,
+        STILL_IMAGE.summit[0],
+        STILL_IMAGE.summit[1],
       );
+      gl.uniform2f(uniforms.focus, anchor[0], anchor[1]);
       gl.uniform3fv(uniforms["circles[0]"], new Float32Array(apertures.flat()));
-      try {
-        stage.drawImage(image, 0, 0, staging.width, staging.height);
-        gl.texImage2D(
-          gl.TEXTURE_2D,
-          0,
-          gl.RGB,
-          gl.RGB,
-          gl.UNSIGNED_BYTE,
-          staging,
-        );
-        gl.generateMipmap(gl.TEXTURE_2D);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-        el.style.opacity = "1";
-        host.dataset.ready = "true";
-        host.dataset.progress = progress.toFixed(3);
-      } catch {
-        /* The CSS poster remains visible if a frame cannot be uploaded. */
-      }
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      el.style.opacity = "1";
+      host.dataset.ready = "true";
+      host.dataset.progress = progress.toFixed(3);
+      host.dataset.medium = "still";
     };
     id = requestAnimationFrame(draw);
     return () => {
       disposed = true;
-      if (videoElement.current === video) videoElement.current = null;
-      document.removeEventListener("visibilitychange", visibility);
-      el.removeEventListener("webglcontextlost", contextLost);
+      photo.onload = null;
       cancelAnimationFrame(id);
       observer.disconnect();
-      media.removeEventListener("change", motion);
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
+      document.removeEventListener("visibilitychange", visibility);
+      el.removeEventListener("webglcontextlost", contextLost);
       gl.deleteTexture(texture);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
@@ -260,7 +224,7 @@ export function Mountain() {
       className="mountain"
       ref={region}
       role="group"
-      aria-label="A turquoise mountain coming into focus through five overlapping lenses"
+      aria-label="A still mountain photograph coming into focus through five overlapping lenses"
     >
       <canvas ref={canvas} aria-hidden="true" />
       <svg
@@ -309,8 +273,6 @@ export function Mountain() {
           onClick={() => {
             const next = !paused;
             pauseRef.current = next;
-            if (next) videoElement.current?.pause();
-            else if (!reduced) videoElement.current?.play().catch(() => {});
             setPaused(next);
           }}
         >

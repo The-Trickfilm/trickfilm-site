@@ -10,7 +10,7 @@ Node 24 recommended. Install with `npm ci`; start locally with `npm run dev`.
 - `npm run typecheck`
 - `npm test` — overlap counts, reversible convergence, and final geometry
 - `npm run build`
-- `npm run test:browser` — production server, desktop/mobile, keyboard navigation, service selection, all portfolio links and screenshots, motion control, reduced motion, fallback, and mobile video selection
+- `npm run test:browser` — production server, desktop/mobile, keyboard navigation, service selection, all portfolio links and screenshots, motion control, reduced motion, fallback, and absence of video requests
 
 Browser checks use `/usr/bin/chromium`; update `executablePath` in `playwright.config.ts` for another machine. `PLAYWRIGHT_BASE_URL` can target a deployed instance instead of starting the local production server.
 
@@ -20,25 +20,20 @@ Use the Vercel Next.js preset. No environment variables, database, or backend se
 
 ## Hero
 
-One detached HTML video decodes a single selected source. Each frame supplies one WebGL texture and its synchronized blur pyramid. A fragment shader counts all five circles at each pixel. Overlaps 0–5 produce clarity values 0%, 20%, 40%, 60%, 80%, 100%; each overlap contributes exactly one fifth of the synchronized sharp frame. Only a subpixel edge is softened. The focus boundaries use the circular inner openings of the supplied artwork, mapped with the same transforms as the visible rims.
+The current milestone uses a still photograph. One texture and one precomputed blur pyramid feed a shader that independently counts the five circular openings. Each overlap adds 20% clarity. All five clear apertures coincide completely over the summit at the end. There are no horizontal image fades or opacity masks; a uniform teal treatment preserves equal brightness inside and outside the openings.
 
-Power-of-two staging textures preserve source detail. A shared full-blur sample is built from the synchronized mipmap pyramid. The independently counted openings mix in 20%, 40%, 60%, 80%, and 100% of the sharp frame. Both explicit-LOD and standard biased-LOD paths are verified by actual GPU pixel-contrast tests. Five-circle overlap samples the fully sharp frame. No separately decoded video layers or single sharp-mask approximation are used.
+The supplied SVG paths retain their tapered rims, with white gradients from 20% outside to 5% inside. Aperture measurements match the native path transforms. Independent drift stops on pause and during final convergence.
 
-The five user-supplied, clockwise SVG paths define the visible tapered rims. They render as native vectors, not uniform shader strokes. Each uses an offset radial gradient from white at 20% opacity on the outer boundary to white at 5% opacity on its inner opening. Rim opacity is compensated during convergence so five transparent layers do not accumulate into a heavy band. Original files are preserved unchanged in `public/brand/lenses`; their path data and aperture measurements live in `src/lib/lens-artwork.ts`. Browser checks sample both sides of each SVG opening to validate the focus geometry.
+The hero stays sticky while the first 65vh (capped at 600px) of scrolling assembles the lenses. It remains assembled for another 15vh before leaving with normal page scrolling. Scrolling back reverses the assembly. Reduced motion removes the sticky runway and shows the assembled still directly. No wheel interception or scroll snapping is used.
 
-The supplied artwork defines each tapered rim. At the final scroll state, all five clear apertures coincide completely as one fully sharp circular window over the summit. The circles follow independent, visible floating paths at rest. Convergence is calculated from the scene’s position in the usable viewport, completing while the entire mark is visible. It then exits with the ordinary page scroll; reverse scrolling separates the lenses again. There is no hero pinning or scroll snapping. The summit is aligned with the shared focus point using measured apex coordinates at one-second intervals across the supplied clip, interpolated against the video clock. This follows the source’s camera movement without another video decoder or a runtime tracking service.
-
-Rendering is limited to 30 fps and 1280 pixels wide on desktop, 640 pixels on smaller screens, with a bounded device-pixel ratio. Video pauses outside the viewport and in hidden documents. User pause stops video and drift. Reduced motion uses the static poster and final geometry, without requesting video. A CSS poster remains available without JavaScript or WebGL.
+Rendering is capped at 30fps and 1280px wide on desktop, 640px on smaller screens. Image upload and mip generation happen once. Offscreen and hidden documents suspend rendering. CSS provides a blurred still fallback without WebGL.
 
 ## Assets
 
-- Original user-supplied SVG symbol and wordmark are unchanged in `public/brand`.
-- Current video master: user upload `277097.mp4`, 1920 × 1080, approximately 18 seconds. The user explicitly selected it to replace the earlier Mixkit footage. Original uploads remain outside the repository.
-- `public/media/summit-desktop.mp4`: 1920px, 24fps, silent H.264, fast-start.
-- `public/media/summit-mobile.mp4`: 960px, 24fps, silent H.264, fast-start. Smaller viewports request this source only; one decoder remains in use.
-- `public/media/summit-poster.webp`: matching high-resolution static frame.
-- Exports use a monochromatic teal grade while retaining bright snow and shadow detail. No remote media or font requests are required by the homepage. Pixels outside every lens use the maximum blurred sample, while increasing overlap restores clarity. An off-white illumination field integrates text and imagery without using image opacity to calculate focus.
-- The original Mixkit license record in `docs/mixkit-video-license.html` concerns the superseded asset, which is no longer shipped.
+- Original user-supplied SVG symbol, wordmark and five separate lens files remain unchanged in `public/brand`.
+- `public/media/mountain-still.webp` is TEMPORARILY copied from the previous mountain poster. The newly shown photograph is visible inline in chat but has not been made available as a downloadable workspace file. Replace this asset and calibrate `src/lib/still-image.ts` once its JPG/PNG is attached.
+- Previous optimized video files remain in `public/media` for a later iteration. The current homepage does not request or decode them.
+- Local portfolio screenshots and fonts avoid remote dependencies.
 
 ## Portfolio
 
@@ -54,7 +49,7 @@ The horizontal gallery uses responsive Next.js Images and links to the actual si
 
 ## Design and interaction
 
-The approved split-hero reference guides the hero composition. LocalPixel was inspected as a quality reference for hierarchy, restrained motion, readable business language, and consistency; its assets and code are not reused.
+The current still-image prototype tests the revised blur and assembly behavior. LocalPixel was inspected as a quality reference for hierarchy, restrained motion, readable business language, and consistency; its assets and code are not reused.
 
 The service explorer supports click, arrow keys, Home/End, and direct service links. Selected work remains server-rendered and accessible without JavaScript. Transitions are brief and disabled for reduced motion. Navigation omits unavailable Insights content. Browser captures are saved under `docs` for review.
 
