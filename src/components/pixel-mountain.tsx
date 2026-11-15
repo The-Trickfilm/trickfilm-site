@@ -16,13 +16,12 @@ export function PixelMountain() {
     const photo = new Image(),
       media = matchMedia("(prefers-reduced-motion: reduce)");
     const sharp = document.createElement("canvas"),
-      coarse = document.createElement("canvas");
+      mask = document.createElement("canvas"),
+      reveal = document.createElement("canvas");
     const sc = sharp.getContext("2d")!,
-      cc = coarse.getContext("2d")!;
-    const variants = [5, 12, 22].map((step) => ({
-      step,
-      canvas: document.createElement("canvas"),
-    }));
+      mc = mask.getContext("2d")!,
+      rc = reveal.getContext("2d")!;
+    let maskPixels: ImageData, seeds: Float32Array;
     let id = 0,
       start = 0,
       elapsed = 0,
@@ -75,51 +74,41 @@ export function PixelMountain() {
         sc.fillStyle = "#6dc9bb";
         sc.fillRect(0, 0, w, h);
         sc.globalCompositeOperation = "source-over";
-        coarse.width = Math.max(1, Math.round(w / 30));
-        coarse.height = Math.max(1, Math.round(h / 30));
-        cc.drawImage(sharp, 0, 0, coarse.width, coarse.height);
-        variants.forEach(({ step, canvas: layer }) => {
-          layer.width = Math.max(1, Math.round(w / step));
-          layer.height = Math.max(1, Math.round(h / step));
-          layer
-            .getContext("2d")!
-            .drawImage(sharp, 0, 0, layer.width, layer.height);
-        });
-      }
-      ctx!.imageSmoothingEnabled = false;
-      ctx!.drawImage(coarse, 0, 0, w, h);
-      const cell = w / Math.ceil(bounds.width / 44);
-      for (let row = 0; row < Math.ceil(h / cell); row++)
-        for (let col = 0; col < Math.ceil(w / cell); col++) {
-          const x = col * cell,
-            y = row * cell,
-            tw = Math.min(cell, w - x),
-            th = Math.min(cell, h - y),
-            level = tileClarity(elapsed, tileSeed(col, row));
-          if (level === 1) {
-            ctx!.drawImage(sharp, x, y, tw, th, x, y, tw, th);
-          } else if (level > 0) {
-            const layer =
-              variants[level > 0.5 ? 0 : level > 0.2 ? 1 : 2].canvas;
-            ctx!.drawImage(
-              layer,
-              (x * layer.width) / w,
-              (y * layer.height) / h,
-              (tw * layer.width) / w,
-              (th * layer.height) / h,
-              x,
-              y,
-              tw,
-              th,
-            );
-          }
+        // A small binary mask makes six-CSS-pixel cells crisp at every viewport.
+        mask.width = Math.ceil(bounds.width / 6);
+        mask.height = Math.ceil(bounds.height / 6);
+        reveal.width = w;
+        reveal.height = h;
+        maskPixels = mc.createImageData(mask.width, mask.height);
+        seeds = new Float32Array(mask.width * mask.height);
+        for (let i = 0; i < seeds.length; i++) {
+          seeds[i] = tileSeed(i % mask.width, Math.floor(i / mask.width));
+          maskPixels.data.set([255, 255, 255, 0], i * 4);
         }
+      }
+      ctx!.fillStyle = "#152c24";
+      ctx!.fillRect(0, 0, w, h);
+      if (elapsed >= 2.2) {
+        ctx!.drawImage(sharp, 0, 0);
+      } else {
+        for (let i = 0; i < seeds.length; i++)
+          maskPixels.data[i * 4 + 3] = tileClarity(elapsed, seeds[i]) ? 255 : 0;
+        mc.putImageData(maskPixels, 0, 0);
+        rc.clearRect(0, 0, w, h);
+        rc.imageSmoothingEnabled = false;
+        rc.drawImage(mask, 0, 0, w, h);
+        rc.globalCompositeOperation = "source-in";
+        rc.drawImage(sharp, 0, 0);
+        rc.globalCompositeOperation = "source-over";
+        ctx!.drawImage(reveal, 0, 0);
+      }
       el.style.opacity = "1";
       root.dataset.phase = elapsed >= 2.2 ? "clear" : "resolving";
       if (elapsed < 2.2) id = requestAnimationFrame(paint);
     }
     function restart() {
       cancelAnimationFrame(id);
+      setAvailable(!media.matches);
       start = 0;
       last = 0;
       id = requestAnimationFrame(paint);

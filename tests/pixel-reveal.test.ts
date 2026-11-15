@@ -9,7 +9,7 @@ test("the reveal is spatially staggered and settles completely without looping",
   assert.ok(seeds.every((s) => s >= 0 && s < 1));
   assert.ok(seeds.every((s) => tileClarity(0, s) === 0));
   const middle = seeds.map((s) => tileClarity(0.8, s));
-  assert.ok(new Set(middle).size > 2);
+  assert.ok(new Set(middle).size === 2);
   assert.ok(
     seeds.every((s) => tileClarity(2.2, s) === 1 && tileClarity(100, s) === 1),
   );

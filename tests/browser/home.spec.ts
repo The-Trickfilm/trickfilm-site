@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 async function loadVisibleImages(page: Page) {
   for (const img of await page.locator("img:visible").all()) {
+    if (await img.evaluate((el) => !!el.closest("[inert]"))) continue;
     if (await img.evaluate((el) => !!el.closest(".service-art"))) {
       await img.evaluate((el) =>
         window.scrollTo({
@@ -17,13 +18,16 @@ async function loadVisibleImages(page: Page) {
       )
       .toBe(true);
   }
-  await page
-    .locator(".work-gallery")
-    .evaluate((root) => root.scrollTo({ left: 0, behavior: "instant" }));
-  await expect(page.locator(".project-card").first()).toHaveAttribute(
-    "aria-current",
-    "true",
-  );
+  await page.locator(".work-gallery").evaluate((root) => {
+    const card = root.querySelector<HTMLElement>("[data-original=true]")!;
+    root.scrollTo({
+      left: card.offsetLeft - (root.clientWidth - card.offsetWidth) / 2,
+      behavior: "instant",
+    });
+  });
+  await expect(
+    page.locator(".project-card[data-original=true]").first(),
+  ).toHaveAttribute("aria-current", "true");
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await expect(page.locator(".pixel-mountain")).toHaveAttribute(
     "data-phase",
@@ -65,7 +69,7 @@ test("services menu links to the selected service", async ({ page }) => {
     "aria-selected",
     "true",
   );
-  await expect(page.getByRole("tabpanel")).toContainText(
+  await expect(page.locator("#services").getByRole("tabpanel")).toContainText(
     "Find the useful in the possible.",
   );
 });
@@ -74,18 +78,19 @@ test("service explorer responds to clicks and keyboard without moving focus unex
   page,
 }) => {
   await page.goto("/");
-  const tabs = page.getByRole("tab");
+  const tabs = page.locator("#services").getByRole("tab");
   await tabs.nth(1).click();
   await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByRole("tabpanel")).toContainText(
+  await expect(page.locator("#services").getByRole("tabpanel")).toContainText(
     "Give good people their time back.",
   );
   await tabs.nth(1).press("ArrowDown");
   await expect(tabs.nth(2)).toBeFocused();
-  await expect(page.getByRole("tabpanel")).toContainText(
+  await expect(page.locator("#services").getByRole("tabpanel")).toContainText(
     "A better fit for the way you work.",
   );
   await page
+    .locator("#services")
     .getByRole("tabpanel")
     .screenshot({ path: "/workspace/work/services-panel.png" });
 });
@@ -96,7 +101,7 @@ test("selected work shows all five supplied sites with loaded local screenshots"
   await page.goto("/");
   await page.getByRole("link", { name: "See our work", exact: true }).click();
   await expect(page.locator("#work")).toBeInViewport();
-  const cards = page.locator(".project-card");
+  const cards = page.locator(".project-card[data-original=true]");
   await expect(cards).toHaveCount(5);
   const urls = [
     "https://gowermodernlaw.com/",
@@ -132,13 +137,13 @@ test("gallery arrows center the full-color project and keep neighbours monochrom
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   await page.locator("#work").scrollIntoViewIfNeeded();
-  const cards = page.locator(".work-gallery .project-card");
+  const cards = page.locator(".work-gallery .project-card[data-original=true]");
   await expect(cards.first()).toHaveAttribute("aria-current", "true");
   await expect(cards.first().locator("img")).toHaveCSS("filter", "none");
   await expect(cards.nth(1).locator("img")).not.toHaveCSS("filter", "none");
   await expect(
     page.getByRole("button", { name: "Previous project" }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await page.getByRole("button", { name: "Next project" }).click();
   await expect
     .poll(() => cards.nth(1).getAttribute("aria-current"))
@@ -163,7 +168,7 @@ test("gallery arrows center the full-color project and keep neighbours monochrom
     .toBe("true");
   await expect(
     page.getByRole("button", { name: "Next project" }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await cards.nth(4).press("Home");
   await expect
     .poll(() => cards.first().getAttribute("aria-current"))

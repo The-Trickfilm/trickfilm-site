@@ -7,9 +7,8 @@ export function tileClarity(elapsed: number, seed: number) {
   const start = seed * 1.35;
   const age = elapsed - start;
   if (age <= 0) return 0;
-  // Two quiet steps through intermediate resolution, then a permanent clear state.
-  if (age < 0.24) return 0.32;
-  if (age < 0.48) return 0.08;
-  if (age < 0.78) return 0.68;
+  // Binary visibility: fine, full-resolution squares blink once, then stay sharp.
+  if (age < 0.18) return 1;
+  if (age < 0.36) return 0;
   return 1;
 }
