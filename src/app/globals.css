@@ -1624,3 +1624,54 @@ summary:focus-visible {
     opacity: 0;
   }
 }
+
+.hero-motion-controls {
+  position: absolute;
+  z-index: 3;
+  right: var(--gutter);
+  bottom: 30px;
+  display: flex;
+  gap: 8px;
+}
+.hero-motion-controls .replay-reveal {
+  position: static;
+}
+@media (max-width: 800px) {
+  .hero-motion-controls {
+    bottom: 60px;
+    right: var(--gutter);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-motion-controls {
+    display: none;
+  }
+}
+
+/* Navigation floats over the page; only its text colour changes with the surface. */
+.header {
+  position: fixed;
+  inset: 0 0 auto;
+  width: 100%;
+  background: transparent;
+  border-bottom: 0;
+}
+.header[data-surface="dark"] {
+  color: var(--paper);
+}
+.header[data-surface="light"] {
+  color: var(--ink);
+}
+.services-menu > div {
+  color: var(--ink);
+}
+.hero {
+  min-height: 100svh;
+  padding-top: calc(76px + clamp(45px, 5vw, 90px));
+}
+@media (max-width: 800px) {
+  .hero {
+    min-height: 100svh;
+    padding-top: 118px;
+  }
+}

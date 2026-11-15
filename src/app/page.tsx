@@ -1,3 +1,4 @@
+import { HeaderSurface } from "@/components/header-surface";
 import { SelectedWork } from "@/components/selected-work";
 import { ServiceExplorer } from "@/components/service-explorer";
 import { Arrow } from "@/components/arrow";
@@ -40,7 +41,7 @@ export default function Home() {
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <header className="header">
+      <header className="header" data-surface="dark">
         <a href="#" aria-label="Trickfilm home">
           <Image
             src="/brand/trickfilm-logo.svg"
@@ -73,6 +74,7 @@ export default function Home() {
           </a>
         </nav>
       </header>
+      <HeaderSurface />
       <main id="main">
         <section
           className="hero"

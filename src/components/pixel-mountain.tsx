@@ -13,6 +13,9 @@ export function PixelMountain() {
     host = useRef<HTMLDivElement>(null);
   const replay = useRef<(() => void) | null>(null);
   const [available, setAvailable] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const pauseMotion = useRef<((paused: boolean) => void) | null>(null);
   useEffect(() => {
     const el = canvas.current!,
       root = host.current!,
@@ -36,19 +39,30 @@ export function PixelMountain() {
       last = 0,
       visible = true,
       loaded = false,
-      disposed = false;
+      disposed = false,
+      forceRender = false;
     function paint(now: number) {
-      if (disposed || !loaded) return;
+      if (
+        disposed ||
+        !loaded ||
+        (pausedRef.current && !media.matches && !forceRender)
+      )
+        return;
       if (!visible || document.hidden) {
         last = now;
         return;
       }
-      if (now - last < 15) {
+      if (!forceRender && now - last < (elapsed < REVEAL_DURATION ? 15 : 33)) {
         id = requestAnimationFrame(paint);
         return;
       }
       if (!start) start = now;
-      elapsed = media.matches ? 3 : (now - start) / 1000;
+      elapsed = media.matches
+        ? 3
+        : pausedRef.current
+          ? elapsed
+          : (now - start) / 1000;
+      forceRender = false;
       last = now;
       const bounds = root.getBoundingClientRect(),
         w = Math.min(
@@ -82,9 +96,9 @@ export function PixelMountain() {
         sc.fillStyle = "#1f8875";
         sc.fillRect(0, 0, w, h);
         sc.globalCompositeOperation = "source-over";
-        // A small binary mask makes six-CSS-pixel cells crisp at every viewport.
-        mask.width = Math.ceil(bounds.width / 6);
-        mask.height = Math.ceil(bounds.height / 6);
+        // Each mask cell covers exactly 10 CSS pixels; excess is clipped at the edges.
+        mask.width = Math.ceil(bounds.width / 10);
+        mask.height = Math.ceil(bounds.height / 10);
 
         maskPixels = mc.createImageData(mask.width, mask.height);
         seeds = new Float32Array(mask.width * mask.height);
@@ -100,11 +114,26 @@ export function PixelMountain() {
       }
       ctx!.imageSmoothingEnabled = true;
       const progress = Math.min(1, elapsed / REVEAL_DURATION);
-      const scale = 1 + 0.035 * Math.pow(1 - progress, 3);
+      const ambient = media.matches
+        ? 0
+        : Math.max(0, elapsed - REVEAL_DURATION);
+      const enter = Math.min(1, ambient / 2.5);
+      const scale =
+        1 +
+        0.035 * Math.pow(1 - progress, 3) +
+        (media.matches
+          ? 0
+          : enter * (0.022 + 0.006 * Math.sin(ambient * 0.26)));
+      const driftX = media.matches
+        ? 0
+        : Math.sin(ambient * 0.18) * w * 0.004 * enter;
+      const driftY = media.matches
+        ? 0
+        : Math.sin(ambient * 0.13) * h * 0.003 * enter;
       ctx!.drawImage(
         sharp,
-        (w - w * scale) * 0.52,
-        (h - h * scale) * 0.47,
+        (w - w * scale) * 0.52 + driftX,
+        (h - h * scale) * 0.47 + driftY,
         w * scale,
         h * scale,
       );
@@ -119,15 +148,44 @@ export function PixelMountain() {
             : 255;
         mc.putImageData(maskPixels, 0, 0);
         ctx!.imageSmoothingEnabled = false;
-        ctx!.drawImage(mask, 0, 0, w, h);
+        ctx!.drawImage(
+          mask,
+          0,
+          0,
+          (mask.width * 10 * w) / bounds.width,
+          (mask.height * 10 * h) / bounds.height,
+        );
+      }
+      if (elapsed >= REVEAL_DURATION && !media.matches) {
+        // A low-contrast, spatially coherent current gives the raster a quiet flow.
+        for (let i = 0; i < seeds.length; i++) {
+          const x = (i % mask.width) / mask.width,
+            y = Math.floor(i / mask.width) / mask.height;
+          const wave =
+            Math.sin(x * 8 + y * 5 - ambient * 0.45) +
+            Math.cos(x * 4 - y * 9 + ambient * 0.31);
+          maskPixels.data[i * 4 + 3] = Math.round((wave + 2) * 7 * enter);
+        }
+        mc.putImageData(maskPixels, 0, 0);
+        ctx!.imageSmoothingEnabled = false;
+        ctx!.drawImage(
+          mask,
+          0,
+          0,
+          (mask.width * 10 * w) / bounds.width,
+          (mask.height * 10 * h) / bounds.height,
+        );
       }
       if (elapsed >= REVEAL_DURATION) hero.dataset.intro = "clear";
       el.style.opacity = "1";
       root.dataset.phase = elapsed >= REVEAL_DURATION ? "clear" : "resolving";
-      if (elapsed < REVEAL_DURATION) id = requestAnimationFrame(paint);
+      if (!media.matches && !pausedRef.current)
+        id = requestAnimationFrame(paint);
     }
     function restart() {
       cancelAnimationFrame(id);
+      pausedRef.current = false;
+      setPaused(false);
       setAvailable(!media.matches);
       hero.dataset.intro = media.matches ? "clear" : "revealing";
       start = 0;
@@ -135,11 +193,18 @@ export function PixelMountain() {
       id = requestAnimationFrame(paint);
     }
     replay.current = restart;
+    pauseMotion.current = (next) => {
+      pausedRef.current = next;
+      if (next) cancelAnimationFrame(id);
+      else {
+        start = performance.now() - elapsed * 1000;
+        restartFrame();
+      }
+    };
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       if (visible && loaded) {
-        if (elapsed < REVEAL_DURATION)
-          start = performance.now() - elapsed * 1000;
+        start = performance.now() - elapsed * 1000;
         restartFrame();
       }
     });
@@ -155,7 +220,7 @@ export function PixelMountain() {
       }
     };
     const resize = new ResizeObserver(() => {
-      el.width = 0;
+      forceRender = true;
       restartFrame();
     });
     resize.observe(root);
@@ -179,6 +244,7 @@ export function PixelMountain() {
       observer.disconnect();
       resize.disconnect();
       replay.current = null;
+      pauseMotion.current = null;
       document.removeEventListener("visibilitychange", visibility);
       media.removeEventListener("change", restart);
     };
@@ -196,13 +262,26 @@ export function PixelMountain() {
       </noscript>
       <canvas ref={canvas} aria-hidden="true" />
       {available && (
-        <button
-          className="replay-reveal"
-          onClick={() => replay.current?.()}
-          aria-label="Replay image focus animation"
-        >
-          <span aria-hidden="true">↻</span> Replay focus
-        </button>
+        <div className="hero-motion-controls">
+          <button
+            className="replay-reveal"
+            onClick={() => replay.current?.()}
+            aria-label="Replay image focus animation"
+          >
+            <span aria-hidden="true">↻</span> Replay focus
+          </button>
+          <button
+            className="replay-reveal"
+            aria-pressed={paused}
+            onClick={() => {
+              const next = !paused;
+              pauseMotion.current?.(next);
+              setPaused(next);
+            }}
+          >
+            {paused ? "Play hero motion" : "Pause hero motion"}
+          </button>
+        </div>
       )}
     </div>
   );
