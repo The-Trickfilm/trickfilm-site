@@ -1,16 +1,5 @@
 export const websiteProjects = [
   {
-    slug: "streamworks-designs",
-    name: "Streamworks Designs",
-    image: "streamworks",
-    sector: "Water features & landscape design",
-    domain: "streamworksdesigns.com",
-    url: "https://www.streamworksdesigns.com/",
-    tone: "charcoal",
-    description:
-      "A website for Streamworks Designs and its water features and landscape work.",
-  },
-  {
     slug: "gower-modern-law",
     name: "Gower Modern Law",
     image: "gower",
@@ -29,6 +18,17 @@ export const websiteProjects = [
     url: "https://nvfc.ca/",
     tone: "paper",
     description: "A community football club, brought together online.",
+  },
+  {
+    slug: "streamworks-designs",
+    name: "Streamworks Designs",
+    image: "streamworks",
+    sector: "Water features & landscape design",
+    domain: "streamworksdesigns.com",
+    url: "https://www.streamworksdesigns.com/",
+    tone: "charcoal",
+    description:
+      "A website for Streamworks Designs and its water features and landscape work.",
   },
   {
     slug: "access-to-justice-bc",

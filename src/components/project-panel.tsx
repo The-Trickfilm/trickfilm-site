@@ -19,7 +19,17 @@ export function ProjectPanel({
         <p className="eyebrow">
           ({application ? "Creative technology" : "Work"})
         </p>
-        <h3>{project.name}</h3>
+        <h3>
+          {project.name === "StrataCouncil.ca" ? (
+            <>
+              <span className="project-name-part">Strata</span>
+              <wbr />
+              <span className="project-name-part">Council.ca</span>
+            </>
+          ) : (
+            project.name
+          )}
+        </h3>
         <span className="project-cta">
           <span className="diamond">
             <Arrow />

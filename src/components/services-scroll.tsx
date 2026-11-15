@@ -50,6 +50,12 @@ export function ServicesScroll({ services }: { services: Service[] }) {
               0{i + 1}
             </span>
             <div>
+              {i === 0 && (
+                <h2 className="services-title" id="services-heading">
+                  A little ingenuity.
+                  <br />A lot of possibility.
+                </h2>
+              )}
               <h3>{service.name}</h3>
               <p>{service.copy}</p>
               <ul>

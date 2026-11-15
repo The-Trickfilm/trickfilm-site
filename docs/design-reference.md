@@ -23,3 +23,7 @@ Desktop project surfaces now have a 64px inset at a 1440px viewport (responsive 
 ## Compact identity carousel
 
 The expanded grid is replaced with a compact, continuously looping horizontal logo rail: five visible items at desktop width, three on tablet, two on mobile. Original artwork, colors, and names are retained. Arrows, Pause/Play, touch scrolling, hover/focus pauses, and the existing large preview provide control. Reduced-motion users get manual scrolling; no-JavaScript users get the original list and image links. Repeated visual copies are excluded from screen-reader navigation and keyboard tab order.
+
+## Services and work density
+
+The separate services introduction is removed; “A little ingenuity. A lot of possibility.” now sits above the first description within the scrolling service content. Website order: Gower Modern Law, North Vancouver FC, Streamworks Designs, Access to Justice BC, StrataCouncil.ca. Work panels are shorter (680px at a 1000px-tall desktop viewport, formerly 952px), with tighter internal spacing and the existing overlap preserved. StrataCouncil.ca can wrap between “Strata” and “Council.ca” while keeping both parts intact. Mobile cards also have reduced padding and gaps.

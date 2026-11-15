@@ -107,7 +107,7 @@ test("desktop project surfaces overlap and release after the final project", asy
       ?.closest(".project-panel")
       ?.getAttribute("href"),
   );
-  expect(covering).toContain("gower-modern-law");
+  expect(covering).toContain("north-vancouver-fc");
   await page.locator("#branding").scrollIntoViewIfNeeded();
   expect((await cards.last().boundingBox())!.y).toBeLessThan(24);
   await expect(
@@ -187,7 +187,7 @@ test("services keep their visual in place and change it with the scrolling copy"
   );
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator(".services-stage")).not.toBeVisible();
-  await expect(rows.first().getByRole("heading")).toBeVisible();
+  await expect(rows.first().getByRole("heading", { level: 3 })).toBeVisible();
 });
 
 test("contact validates, retains failed messages, and acknowledges accepted delivery", async ({
