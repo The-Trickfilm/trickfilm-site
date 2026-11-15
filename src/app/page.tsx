@@ -33,6 +33,10 @@ const services = [
 export default function Home() {
   return (
     <>
+      <link rel="preload" as="image" href="/media/mountain-still.webp" />
+      <noscript>
+        <style>{`.hero[data-intro="pending"] .hero-copy,.hero[data-intro="pending"] .hero-bottom{opacity:1}`}</style>
+      </noscript>
       <a className="skip" href="#main">
         Skip to content
       </a>
@@ -70,7 +74,11 @@ export default function Home() {
         </nav>
       </header>
       <main id="main">
-        <section className="hero" aria-labelledby="hero-title">
+        <section
+          className="hero"
+          aria-labelledby="hero-title"
+          data-intro="pending"
+        >
           <PixelMountain />
           <div className="hero-copy">
             <p className="eyebrow">Independent creative technology studio</p>

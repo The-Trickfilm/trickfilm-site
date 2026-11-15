@@ -1,7 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { STILL_IMAGE } from "@/lib/still-image";
-import { tileClarity, tileSeed } from "@/lib/pixel-reveal";
+import {
+  revealPixel,
+  revealDistance,
+  REVEAL_DURATION,
+  tileSeed,
+} from "@/lib/pixel-reveal";
 
 export function PixelMountain() {
   const canvas = useRef<HTMLCanvasElement>(null),
@@ -12,19 +17,19 @@ export function PixelMountain() {
     const el = canvas.current!,
       root = host.current!,
       ctx = el.getContext("2d", { alpha: false });
+    const hero = root.closest<HTMLElement>(".hero")!;
     if (!ctx) {
+      hero.dataset.intro = "clear";
       root.dataset.phase = "fallback";
       return;
     }
     const photo = new Image(),
       media = matchMedia("(prefers-reduced-motion: reduce)");
     const sharp = document.createElement("canvas"),
-      mask = document.createElement("canvas"),
-      reveal = document.createElement("canvas");
+      mask = document.createElement("canvas");
     const sc = sharp.getContext("2d")!,
-      mc = mask.getContext("2d")!,
-      rc = reveal.getContext("2d")!;
-    let maskPixels: ImageData, seeds: Float32Array;
+      mc = mask.getContext("2d")!;
+    let maskPixels: ImageData, seeds: Float32Array, distances: Float32Array;
     let id = 0,
       start = 0,
       elapsed = 0,
@@ -38,7 +43,7 @@ export function PixelMountain() {
         last = now;
         return;
       }
-      if (now - last < 42) {
+      if (now - last < 15) {
         id = requestAnimationFrame(paint);
         return;
       }
@@ -80,38 +85,51 @@ export function PixelMountain() {
         // A small binary mask makes six-CSS-pixel cells crisp at every viewport.
         mask.width = Math.ceil(bounds.width / 6);
         mask.height = Math.ceil(bounds.height / 6);
-        reveal.width = w;
-        reveal.height = h;
+
         maskPixels = mc.createImageData(mask.width, mask.height);
         seeds = new Float32Array(mask.width * mask.height);
+        distances = new Float32Array(seeds.length);
         for (let i = 0; i < seeds.length; i++) {
           seeds[i] = tileSeed(i % mask.width, Math.floor(i / mask.width));
-          maskPixels.data.set([255, 255, 255, 0], i * 4);
+          distances[i] = revealDistance(
+            ((i % mask.width) + 0.5) / mask.width,
+            (Math.floor(i / mask.width) + 0.5) / mask.height,
+          );
+          maskPixels.data.set([0, 0, 0, 255], i * 4);
         }
       }
-      ctx!.fillStyle = "#000000";
-      ctx!.fillRect(0, 0, w, h);
-      if (elapsed >= 2.2) {
-        ctx!.drawImage(sharp, 0, 0);
-      } else {
+      ctx!.imageSmoothingEnabled = true;
+      const progress = Math.min(1, elapsed / REVEAL_DURATION);
+      const scale = 1 + 0.035 * Math.pow(1 - progress, 3);
+      ctx!.drawImage(
+        sharp,
+        (w - w * scale) * 0.52,
+        (h - h * scale) * 0.47,
+        w * scale,
+        h * scale,
+      );
+      if (elapsed < REVEAL_DURATION) {
         for (let i = 0; i < seeds.length; i++)
-          maskPixels.data[i * 4 + 3] = tileClarity(elapsed, seeds[i]) ? 255 : 0;
+          maskPixels.data[i * 4 + 3] = revealPixel(
+            elapsed,
+            distances[i],
+            seeds[i],
+          )
+            ? 0
+            : 255;
         mc.putImageData(maskPixels, 0, 0);
-        rc.clearRect(0, 0, w, h);
-        rc.imageSmoothingEnabled = false;
-        rc.drawImage(mask, 0, 0, w, h);
-        rc.globalCompositeOperation = "source-in";
-        rc.drawImage(sharp, 0, 0);
-        rc.globalCompositeOperation = "source-over";
-        ctx!.drawImage(reveal, 0, 0);
+        ctx!.imageSmoothingEnabled = false;
+        ctx!.drawImage(mask, 0, 0, w, h);
       }
+      if (elapsed >= REVEAL_DURATION) hero.dataset.intro = "clear";
       el.style.opacity = "1";
-      root.dataset.phase = elapsed >= 2.2 ? "clear" : "resolving";
-      if (elapsed < 2.2) id = requestAnimationFrame(paint);
+      root.dataset.phase = elapsed >= REVEAL_DURATION ? "clear" : "resolving";
+      if (elapsed < REVEAL_DURATION) id = requestAnimationFrame(paint);
     }
     function restart() {
       cancelAnimationFrame(id);
       setAvailable(!media.matches);
+      hero.dataset.intro = media.matches ? "clear" : "revealing";
       start = 0;
       last = 0;
       id = requestAnimationFrame(paint);
@@ -120,7 +138,8 @@ export function PixelMountain() {
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       if (visible && loaded) {
-        if (elapsed < 2.2) start = performance.now() - elapsed * 1000;
+        if (elapsed < REVEAL_DURATION)
+          start = performance.now() - elapsed * 1000;
         restartFrame();
       }
     });
@@ -149,6 +168,7 @@ export function PixelMountain() {
       restart();
     };
     photo.onerror = () => {
+      hero.dataset.intro = "clear";
       root.dataset.phase = "fallback";
     };
     photo.src = STILL_IMAGE.src;

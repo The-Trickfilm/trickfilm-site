@@ -1595,3 +1595,32 @@ summary:focus-visible {
   color: var(--teal);
   border-color: var(--teal);
 }
+
+/* The title settles as the image's expanding reveal crosses the hero. */
+@keyframes intro-copy {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero[data-intro="revealing"] .hero-copy {
+    animation: intro-copy 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) 0.18s both;
+  }
+  .hero[data-intro="revealing"] .hero-bottom {
+    animation: intro-copy 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) 0.38s both;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero[data-intro="pending"] .hero-copy,
+  .hero[data-intro="pending"] .hero-bottom {
+    opacity: 0;
+  }
+}

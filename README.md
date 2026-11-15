@@ -22,7 +22,7 @@ Use the Vercel Next.js preset. No environment variables, database, or backend se
 
 The latest user reference is the 36.8-second `reference.mov` recording of LocalPixel. It guides the editorial scale, compact navigation, dark hero, brief pixel transitions and generous section spacing. Trickfilm retains its original logo, turquoise palette, supplied mountain photograph and its own copy, content and implementation.
 
-The lens direction is retired. `PixelMountain` composites one sharp image through a low-resolution binary mask. Six-CSS-pixel squares blink in spatially staggered order, then settle on the complete photograph after 2.2 seconds. The hero starts on black, including while the photograph downloads, and never displays the ungraded source as a loading background. Each visible square contains full-resolution image detail; there is no coarse-image sampling or blur. The mask is scaled with smoothing disabled. It runs at most 24fps during the reveal, then stops rendering. A replay button starts it again. There is no scroll pinning, video, WebGL dependency, or left-side opacity fade. Rendering stops offscreen and while the document is hidden.
+The lens direction is retired. `PixelMountain` composites one sharp image through a low-resolution binary mask. A coherent reveal grows out from a central cluster. Six-CSS-pixel cells flicker only along its irregular advancing edge; the resolved image behind the edge stays stable. A subtle 3.5% camera settle accompanies the 1.25-second reveal. The hero starts on black, including while the photograph downloads, and never displays the ungraded source as a loading background. Each visible square contains full-resolution image detail; there is no coarse-image sampling or blur. The mask is scaled with smoothing disabled. It schedules up to 60fps during the reveal, then stops rendering. The headline and supporting copy enter with a short blur/translate settle. A replay button restarts the image reveal. There is no scroll pinning, video, WebGL dependency, or left-side opacity fade. Rendering stops offscreen and while the document is hidden.
 
 `FocusText` preserves readable semantic text in HTML. Words move from a 7px blur to sharp as their heading enters reading position, driven by passive scroll events and one scheduled animation frame. Scrolling back reverses the effect. No scrambled or matrix characters are used. Reduced motion shows the clear image and sharp text immediately; without JavaScript the image and text remain visible.
 
@@ -51,7 +51,7 @@ Both horizontal galleries loop continuously in either direction using matching l
 
 The current direction uses a pixel-to-clear hero and scroll-driven text focus. LocalPixel was inspected as a quality reference for hierarchy, restrained motion, readable business language, and consistency; its assets and code are not reused.
 
-The service explorer supports click, arrow keys, Home/End, and direct service links. Selected work remains server-rendered and accessible without JavaScript. Transitions are brief and disabled for reduced motion. Navigation omits unavailable Insights content. Browser captures are saved under `docs` for review.
+The service explorer supports click, arrow keys, Home/End, and direct service links. Selected work remains server-rendered and accessible without JavaScript. Transitions are brief and disabled for reduced motion. Navigation omits unavailable Insights content. Browser captures are saved under `docs` for review, including an actual intro recording at `docs/intro-preview.mp4`.
 
 ## Remaining work
 
