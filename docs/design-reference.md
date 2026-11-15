@@ -15,3 +15,7 @@ Reference screenshots and template assets are not part of the repository.
 The 47-second `agentic.mov` supplied by the user informed the second pass: staggered navigation and introduction entrances, a persistent white-backed home symbol, rotating diamond accents, full-height overlapping project panels, generous service spacing with turquoise numerals, and a continuous dark contact/footer surface behind the original wordmark. No reference footage or template assets are shipped.
 
 The home mark returns to the intro; native anchors retain keyboard navigation. Entrance effects cancel when the motion preference changes. Project panels themselves are never faded or transformed by JavaScript, preserving sticky positioning; only their contents receive brief entrances. No scroll listeners, scroll interception, or new animation dependency is needed.
+
+## Margins, services, and contact
+
+Desktop project surfaces now have a 64px inset at a 1440px viewport (responsive 32–80px range), with 20px mobile edges. Services match the walkthrough's fixed visual / scrolling description treatment: a sticky turquoise number changes as each service crosses the viewport midpoint. Smaller/shorter screens and reduced-motion users get a standard list. The contact section now has a labeled, validated form with Mailtrap delivery behind a server route and a direct email fallback. Credentials and a verified sending domain are required before live delivery can be confirmed.

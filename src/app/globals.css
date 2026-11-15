@@ -6,7 +6,7 @@
   --muted: #717171;
   --line: #dededb;
   --radius: 60px;
-  --gutter: 24px;
+  --gutter: clamp(32px, 4.444vw, 80px);
   --content: clamp(48px, 11.111vw, 160px);
 }
 * {
@@ -197,7 +197,7 @@ summary:focus-visible {
   background: #81d5cb;
 }
 .hero-wordmark {
-  width: calc(100% - 96px);
+  width: calc(100% - var(--gutter) * 2);
   margin: 0 auto 24px;
 }
 .hero-wordmark img {
@@ -554,21 +554,74 @@ summary:focus-visible {
   padding-top: 160px;
   padding-bottom: 80px;
 }
-.service-row {
+/* The label and rotating number stay put as each service passes through. */
+.services-story {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 50px;
-  padding: 64px 0;
-  border-top: 1px solid var(--line);
-  min-height: 480px;
-  align-items: center;
+  position: relative;
 }
-.service-index {
-  color: var(--teal);
-  font-size: 180px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.06em;
+.services-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-block: 160px 110px;
+  align-self: start;
+}
+.service-symbols {
+  position: relative;
+  height: 240px;
+  width: 240px;
+}
+.service-glyph {
+  position: absolute;
+  inset: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--teal);
+  opacity: 0;
+  transform: rotate(-25deg) scale(0.8);
+  transition:
+    opacity 0.35s,
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.service-glyph[data-active="true"] {
+  opacity: 1;
+  transform: rotate(12deg) scale(1);
+}
+.service-glyph:nth-child(2)[data-active="true"] {
+  transform: rotate(-10deg) scale(1);
+}
+.service-glyph:nth-child(3)[data-active="true"] {
+  transform: rotate(20deg) scale(1);
+}
+.service-glyph span {
+  color: #fff;
+  font-size: 240px;
+  line-height: 0.8;
+  font-weight: 500;
+  letter-spacing: -0.08em;
+  transform: translateX(-5px);
+}
+.service-progress {
+  font-size: 13px;
+  color: var(--muted);
+}
+.service-row {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: 120px 0;
+}
+.service-row > div {
+  width: 100%;
+  max-width: 560px;
+}
+.service-mobile-index {
+  display: none;
 }
 .service-row h3 {
   font-size: 40px;
@@ -631,25 +684,108 @@ summary:focus-visible {
   margin-top: 50px;
   font-weight: 600;
 }
-.contact-email {
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 80px;
+}
+.contact-introduction h2 {
+  font-size: clamp(48px, 5vw, 72px);
+}
+.contact-direct {
+  display: inline-flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 40px;
+  font-size: 20px;
+}
+.contact-direct:hover {
+  color: var(--teal);
+}
+.contact-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.contact-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px 24px;
+}
+.contact-fields label {
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.contact-fields label > span {
+  color: #bdbdbd;
+}
+.contact-fields input,
+.contact-fields textarea {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #ffffff66;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  padding: 16px 0;
+  font: inherit;
+  font-size: 20px;
+  outline-offset: 5px;
+}
+.contact-fields input::placeholder,
+.contact-fields textarea::placeholder {
+  color: #aaa;
+  opacity: 1;
+}
+.contact-fields input:focus-visible,
+.contact-fields textarea:focus-visible {
+  outline: 2px solid var(--teal);
+}
+.contact-fields textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+.field-wide {
+  grid-column: 1 / -1;
+}
+.contact-trap {
+  display: none;
+}
+.contact-submit {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 30px;
-  font-size: clamp(24px, 5.3vw, 76px);
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-  margin-top: 64px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #ffffff55;
+  gap: 50px;
+  border: 0;
+  border-radius: 100px;
+  background: var(--teal);
+  color: var(--ink);
+  padding: 20px 28px;
+  margin-top: 32px;
+  font-size: 18px;
+  min-height: 60px;
+  transition: background 0.2s;
 }
-.contact-email svg {
-  width: clamp(24px, 4vw, 58px);
-  height: auto;
-  flex-shrink: 0;
+.contact-submit:hover {
+  background: #81d5cb;
 }
-.contact-email:hover {
-  color: var(--teal);
+.contact-submit:disabled,
+fieldset:disabled .contact-submit {
+  cursor: wait;
+  opacity: 0.7;
+}
+.contact-status {
+  min-height: 48px;
+  padding-top: 20px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.contact-status a,
+.contact-form noscript a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .contact-bottom {
   display: flex;
@@ -791,7 +927,7 @@ summary:focus-visible {
   position: fixed;
   z-index: 50;
   top: 48px;
-  left: 64px;
+  left: calc(var(--gutter) + 24px);
   display: grid;
   place-items: center;
   width: 84px;
@@ -904,6 +1040,30 @@ summary:focus-visible {
     z-index: 10;
   }
 }
+@media (max-width: 900px),
+  (max-height: 700px),
+  (prefers-reduced-motion: reduce) {
+  .services-story {
+    display: block;
+  }
+  .services-stage {
+    display: none;
+  }
+  .service-row {
+    min-height: 0;
+    padding: 64px 0;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 30px;
+  }
+  .service-mobile-index {
+    display: block;
+    font-size: 48px;
+    color: #277b76;
+    align-self: start;
+  }
+}
 @media (min-width: 1800px) {
   .hero-layout {
     max-width: 1440px;
@@ -925,6 +1085,7 @@ summary:focus-visible {
 }
 @media (max-width: 1100px) {
   :root {
+    --gutter: 32px;
     --content: 64px;
     --radius: 44px;
   }
@@ -950,7 +1111,7 @@ summary:focus-visible {
     inset: 48px 48px auto;
   }
   .hero-wordmark {
-    width: calc(100% - 64px);
+    width: calc(100% - var(--gutter) * 2);
   }
   .project-info {
     padding-left: 64px;
@@ -989,14 +1150,17 @@ summary:focus-visible {
   .service-row {
     gap: 40px;
   }
-  .service-index {
-    font-size: 90px;
-  }
   .service-row h3 {
     font-size: 36px;
   }
   .case-stage {
     padding: 80px 10%;
+  }
+}
+@media (min-width: 701px) and (max-width: 1100px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
+    gap: 60px;
   }
 }
 @media (min-width: 701px) and (max-width: 900px) {
@@ -1022,7 +1186,7 @@ summary:focus-visible {
 }
 @media (max-width: 700px) {
   :root {
-    --gutter: 16px;
+    --gutter: 20px;
     --content: 24px;
     --radius: 32px;
   }
@@ -1095,7 +1259,7 @@ summary:focus-visible {
     height: 38px;
   }
   .hero-wordmark {
-    width: calc(100% - 32px);
+    width: calc(100% - var(--gutter) * 2);
     margin-bottom: 24px;
   }
   .project-stack {
@@ -1226,9 +1390,6 @@ summary:focus-visible {
     min-height: 0;
     padding: 40px 0;
   }
-  .service-index {
-    font-size: 56px;
-  }
   .service-row h3 {
     font-size: 30px;
   }
@@ -1252,22 +1413,28 @@ summary:focus-visible {
   .text-link {
     font-size: 15px;
   }
+  .contact-layout {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  .contact-fields {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .contact-direct {
+    font-size: 17px;
+    margin-top: 28px;
+  }
+  .contact-submit {
+    width: 100%;
+  }
   .contact-panel {
-    padding: 54px 26px 32px;
+    padding: 70px 26px 32px;
   }
   .contact-panel h2 {
     font-size: 54px;
     line-height: 1;
     margin-top: 34px;
-  }
-  .contact-email {
-    font-size: clamp(20px, 6vw, 32px);
-    margin-top: 44px;
-    gap: 12px;
-    letter-spacing: -0.04em;
-  }
-  .contact-email svg {
-    width: 24px;
   }
   .contact-bottom {
     flex-direction: column;

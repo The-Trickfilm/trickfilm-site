@@ -16,7 +16,7 @@ Validation: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, th
 - `public/work`: existing website screenshots and supplied logo exports, retained.
 - `public/work/applications`: captures of StrataCouncil.ca's public product previews. Its public footer identifies it as a Trickfilm product. These are not authenticated application screenshots.
 
-Project pages deliberately omit unsupported results, durations, testimonials, and process claims. Dedicated authenticated application screenshots, further application projects, and fuller case-study copy remain editorial follow-ups. Contact is a mailto link, with no form or backend integration.
+Project pages deliberately omit unsupported results, durations, testimonials, and process claims. Dedicated authenticated application screenshots, further application projects, and fuller case-study copy remain editorial follow-ups. The contact form posts to a server route and delivers via Mailtrap when its sending configuration is present. Direct email remains available.
 
 ## Design
 
@@ -26,4 +26,14 @@ Content remains visible without JavaScript. Reduced motion disables entrance ani
 
 ## Deployment
 
-Vercel detects Next.js automatically. This change is developed on `feat/agentic-redesign` for pull-request review and a Vercel preview; merge through the repository's established production branch when approved. No environment variables are required. Domain/DNS configuration is separate from this implementation.
+Vercel detects Next.js automatically. This change is developed on `feat/agentic-redesign` for pull-request review and a Vercel preview; merge through the repository's established production branch when approved. Page rendering needs no environment variables. Live contact delivery requires `MAILTRAP_API_TOKEN` and `MAILTRAP_FROM_EMAIL` in Vercel; the sender must belong to a verified Mailtrap sending domain. See `.env.example`. Domain/DNS configuration is separate from this implementation.
+
+## Contact delivery
+
+POST `/api/contact` validates the form server-side, bounds request size, checks same-origin browser requests, rejects the honeypot, and applies a bounded per-instance throttle (5 attempts / 10 minutes / IP). This throttle is best-effort on serverless infrastructure; a shared Vercel WAF rule is appropriate if traffic requires stronger abuse protection. No message contents or credentials are logged or stored. Mailtrap sends to jeremy@trickfilm.com with the visitor as Reply-To.
+
+Success is returned only after Mailtrap acknowledges acceptance. Missing configuration returns 503, delivery failure returns 502, and the form preserves entered text and offers direct email. Provider integration is tested with a mocked transport; live inbox delivery still requires configuration and an end-to-end check. Native HTML submission also returns an accessible confirmation/error page without JavaScript.
+
+## Services scrolling
+
+On large screens, the service label and number stay in a sticky left column while the three descriptions scroll naturally at right. An IntersectionObserver changes the decorative number at the viewport midpoint, including on reverse scrolling. Mobile, short screens, and reduced-motion users receive an ordinary list. No wheel interception or automatic scrolling.

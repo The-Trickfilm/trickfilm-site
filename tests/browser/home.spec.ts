@@ -158,3 +158,85 @@ test("all project pages fit a mobile viewport", async ({ page }) => {
     await expect(back).toBeInViewport();
   }
 });
+
+test("services keep their visual in place and change it with the scrolling copy", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const rows = page.locator("[data-service]");
+  for (let i = 0; i < 3; i++) {
+    await rows.nth(i).evaluate((el) => {
+      const y = el.getBoundingClientRect().top + scrollY;
+      scrollTo({ top: y, behavior: "instant" });
+    });
+    await expect(page.locator('.service-glyph[data-active="true"]')).toHaveText(
+      String(i + 1),
+    );
+    const box = (await page.locator(".services-stage").boundingBox())!;
+    expect(Math.abs(box.y)).toBeLessThan(2);
+  }
+  await rows.first().evaluate((el) =>
+    scrollTo({
+      top: el.getBoundingClientRect().top + scrollY,
+      behavior: "instant",
+    }),
+  );
+  await expect(page.locator('.service-glyph[data-active="true"]')).toHaveText(
+    "1",
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator(".services-stage")).not.toBeVisible();
+  await expect(rows.first().getByRole("heading")).toBeVisible();
+});
+
+test("contact validates, retains failed messages, and acknowledges accepted delivery", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const invalid = await page.request.post("/api/contact", {
+    multipart: {
+      name: "Visitor",
+      email: "invalid",
+      message: "A website enquiry.",
+    },
+    headers: { Accept: "application/json" },
+  });
+  expect(invalid.status()).toBe(400);
+  const form = page.locator(".contact-form");
+  await form.scrollIntoViewIfNeeded();
+  await form.getByRole("button", { name: "Send enquiry" }).click();
+  expect(
+    await form
+      .locator('input[name="name"]')
+      .evaluate((el) => (el as HTMLInputElement).validity.valueMissing),
+  ).toBe(true);
+  await form.getByLabel("Your name").fill("Jane Visitor");
+  await form.getByLabel("Email address").fill("jane@example.com");
+  await form
+    .getByLabel("What do you have in mind?")
+    .fill("We would love to talk about a website.");
+  await page.route("**/api/contact", (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ message: "Unavailable" }),
+    }),
+  );
+  await form.getByRole("button", { name: "Send enquiry" }).click();
+  await expect(form.getByRole("alert")).toContainText("couldn’t be sent");
+  await expect(form.getByLabel("Your name")).toHaveValue("Jane Visitor");
+  await page.unroute("**/api/contact");
+  await page.route("**/api/contact", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ message: "Accepted" }),
+    }),
+  );
+  await form.getByRole("button", { name: "Send enquiry" }).click();
+  await expect(form.locator(".contact-status")).toContainText(
+    "your message has been sent",
+  );
+  await expect(form.getByLabel("Your name")).toHaveValue("");
+});
