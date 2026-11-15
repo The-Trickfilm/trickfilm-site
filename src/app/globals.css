@@ -3,7 +3,7 @@
   --paper: #f3f2ec;
   --ink: #1d2421;
   --teal: #5ec3ba;
-  --accent: #75f5b0;
+  --accent: var(--teal);
   --muted: #67736d;
   --line: #cfd5cc;
   --gutter: 4vw;
@@ -180,7 +180,7 @@ nav > a:not(.nav-contact),
   content: "";
   position: absolute;
   inset: 0;
-  background: #0005;
+  background: #0009;
   pointer-events: none;
 }
 .pixel-mountain canvas {
@@ -1505,7 +1505,7 @@ footer img {
   display: none;
 }
 
-/* Dark imagery keeps the bright green reserved for actions and emphasis. */
+/* Near-black imagery lets the original Trickfilm teal carry the accents. */
 .pixel-mountain[data-phase="fallback"],
 .mountain-no-script {
   background: #000 url("/media/mountain-still.webp") 58% 30% / cover;
@@ -1521,7 +1521,7 @@ footer img {
 }
 .button:hover,
 .nav-contact:hover {
-  background: #a5ffcd;
+  background: var(--teal);
 }
 .perspective .eyebrow,
 .hero .eyebrow,
@@ -1548,11 +1548,50 @@ footer img {
   border-top: 1px solid var(--line);
 }
 .service-options button[aria-selected="true"] {
-  border-left: 3px solid #279b66;
-  background: #d8efdf;
+  border-left: 3px solid var(--teal);
+  background: #d8eeeb;
 }
 a:focus-visible,
 button:focus-visible,
 summary:focus-visible {
-  outline-color: #24965c;
+  outline-color: var(--teal);
+}
+
+/* Logo artwork is exactly half the website preview stage's height. */
+:root {
+  --website-card-width: clamp(270px, 43vw, 520px);
+  --website-stage-height: calc(
+    (var(--website-card-width) - 48px) * 833 / 1200 + 93px
+  );
+}
+#work .work-gallery {
+  --project-width: var(--website-card-width);
+}
+#logos .logo-gallery {
+  --project-width: calc(var(--website-stage-height) * 0.75);
+}
+#logos .logo-stage {
+  height: calc(var(--website-stage-height) * 0.5);
+  aspect-ratio: auto;
+}
+@media (max-width: 700px) {
+  :root {
+    --website-card-width: 74vw;
+    --website-stage-height: calc(
+      (var(--website-card-width) - 32px) * 833 / 1200 + 81px
+    );
+  }
+}
+.gallery-controls button {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--ink);
+}
+.hero .text-link {
+  color: var(--teal);
+  border-color: var(--teal);
+}
+.replay-reveal {
+  color: var(--teal);
+  border-color: var(--teal);
 }
