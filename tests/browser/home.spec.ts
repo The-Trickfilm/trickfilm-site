@@ -165,7 +165,7 @@ test("services keep their visual in place and change it with the scrolling copy"
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   const rows = page.locator("[data-service]");
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     await rows.nth(i).evaluate((el) => {
       const y =
         el.getBoundingClientRect().top +
@@ -194,7 +194,9 @@ test("services keep their visual in place and change it with the scrolling copy"
     "1",
   );
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(page.locator(".services-stage")).not.toBeVisible();
+  await expect(
+    page.locator(".services-stage .service-symbols"),
+  ).not.toBeVisible();
   await expect(rows.first().getByRole("heading", { level: 3 })).toBeVisible();
 });
 
@@ -425,7 +427,7 @@ test("service flower follows scroll while the numeral stays upright", async ({
     .not.toBe(before);
   expect(
     await page
-      .locator('.service-glyph[data-active="true"] > span')
+      .locator('.service-glyph[data-active="true"] .service-number')
       .evaluate((el) => getComputedStyle(el).transform),
   ).toBe("none");
   await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }), start);
@@ -444,4 +446,94 @@ test("service flower follows scroll while the numeral stays upright", async ({
       flower.evaluate((el) => getComputedStyle(el, "::before").transform),
     )
     .toBe("none");
+});
+
+test("five service headings stay consistent while copy fades through focus", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const rows = page.locator("[data-service]");
+  await expect(rows.locator("h3")).toHaveText([
+    "Web design",
+    "Branding",
+    "Graphic Design",
+    "Workflow Automation",
+    "Business Process Design",
+  ]);
+  const center = async (index: number) => {
+    await rows.nth(index).evaluate((el) =>
+      scrollTo({
+        top:
+          el.getBoundingClientRect().top +
+          scrollY +
+          el.getBoundingClientRect().height / 2 -
+          innerHeight / 2,
+        behavior: "instant",
+      }),
+    );
+  };
+  await center(1);
+  await expect
+    .poll(() =>
+      rows
+        .nth(1)
+        .locator(".service-copy")
+        .evaluate((el) => Number(getComputedStyle(el).opacity)),
+    )
+    .toBeGreaterThan(0.99);
+  await expect
+    .poll(() =>
+      rows
+        .nth(0)
+        .locator(".service-copy")
+        .evaluate((el) => Number(getComputedStyle(el).opacity)),
+    )
+    .toBeLessThan(0.1);
+  await expect(page.locator("#services-heading")).toBeInViewport();
+  const title = await page.locator("#services-heading").boundingBox();
+  await center(3);
+  await expect
+    .poll(() =>
+      rows
+        .nth(1)
+        .locator(".service-copy")
+        .evaluate((el) => Number(getComputedStyle(el).opacity)),
+    )
+    .toBeLessThan(0.1);
+  await expect
+    .poll(() =>
+      rows
+        .nth(3)
+        .locator(".service-copy")
+        .evaluate((el) => Number(getComputedStyle(el).opacity)),
+    )
+    .toBeGreaterThan(0.99);
+  expect(
+    Math.abs(
+      (await page.locator("#services-heading").boundingBox())!.y - title!.y,
+    ),
+  ).toBeLessThan(2);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (let i = 0; i < 5; i++)
+    expect(
+      await rows
+        .nth(i)
+        .locator(".service-copy")
+        .evaluate((el) => Number(getComputedStyle(el).opacity)),
+    ).toBe(1);
+  await expect(page.locator("#services-heading")).toBeVisible();
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await center(2);
+  await expect
+    .poll(() =>
+      rows.nth(2).evaluate((el) => Number(getComputedStyle(el).opacity)),
+    )
+    .toBeGreaterThan(0.99);
+  await expect
+    .poll(() =>
+      rows.first().evaluate((el) => Number(getComputedStyle(el).opacity)),
+    )
+    .toBeLessThan(0.1);
 });

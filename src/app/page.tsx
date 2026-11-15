@@ -12,27 +12,33 @@ import { ServicesScroll } from "@/components/services-scroll";
 import { ContactForm } from "@/components/contact-form";
 const services = [
   {
-    name: "Design & Branding",
-    copy: "Distinctive identities and thoughtful design, from the first idea to the final detail.",
-    items: ["Visual identity", "Logo design", "Creative direction"],
-  },
-  {
-    name: "Websites & Marketing",
-    copy: "Websites that look right, tell your story, and make the next step clear.",
+    name: "Web design",
+    copy: "Clear, considered websites that tell your story and make the next step easy.",
     items: [
       "Website design & development",
-      "Content & digital campaigns",
-      "Ongoing improvements",
+      "Responsive interfaces",
+      "Ongoing support",
     ],
   },
   {
-    name: "Applications & Automation",
-    copy: "Practical tools and connected workflows, built around the way your business works.",
-    items: [
-      "Custom business applications",
-      "Workflow automation",
-      "Practical AI consulting",
-    ],
+    name: "Branding",
+    copy: "Distinctive identities that give your business a recognizable, consistent presence.",
+    items: ["Logo design", "Visual identity", "Brand guidelines"],
+  },
+  {
+    name: "Graphic Design",
+    copy: "Thoughtful design for the things your business puts into the world, in print and on screen.",
+    items: ["Print & editorial", "Marketing materials", "Digital assets"],
+  },
+  {
+    name: "Workflow Automation",
+    copy: "Connected tools and practical automations that take repetitive work off your plate.",
+    items: ["Connected systems", "Automated workflows", "Practical AI"],
+  },
+  {
+    name: "Business Process Design",
+    copy: "A clearer way of working, built around your people, your tools, and your business.",
+    items: ["Process mapping", "Workflow planning", "Business systems"],
   },
 ];
 export default function Home() {

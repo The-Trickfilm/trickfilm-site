@@ -45,3 +45,9 @@ The logo rail repeats the supplied catalog on either side of the accessible orig
 ## Flower accents
 
 `public/brand/flower.svg` is the exact user-supplied flower artwork. CSS masks reuse its silhouette for the hero and project CTAs, keeping arrow icons upright. In Services, a separate flower layer rotates with scroll progress while the number layer remains upright. Rows use approximately 46% of viewport height (clamped to 360–480px), and the shorter sticky visual stays centered through all services. Mobile uses compact flower-backed numbers. Reduced motion disables rotation.
+
+## Services focus treatment
+
+Services are Web design, Branding, Graphic Design, Workflow Automation, and Business Process Design. The section title stays in the desktop visual column; every service uses the same heading style. Copy opacity follows distance from the viewport center in either scroll direction. Reduced-motion and no-JavaScript views retain fully visible copy.
+
+The numeral is SVG text positioned using the loaded font's visible ink bounds, removing font-bearing and line-box offsets. The flower's original path and color are preserved in `flower-centered.svg`; only the viewBox adds a square presentation frame centered on its alpha centroid, so rotation stays centered on the upright number. `flower.svg` remains the unchanged upload.
