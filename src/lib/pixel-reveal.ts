@@ -1,4 +1,6 @@
 export const REVEAL_DURATION = 1.25;
+export const CLARITY_DURATION = 0.6;
+export const HERO_DURATION = REVEAL_DURATION + CLARITY_DURATION;
 export const PIXEL_CELL = 10;
 /** Normalized lattice with two overscan rows/columns for the flowing surface. */
 export function pixelGrid(width: number, height: number) {

@@ -22,13 +22,15 @@ test("the real image resolves, replay changes pixels, and scrolling leaves immed
   expect(pixelated).not.toEqual(resolved);
   await page.screenshot({ path: "/workspace/work/pixel-resolving.png" });
   await expect(scene).toHaveAttribute("data-phase", "clear");
-  await expect
-    .poll(() =>
-      scene
-        .locator("canvas")
-        .evaluate((el: HTMLCanvasElement) => el.toDataURL()),
-    )
-    .not.toBe(resolved);
+  const clearFrame = await scene
+    .locator("canvas")
+    .evaluate((el: HTMLCanvasElement) => el.toDataURL());
+  await page.waitForTimeout(200);
+  expect(
+    await scene
+      .locator("canvas")
+      .evaluate((el: HTMLCanvasElement) => el.toDataURL()),
+  ).toBe(clearFrame);
   const top = (await scene.boundingBox())!.y;
   await page.evaluate(() => window.scrollTo({ top: 200, behavior: "instant" }));
   expect((await scene.boundingBox())!.y).toBeCloseTo(top - 200, 0);
@@ -131,28 +133,27 @@ test("the reveal stays black while the photo loads, with no colour-image flash",
     "clear",
   );
 });
-test("ambient image motion continues, freezes on pause, and suspends offscreen", async ({
+test("the intro finishes on a sharp image that stays still, including under the pointer", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 1440, height: 960 });
   await page.goto("/");
   const scene = page.locator(".pixel-mountain");
   await expect(scene).toHaveAttribute("data-phase", "clear");
   const frame = () =>
     scene.locator("canvas").evaluate((el: HTMLCanvasElement) => el.toDataURL());
   const a = await frame();
-  await expect.poll(frame).not.toBe(a);
-  await page.getByRole("button", { name: "Pause hero motion" }).click();
-  const frozen = await frame();
-  await page.waitForTimeout(250);
-  expect(await frame()).toBe(frozen);
-  await page.getByRole("button", { name: "Play hero motion" }).click();
-  await expect.poll(frame).not.toBe(frozen);
+  await page.mouse.move(700, 500);
+  await page.waitForTimeout(300);
+  expect(await frame()).toBe(a);
+  await page.mouse.move(400, 400);
+  await page.waitForTimeout(300);
+  expect(await frame()).toBe(a);
+  await expect(
+    page.getByRole("button", { name: "Pause hero motion" }),
+  ).toHaveCount(0);
   await page.locator("#contact").scrollIntoViewIfNeeded();
   await page.waitForTimeout(100);
-  const hidden = await frame();
-  await page.waitForTimeout(250);
-  expect(await frame()).toBe(hidden);
+  expect(await frame()).toBe(a);
 });
 test("reduced motion keeps the rendered mountain static after the intro", async ({
   page,

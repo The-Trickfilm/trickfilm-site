@@ -62,10 +62,12 @@ test("the GPU constructs separated micro-squares and moves their geometry over t
         if (aa) occupied++;
         if (aa !== bb) changed++;
       }
-      field.render({ ...args, reduced: true });
+      field.render({ ...args, reduced: true, resolve: 1 });
       const still = read();
-      field.render({ ...args, reduced: true, time: 10 });
+      field.render({ ...args, reduced: true, time: 10, resolve: 1 });
       const still2 = read();
+      let filled = 0;
+      for (let i = 0; i < still.length; i += 4) if (still[i + 1] > 3) filled++;
       const stable = still.every((v, i) => v === still2[i]);
       field.dispose();
       return {
@@ -73,6 +75,7 @@ test("the GPU constructs separated micro-squares and moves their geometry over t
         occupied: occupied / (640 * 360),
         changed: changed / (640 * 360),
         stable,
+        clearCoverage: filled / (640 * 360),
       };
     },
     `data:text/javascript;base64,${Buffer.from(code).toString("base64")}`,
@@ -82,5 +85,6 @@ test("the GPU constructs separated micro-squares and moves their geometry over t
   expect(result.occupied).toBeLessThan(0.6);
   expect(result.changed).toBeGreaterThan(0.1);
   expect(result.stable).toBe(true);
+  expect(result.clearCoverage).toBeGreaterThan(0.999);
   console.log("Actual GPU surface coverage and moving geometry:", result);
 });

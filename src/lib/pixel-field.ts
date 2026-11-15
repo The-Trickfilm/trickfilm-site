@@ -7,6 +7,7 @@ export type FieldFrame = {
   time: number;
   intro: number;
   reduced: boolean;
+  resolve?: number;
   pointer: readonly number[];
 };
 const vertex = `
@@ -15,6 +16,7 @@ attribute vec2 position;
 uniform vec2 resolution,viewport,source;
 uniform sampler2D photo;
 uniform float time,intro,reduced;
+uniform mediump float resolve;
 uniform vec3 pointer;
 varying vec3 ink;
 varying float visibility,edge;
@@ -32,7 +34,7 @@ void main(){
  float fold=sin(phase);
  float second=sin(uv.x*5.-uv.y*6.2+t*.37);
  float crest=pow(.5+.5*fold,1.7);
- float motion=1.-reduced;
+ float motion=(1.-reduced)*(1.-resolve);
  vec2 p=uv*viewport;
  p.x+=motion*(sin(uv.y*6.5+t*.48+bend)*20.+second*9.);
  p.y+=motion*(cos(uv.x*5.5-t*.39)*15.+fold*9.);
@@ -58,6 +60,7 @@ void main(){
 }`;
 const fragment = `
 precision mediump float;
+uniform float resolve;
 varying vec3 ink;
 varying float visibility,edge;
 void main(){
@@ -70,7 +73,21 @@ void main(){
  float rim=step(.43,outer)*(1.-step(.48,outer));
  float density=max(solid,rim*.14*edge);
  if(density<.01)discard;
- gl_FragColor=vec4(ink*density,1.);
+ gl_FragColor=vec4(ink*density,1.-resolve);
+}`;
+const photoVertex = `attribute vec2 position;varying vec2 uv;void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}`;
+const photoFragment = `
+precision mediump float;
+uniform sampler2D photo;
+uniform vec2 viewport,source;
+uniform float resolve;
+varying vec2 uv;
+void main(){
+ vec2 crop=(viewport/source)/max(viewport.x/source.x,viewport.y/source.y);
+ vec2 st=uv*crop+(1.-crop)*vec2(.58,.70);
+ vec3 rgb=texture2D(photo,st).rgb;
+ float luminance=clamp((dot(rgb,vec3(.2126,.7152,.0722))-.5)*1.2+.5,0.,1.);
+ gl_FragColor=vec4(vec3(.1215686,.5333333,.4588235)*luminance*.55*resolve,1.);
 }`;
 export function createPixelField(
   canvas: HTMLCanvasElement,
@@ -124,9 +141,32 @@ export function createPixelField(
       "intro",
       "reduced",
       "pointer",
+      "resolve",
     ].map((name) => [name, gl.getUniformLocation(program, name)]),
   );
   gl.uniform2f(uniforms.source, photo.naturalWidth, photo.naturalHeight);
+  const qvs = compile(gl.VERTEX_SHADER, photoVertex),
+    qfs = compile(gl.FRAGMENT_SHADER, photoFragment);
+  if (!qvs || !qfs) return null;
+  const photoProgram = gl.createProgram()!;
+  gl.attachShader(photoProgram, qvs);
+  gl.attachShader(photoProgram, qfs);
+  gl.linkProgram(photoProgram);
+  if (!gl.getProgramParameter(photoProgram, gl.LINK_STATUS)) return null;
+  const photoBuffer = gl.createBuffer()!;
+  gl.bindBuffer(gl.ARRAY_BUFFER, photoBuffer);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+    gl.STATIC_DRAW,
+  );
+  const photoAttribute = gl.getAttribLocation(photoProgram, "position");
+  const photoUniforms = Object.fromEntries(
+    ["viewport", "source", "resolve"].map((name) => [
+      name,
+      gl.getUniformLocation(photoProgram, name),
+    ]),
+  );
   gl.clearColor(0, 0, 0, 1);
   let layout = "",
     count = 0;
@@ -141,12 +181,14 @@ export function createPixelField(
         intro,
         reduced,
         pointer,
+        resolve = 0,
       } = frame;
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
         gl!.viewport(0, 0, width, height);
       }
+      gl!.bindBuffer(gl!.ARRAY_BUFFER, buffer);
       const key = `${cssWidth},${cssHeight}`;
       if (key !== layout) {
         layout = key;
@@ -154,16 +196,41 @@ export function createPixelField(
         count = points.length / 2;
         gl!.bufferData(gl!.ARRAY_BUFFER, points, gl!.STATIC_DRAW);
       }
+      gl!.clear(gl!.COLOR_BUFFER_BIT);
+      gl!.useProgram(photoProgram);
+      gl!.bindBuffer(gl!.ARRAY_BUFFER, photoBuffer);
+      gl!.enableVertexAttribArray(photoAttribute);
+      gl!.vertexAttribPointer(photoAttribute, 2, gl!.FLOAT, false, 0, 0);
+      gl!.uniform2f(photoUniforms.viewport, cssWidth, cssHeight);
+      gl!.uniform2f(
+        photoUniforms.source,
+        photo.naturalWidth,
+        photo.naturalHeight,
+      );
+      gl!.uniform1f(photoUniforms.resolve, resolve);
+      gl!.drawArrays(gl!.TRIANGLES, 0, 6);
+      if (resolve >= 1) return;
+      gl!.useProgram(program);
+      gl!.bindBuffer(gl!.ARRAY_BUFFER, buffer);
+      gl!.enableVertexAttribArray(attribute);
+      gl!.vertexAttribPointer(attribute, 2, gl!.FLOAT, false, 0, 0);
+      gl!.uniform1f(uniforms.resolve, resolve);
       gl!.uniform2f(uniforms.resolution, width, height);
       gl!.uniform2f(uniforms.viewport, cssWidth, cssHeight);
       gl!.uniform1f(uniforms.time, time);
       gl!.uniform1f(uniforms.intro, intro);
       gl!.uniform1f(uniforms.reduced, reduced ? 1 : 0);
       gl!.uniform3f(uniforms.pointer, pointer[0], pointer[1], pointer[2]);
-      gl!.clear(gl!.COLOR_BUFFER_BIT);
+      gl!.enable(gl!.BLEND);
+      gl!.blendFunc(gl!.SRC_ALPHA, gl!.ONE_MINUS_SRC_ALPHA);
       gl!.drawArrays(gl!.POINTS, 0, count);
+      gl!.disable(gl!.BLEND);
     },
     dispose() {
+      gl!.deleteProgram(photoProgram);
+      gl!.deleteBuffer(photoBuffer);
+      gl!.deleteShader(qvs);
+      gl!.deleteShader(qfs);
       gl!.deleteTexture(texture);
       gl!.deleteBuffer(buffer);
       gl!.deleteProgram(program);

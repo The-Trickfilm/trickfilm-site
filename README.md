@@ -10,7 +10,7 @@ Node 24 recommended. Install with `npm ci`; start locally with `npm run dev`.
 - `npm run typecheck`
 - `npm test` — deterministic spatial reveal order and complete settling
 - `npm run build`
-- `npm run test:browser` — production server, desktop/mobile, keyboard navigation, service selection, all portfolio links and screenshots, pixel replay, continuing hero motion and pause/resume, scroll-driven text focus, reduced motion, fallback, and absence of video requests
+- `npm run test:browser` — production server, desktop/mobile, keyboard navigation, service selection, all portfolio links and screenshots, pixel replay, a fully clear and static endpoint, scroll-driven text focus, reduced motion, fallback, and absence of video requests
 
 Browser checks use `/usr/bin/chromium`; update `executablePath` in `playwright.config.ts` for another machine. `PLAYWRIGHT_BASE_URL` can target a deployed instance instead of starting the local production server.
 
@@ -22,9 +22,9 @@ Use the Vercel Next.js preset. No environment variables, database, or backend se
 
 The latest user reference is the 36.8-second `reference.mov` recording of LocalPixel. It guides the editorial scale, compact navigation, dark hero, brief pixel transitions and generous section spacing. Trickfilm retains its original logo, turquoise palette, supplied mountain photograph and its own copy, content and implementation.
 
-The hero is rendered as a WebGL point surface, rather than a full photograph with an animated overlay. A 10px lattice samples the supplied mountain image. Each cell contains four separated square emitters, a central gutter and a faint rim. Domain-warped folds continuously change the actual vertex positions, perspective depth, cell size and lighting. The image is constructed from these moving cells; there is no photograph zoom or camera-pan approximation. Pointer movement gently displaces nearby points.
+The hero begins with a WebGL pixel surface, constructed from a 10px lattice with four separated square emitters per cell. The 1.25-second central bloom retains its moving folds and synchronized headline entrance. Over the following 0.6 seconds, the field aligns and resolves into the full-resolution, uniformly dark teal mountain photograph.
 
-A 1.25-second central pixel bloom opens the surface, synchronized with the headline entrance. The hero starts on black and uses only the original teal over near-black. One texture, one static vertex buffer and one draw call render each frame, capped at 60fps with a bounded render resolution. Pause/Play freezes and resumes the field; reduced motion renders a static surface. Rendering suspends offscreen and in hidden documents. Unsupported or lost WebGL contexts use the dark static image fallback.
+The endpoint is a complete, sharp image: no micro-square gaps, surface deformation, pointer effect, or continuing motion. Rendering stops after the transition. Static rendering can use up to 2400px width for more detail, while the animated intro is capped at 1600px. Reduced motion skips straight to the same clear photograph. Replay restarts the intro. Offscreen and hidden documents suspend work; unavailable or lost WebGL contexts use the static fallback.
 
 
 `FocusText` preserves readable semantic text in HTML. Words move from a 7px blur to sharp as their heading enters reading position, driven by passive scroll events and one scheduled animation frame. Scrolling back reverses the effect. No scrambled or matrix characters are used. Reduced motion shows the clear image and sharp text immediately; without JavaScript the image and text remain visible.
@@ -52,7 +52,7 @@ Both horizontal galleries loop continuously in either direction using matching l
 
 ## Design and interaction
 
-The current direction uses a pixel-to-clear hero, continuing ambient image motion and scroll-driven text focus. The fixed navigation has no background; it floats over the full-height hero and switches text colour as the section beneath it changes. LocalPixel was inspected as a quality reference for hierarchy, restrained motion, readable business language, and consistency; its assets and code are not reused.
+The current direction uses a pixel-to-clear hero, a clear static endpoint and scroll-driven text focus. The fixed navigation has no background; it floats over the full-height hero and switches text colour as the section beneath it changes. LocalPixel was inspected as a quality reference for hierarchy, restrained motion, readable business language, and consistency; its assets and code are not reused.
 
 The service explorer supports click, arrow keys, Home/End, and direct service links. Selected work remains server-rendered and accessible without JavaScript. Transitions are brief and disabled for reduced motion. Navigation omits unavailable Insights content. Browser captures are saved under `docs` for review, including a recording of the rendered field at `public/media/hero-motion-preview.mp4`.
 
