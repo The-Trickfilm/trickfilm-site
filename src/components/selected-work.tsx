@@ -32,17 +32,19 @@ function centerOf(root: HTMLElement, index: number) {
   const card = root.querySelectorAll<HTMLElement>(".project-card")[index];
   return card.offsetLeft - (root.clientWidth - card.offsetWidth) / 2;
 }
-export function SelectedWork() {
-  const [kind, setKind] = useState<"websites" | "logos">("websites"),
-    [active, setActive] = useState(0);
+export function SelectedWork({
+  category: kind = "websites",
+}: {
+  category?: "websites" | "logos";
+}) {
+  const [active, setActive] = useState(0);
   const projects: readonly Project[] =
       kind === "websites" ? websiteProjects : logoProjects,
     n = projects.length;
   const gallery = useRef<HTMLDivElement>(null),
     settle = useRef<ReturnType<typeof setTimeout> | null>(null),
     dragging = useRef(false);
-  const id = useId(),
-    tabs = useRef<HTMLDivElement>(null);
+  const id = useId();
   useLayoutEffect(() => {
     const root = gallery.current!;
     root.dataset.loopReady = "true";
@@ -104,68 +106,36 @@ export function SelectedWork() {
     setActive(nearest(root) % n);
     scheduleRebase();
   }
-  function changeKind(next: "websites" | "logos") {
-    if (settle.current) clearTimeout(settle.current);
-    setActive(0);
-    setKind(next);
-  }
   return (
     <section
       className="selected-work section"
-      id="work"
-      aria-labelledby="work-title"
+      id={kind === "websites" ? "work" : "logos"}
+      aria-labelledby={`${id}-title`}
     >
       <div className="work-heading">
-        <p className="eyebrow">02 / Selected work</p>
+        <p className="eyebrow">
+          {kind === "websites" ? "02 / Selected websites" : "03 / Logo design"}
+        </p>
         <FocusText
-          id="work-title"
-          text="Different businesses. Distinctive solutions."
+          id={`${id}-title`}
+          text={
+            kind === "websites"
+              ? "Different businesses. Distinctive solutions."
+              : "Identity, made distinctive."
+          }
         />
         <p>
-          Websites and visual identities by Trickfilm.
-          <br />
-          Built around the people they serve.
+          {kind === "websites"
+            ? "Selected websites by Trickfilm. Built around the people they serve."
+            : "A selection of logos and visual identities designed by Trickfilm."}
         </p>
       </div>
       <div className="gallery-controls">
-        <div
-          className="work-tabs"
-          role="tablist"
-          aria-label="Portfolio category"
-          ref={tabs}
-          onKeyDown={(event) => {
-            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
-              return;
-            event.preventDefault();
-            const next =
-              event.key === "Home"
-                ? "websites"
-                : event.key === "End"
-                  ? "logos"
-                  : kind === "websites"
-                    ? "logos"
-                    : "websites";
-            changeKind(next);
-            tabs.current
-              ?.querySelectorAll<HTMLButtonElement>("button")
-              [next === "websites" ? 0 : 1].focus();
-          }}
-        >
-          {(["websites", "logos"] as const).map((tab) => (
-            <button
-              key={tab}
-              role="tab"
-              id={`${id}-${tab}`}
-              aria-selected={kind === tab}
-              aria-controls={`${id}-panel`}
-              tabIndex={kind === tab ? 0 : -1}
-              onClick={() => changeKind(tab)}
-            >
-              {tab === "websites" ? "Websites" : "Logo design"}
-              <span>{tab === "websites" ? "05" : "18"}</span>
-            </button>
-          ))}
-        </div>
+        <p className="gallery-category">
+          {kind === "websites"
+            ? "Web design & development"
+            : "Marks, wordmarks & identities"}
+        </p>
         <div className="gallery-navigation">
           <p aria-live="polite" aria-atomic="true">
             <span>{String(active + 1).padStart(2, "0")}</span> /{" "}
@@ -194,7 +164,7 @@ export function SelectedWork() {
           </button>
         </div>
       </div>
-      <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${kind}`}>
+      <div>
         <div
           className={`work-gallery ${kind === "logos" ? "logo-gallery" : ""}`}
           ref={gallery}

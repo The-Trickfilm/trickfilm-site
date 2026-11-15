@@ -114,9 +114,10 @@ export default function Home() {
           </p>
         </section>
         <SelectedWork />
+        <SelectedWork category="logos" />
         <section className="approach section" id="approach">
           <div className="approach-mark">
-            <p className="eyebrow">03 / About Trickfilm</p>
+            <p className="eyebrow">04 / About Trickfilm</p>
             <Image
               src="/brand/trickfilm-symbol.svg"
               width={200}
@@ -139,7 +140,7 @@ export default function Home() {
         </section>
         <section className="services section" id="services">
           <div className="section-heading">
-            <p className="eyebrow">04 / Services</p>
+            <p className="eyebrow">05 / Services</p>
             <FocusText text="Good thinking. Working solutions." />
             <p>
               Four disciplines. One focus:
@@ -156,7 +157,7 @@ export default function Home() {
         <section className="method section" aria-labelledby="method-title">
           <div className="method-heading">
             <p className="eyebrow">
-              05 / From a question to a working solution
+              06 / From a question to a working solution
             </p>
             <FocusText
               id="method-title"
@@ -191,7 +192,7 @@ export default function Home() {
           </div>
         </section>
         <section className="contact section" id="contact">
-          <p className="eyebrow">06 / Let’s find the way forward</p>
+          <p className="eyebrow">07 / Let’s find the way forward</p>
           <div>
             <FocusText text="What could work better for you?" />
             <p>

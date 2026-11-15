@@ -1,7 +1,16 @@
 import { test, expect, type Page } from "@playwright/test";
 async function loadVisibleImages(page: Page) {
   for (const img of await page.locator("img:visible").all()) {
-    if (await img.evaluate((el) => !!el.closest("[inert]"))) continue;
+    if (
+      await img.evaluate(
+        (el) =>
+          !!el.closest("[inert]") ||
+          (!!el.closest("#logos") &&
+            el.closest(".project-card")?.getAttribute("data-project-index") !==
+              "0"),
+      )
+    )
+      continue;
     if (await img.evaluate((el) => !!el.closest(".service-art"))) {
       await img.evaluate((el) =>
         window.scrollTo({
@@ -18,7 +27,7 @@ async function loadVisibleImages(page: Page) {
       )
       .toBe(true);
   }
-  await page.locator(".work-gallery").evaluate((root) => {
+  await page.locator("#work .work-gallery").evaluate((root) => {
     const card = root.querySelector<HTMLElement>("[data-original=true]")!;
     root.scrollTo({
       left: card.offsetLeft - (root.clientWidth - card.offsetWidth) / 2,
@@ -26,7 +35,7 @@ async function loadVisibleImages(page: Page) {
     });
   });
   await expect(
-    page.locator(".project-card[data-original=true]").first(),
+    page.locator("#work .project-card[data-original=true]").first(),
   ).toHaveAttribute("aria-current", "true");
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await expect(page.locator(".pixel-mountain")).toHaveAttribute(
@@ -101,7 +110,7 @@ test("selected work shows all five supplied sites with loaded local screenshots"
   await page.goto("/");
   await page.getByRole("link", { name: "See our work", exact: true }).click();
   await expect(page.locator("#work")).toBeInViewport();
-  const cards = page.locator(".project-card[data-original=true]");
+  const cards = page.locator("#work .project-card[data-original=true]");
   await expect(cards).toHaveCount(5);
   const urls = [
     "https://gowermodernlaw.com/",
@@ -137,20 +146,28 @@ test("gallery arrows center the full-color project and keep neighbours monochrom
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   await page.locator("#work").scrollIntoViewIfNeeded();
-  const cards = page.locator(".work-gallery .project-card[data-original=true]");
+  const cards = page.locator(
+    "#work .work-gallery .project-card[data-original=true]",
+  );
   await expect(cards.first()).toHaveAttribute("aria-current", "true");
   await expect(cards.first().locator("img")).toHaveCSS("filter", "none");
   await expect(cards.nth(1).locator("img")).not.toHaveCSS("filter", "none");
   await expect(
-    page.getByRole("button", { name: "Previous project" }),
+    page.locator("#work").getByRole("button", { name: "Previous project" }),
   ).toBeEnabled();
-  await page.getByRole("button", { name: "Next project" }).click();
+  await page
+    .locator("#work")
+    .getByRole("button", { name: "Next project" })
+    .click();
   await expect
     .poll(() => cards.nth(1).getAttribute("aria-current"))
     .toBe("true");
   await expect(cards.nth(1).locator("img")).toHaveCSS("filter", "none");
   await expect(cards.first().locator("img")).not.toHaveCSS("filter", "none");
-  await page.getByRole("button", { name: "Previous project" }).click();
+  await page
+    .locator("#work")
+    .getByRole("button", { name: "Previous project" })
+    .click();
   await expect
     .poll(() => cards.first().getAttribute("aria-current"))
     .toBe("true");
@@ -167,7 +184,7 @@ test("gallery arrows center the full-color project and keep neighbours monochrom
     .poll(() => cards.nth(4).getAttribute("aria-current"))
     .toBe("true");
   await expect(
-    page.getByRole("button", { name: "Next project" }),
+    page.locator("#work").getByRole("button", { name: "Next project" }),
   ).toBeEnabled();
   await cards.nth(4).press("Home");
   await expect

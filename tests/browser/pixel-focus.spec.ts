@@ -108,3 +108,24 @@ test("canvas unavailable retains the photograph", async ({ page }) => {
     "clarity to complexity.",
   );
 });
+test("the reveal stays black while the photo loads, with no colour-image flash", async ({
+  page,
+}) => {
+  await page.route("**/media/mountain-still.webp", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    await route.continue();
+  });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".pixel-mountain")).toHaveCSS(
+    "background-image",
+    "none",
+  );
+  await expect(page.locator(".pixel-mountain")).toHaveCSS(
+    "background-color",
+    "rgb(0, 0, 0)",
+  );
+  await expect(page.locator(".pixel-mountain")).toHaveAttribute(
+    "data-phase",
+    "clear",
+  );
+});

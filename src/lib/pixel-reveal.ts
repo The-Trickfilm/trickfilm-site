@@ -4,11 +4,11 @@ export function tileSeed(x: number, y: number) {
   return n - Math.floor(n);
 }
 export function tileClarity(elapsed: number, seed: number) {
-  const start = seed * 1.35;
+  const start = 0.18 + seed * 1.35;
   const age = elapsed - start;
   if (age <= 0) return 0;
   // Binary visibility: fine, full-resolution squares blink once, then stay sharp.
-  if (age < 0.18) return 1;
-  if (age < 0.36) return 0;
+  if (age < 0.1) return 1;
+  if (age < 0.2) return 0;
   return 1;
 }

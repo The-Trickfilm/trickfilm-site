@@ -12,7 +12,10 @@ export function PixelMountain() {
     const el = canvas.current!,
       root = host.current!,
       ctx = el.getContext("2d", { alpha: false });
-    if (!ctx) return;
+    if (!ctx) {
+      root.dataset.phase = "fallback";
+      return;
+    }
     const photo = new Image(),
       media = matchMedia("(prefers-reduced-motion: reduce)");
     const sharp = document.createElement("canvas"),
@@ -57,7 +60,7 @@ export function PixelMountain() {
         const scale = Math.max(w / photo.naturalWidth, h / photo.naturalHeight),
           sw = w / scale,
           sh = h / scale;
-        sc.filter = "grayscale(1) contrast(1.15)";
+        sc.filter = "grayscale(1) contrast(1.2)";
         sc.drawImage(
           photo,
           (photo.naturalWidth - sw) * 0.58,
@@ -71,7 +74,7 @@ export function PixelMountain() {
         );
         sc.filter = "none";
         sc.globalCompositeOperation = "multiply";
-        sc.fillStyle = "#6dc9bb";
+        sc.fillStyle = "#1f8875";
         sc.fillRect(0, 0, w, h);
         sc.globalCompositeOperation = "source-over";
         // A small binary mask makes six-CSS-pixel cells crisp at every viewport.
@@ -86,7 +89,7 @@ export function PixelMountain() {
           maskPixels.data.set([255, 255, 255, 0], i * 4);
         }
       }
-      ctx!.fillStyle = "#152c24";
+      ctx!.fillStyle = "#000000";
       ctx!.fillRect(0, 0, w, h);
       if (elapsed >= 2.2) {
         ctx!.drawImage(sharp, 0, 0);
@@ -145,6 +148,9 @@ export function PixelMountain() {
       setAvailable(!media.matches);
       restart();
     };
+    photo.onerror = () => {
+      root.dataset.phase = "fallback";
+    };
     photo.src = STILL_IMAGE.src;
     return () => {
       disposed = true;
@@ -165,6 +171,9 @@ export function PixelMountain() {
       role="group"
       aria-label="A pixelated mountain photograph resolving into a clear turquoise landscape"
     >
+      <noscript>
+        <div className="mountain-no-script" />
+      </noscript>
       <canvas ref={canvas} aria-hidden="true" />
       {available && (
         <button

@@ -6,11 +6,17 @@ test("arrows, keyboard and native horizontal scrolling wrap in both directions",
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   await page.locator("#work").scrollIntoViewIfNeeded();
-  const cards = page.locator(".project-card[data-original=true]"),
-    root = page.locator(".work-gallery");
-  await page.getByRole("button", { name: "Previous project" }).click();
+  const cards = page.locator("#work .project-card[data-original=true]"),
+    root = page.locator("#work .work-gallery");
+  await page
+    .locator("#work")
+    .getByRole("button", { name: "Previous project" })
+    .click();
   await expect(cards.last()).toHaveAttribute("aria-current", "true");
-  await page.getByRole("button", { name: "Next project" }).click();
+  await page
+    .locator("#work")
+    .getByRole("button", { name: "Next project" })
+    .click();
   await expect(cards.first()).toHaveAttribute("aria-current", "true");
   await cards.first().evaluate((el) => el.focus({ preventScroll: true }));
   await cards.first().press("ArrowLeft");
@@ -53,8 +59,8 @@ test("all 18 supplied logo images are available, preserve their aspect ratios, a
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
-  await page.getByRole("tab", { name: "Logo design" }).click();
-  const cards = page.locator(".project-card[data-original=true]");
+  await page.locator("#logos").scrollIntoViewIfNeeded();
+  const cards = page.locator("#logos .project-card[data-original=true]");
   await expect(cards).toHaveCount(18);
   await expect(
     page.getByRole("region", { name: "Selected logo design gallery" }),
@@ -70,18 +76,20 @@ test("all 18 supplied logo images are available, preserve their aspect ratios, a
     expect(loaded).toBe(true);
     await expect(img).toHaveCSS("object-fit", "contain");
   }
-  await page.getByRole("button", { name: "Previous project" }).click();
+  await page
+    .locator("#logos")
+    .getByRole("button", { name: "Previous project" })
+    .click();
   await expect(cards.last()).toHaveAttribute("aria-current", "true");
-  await page.getByRole("button", { name: "Next project" }).click();
+  await page
+    .locator("#logos")
+    .getByRole("button", { name: "Next project" })
+    .click();
   await expect(cards.first()).toHaveAttribute("aria-current", "true");
-  await page.locator("#work").screenshot({
+  await page.locator("#logos").screenshot({
     path: "/workspace/work/logo-gallery.png",
     style: ".header,.skip{visibility:hidden!important}",
   });
-  await page.getByRole("tab", { name: "Websites" }).click();
-  await expect(page.locator(".project-card[data-original=true]")).toHaveCount(
-    5,
-  );
 });
 test("mobile gallery wraps after a native scroll and has no page overflow", async ({
   page,
@@ -90,7 +98,7 @@ test("mobile gallery wraps after a native scroll and has no page overflow", asyn
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.locator("#work").scrollIntoViewIfNeeded();
-  await page.locator(".work-gallery").evaluate((el) => {
+  await page.locator("#work .work-gallery").evaluate((el) => {
     const card = el.querySelectorAll<HTMLElement>(".project-card")[4];
     el.scrollTo({
       left: card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2,
@@ -98,13 +106,13 @@ test("mobile gallery wraps after a native scroll and has no page overflow", asyn
     });
   });
   await expect(
-    page.locator(".project-card[data-original=true]").last(),
+    page.locator("#work .project-card[data-original=true]").last(),
   ).toHaveAttribute("aria-current", "true");
-  await page.getByRole("tab", { name: "Logo design" }).click();
+  await page.locator("#logos").scrollIntoViewIfNeeded();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     390,
   );
-  await page.locator("#work").screenshot({
+  await page.locator("#logos").screenshot({
     path: "/workspace/work/logo-mobile.png",
     style: ".header,.skip{visibility:hidden!important}",
   });
@@ -119,10 +127,12 @@ test("without JavaScript the visible portfolio contains usable original links", 
   });
   const page = await context.newPage();
   await page.goto(baseURL!);
-  const first = page.locator(".project-card[data-original=true]").first();
+  const first = page.locator("#work .project-card[data-original=true]").first();
   await expect(first).toHaveAttribute("href", "https://gowermodernlaw.com/");
   await first.scrollIntoViewIfNeeded();
   await expect(first).toBeInViewport();
-  await expect(page.locator(".project-card[inert]").first()).not.toBeVisible();
+  await expect(
+    page.locator("#work .project-card[inert]").first(),
+  ).not.toBeVisible();
   await context.close();
 });

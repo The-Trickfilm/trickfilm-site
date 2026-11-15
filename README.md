@@ -22,14 +22,14 @@ Use the Vercel Next.js preset. No environment variables, database, or backend se
 
 The latest user reference is the 36.8-second `reference.mov` recording of LocalPixel. It guides the editorial scale, compact navigation, dark hero, brief pixel transitions and generous section spacing. Trickfilm retains its original logo, turquoise palette, supplied mountain photograph and its own copy, content and implementation.
 
-The lens direction is retired. `PixelMountain` composites one sharp image through a low-resolution binary mask. Six-CSS-pixel squares blink in spatially staggered order, then settle on the complete photograph after 2.2 seconds. Each visible square contains full-resolution image detail; there is no coarse-image sampling or blur. The mask is scaled with smoothing disabled. It runs at most 24fps during the reveal, then stops rendering. A replay button starts it again. There is no scroll pinning, video, WebGL dependency, or left-side opacity fade. Rendering stops offscreen and while the document is hidden.
+The lens direction is retired. `PixelMountain` composites one sharp image through a low-resolution binary mask. Six-CSS-pixel squares blink in spatially staggered order, then settle on the complete photograph after 2.2 seconds. The hero starts on black, including while the photograph downloads, and never displays the ungraded source as a loading background. Each visible square contains full-resolution image detail; there is no coarse-image sampling or blur. The mask is scaled with smoothing disabled. It runs at most 24fps during the reveal, then stops rendering. A replay button starts it again. There is no scroll pinning, video, WebGL dependency, or left-side opacity fade. Rendering stops offscreen and while the document is hidden.
 
 `FocusText` preserves readable semantic text in HTML. Words move from a 7px blur to sharp as their heading enters reading position, driven by passive scroll events and one scheduled animation frame. Scrolling back reverses the effect. No scrambled or matrix characters are used. Reduced motion shows the clear image and sharp text immediately; without JavaScript the image and text remain visible.
 
 ## Assets
 
 - Original user-supplied SVG symbol, wordmark and five separate lens files remain unchanged in `public/brand`.
-- `public/media/mountain-still.webp` is the user-supplied Siguniang photograph from `lin2015-siguniang-mountain-8568913.jpg.zip`, optimized from 6000 × 4000 to 2400 × 1600. The image configuration lives in `src/lib/still-image.ts`. The image retains a uniform teal treatment, with no horizontal fade.
+- `public/media/mountain-still.webp` is the user-supplied Siguniang photograph from `lin2015-siguniang-mountain-8568913.jpg.zip`, optimized from 6000 × 4000 to 2400 × 1600. The image configuration lives in `src/lib/still-image.ts`. The image uses a darker uniform teal treatment, with no horizontal fade. A brighter mint green is reserved for actions and emphasis.
 - Previous optimized video files remain in `public/media` for a later iteration. The current homepage does not request or decode them.
 - Local portfolio screenshots and fonts avoid remote dependencies.
 
@@ -43,7 +43,7 @@ The user supplied these five sites as their work. Homepage screenshots were capt
 - https://accesstojusticebc.ca/
 - https://www.stratacouncil.ca/
 
-The portfolio has Websites and Logo design tabs. The website gallery links to the five actual sites; the identity gallery includes all 18 user-supplied images from `logos.zip`, including supplied variants. These assets are optimized as WebP without redesign, recoloring or cropping, and use `object-fit: contain`.
+Websites and Logo design now have separate, always-visible sections. The logo section follows the website gallery without requiring a tab selection. The website gallery links to the five actual sites; the identity gallery includes all 18 user-supplied images from `logos.zip`, including supplied variants. These assets are optimized as WebP without redesign, recoloring or cropping, and use `object-fit: contain`.
 
 Both horizontal galleries loop continuously in either direction using matching leading/trailing copies and a scroll-end reset that preserves the visual offset. Duplicate slides are inert and hidden from assistive technology. Left/right controls, native horizontal touch/trackpad scrolling, and keyboard arrows move between smaller previews; Home/End reach the first/last original item. The website previews are capped at 520px and identities at 440px on desktop. The centered project appears in its original colors, with neighboring sites in monochrome green. Selection follows the actual scroll position. It describes the organizations without inventing results or detailed delivery scope. Illustrative service concepts are explicitly labelled and separate from this real portfolio.
 
