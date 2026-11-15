@@ -1,63 +1,29 @@
 # Trickfilm
 
-Next.js homepage for Trickfilm.com: original brand assets, a pixel-to-clear mountain hero and scroll-driven text focus, selected work, services, approach, and contact.
+Next.js 16, React 19, TypeScript, Tailwind CSS 4. Local Inter and Inter Tight fonts. No Framer runtime or remote font dependency.
 
-## Run and verify
+## Development
 
-Node 24 recommended. Install with `npm ci`; start locally with `npm run dev`.
+`npm ci`, then `npm run dev`.
 
-- `npm run lint`
-- `npm run typecheck`
-- `npm test` — deterministic spatial reveal order and complete settling
-- `npm run build`
-- `npm run test:browser` — production server, desktop/mobile, keyboard navigation, service selection, all portfolio links and screenshots, pixel replay, a fully clear and static endpoint, scroll-driven text focus, reduced motion, fallback, and absence of video requests
+Validation: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, then `npm run test:browser` (requires Chromium at `/usr/bin/chromium`; edit playwright.config.ts for another installation).
 
-Browser checks use `/usr/bin/chromium`; update `executablePath` in `playwright.config.ts` for another machine. `PLAYWRIGHT_BASE_URL` can target a deployed instance instead of starting the local production server.
+## Content and assets
+
+- `src/lib/projects.ts`: five supplied website projects and StrataCouncil.ca application; confirmed contact jeremy@trickfilm.com.
+- `src/lib/logo-projects.ts`: 18 supplied logo images, including variants. Six featured identities expand to all 18; accessible native dialog supports arrow keys and Escape.
+- `public/brand`: original Trickfilm SVG artwork, unchanged.
+- `public/work`: existing website screenshots and supplied logo exports, retained.
+- `public/work/applications`: captures of StrataCouncil.ca's public product previews. Its public footer identifies it as a Trickfilm product. These are not authenticated application screenshots.
+
+Project pages deliberately omit unsupported results, durations, testimonials, and process claims. Dedicated authenticated application screenshots, further application projects, and fuller case-study copy remain editorial follow-ups. Contact is a mailto link, with no form or backend integration.
+
+## Design
+
+Agentic (https://agentic.framer.website/) is the visual reference: oversized navigation, compact introduction, prominent wordmark, rounded full-width portfolio panels, restrained typography and motion. Original implementation, actual Trickfilm assets, and original CSS laptop frames; no proprietary template assets or source copied. Prior mountain/pixel/lens implementation is removed and remains available in Git history.
+
+Content remains visible without JavaScript. Reduced motion disables entrance animations, rotating accents, and desktop panel stacking. Small or short screens use normal project flow. Logo links and the native expand control remain usable without JavaScript.
 
 ## Deployment
 
-Use the Vercel Next.js preset. No environment variables, database, or backend services are required for this milestone. The review branch is `feat/trickfilm-homepage`.
-
-## Hero and focus direction
-
-The latest user reference is the 36.8-second `reference.mov` recording of LocalPixel. It guides the editorial scale, compact navigation, dark hero, brief pixel transitions and generous section spacing. Trickfilm retains its original logo, turquoise palette, supplied mountain photograph and its own copy, content and implementation.
-
-The hero begins with a WebGL pixel surface, constructed from a 10px lattice with four separated square emitters per cell. The 1.25-second central bloom retains its moving folds and synchronized headline entrance. Over the following 0.6 seconds, the field aligns and resolves into the full-resolution, uniformly dark teal mountain photograph.
-
-The endpoint is a complete, sharp image: no micro-square gaps, surface deformation, pointer effect, or continuing motion. Rendering stops after the transition. Static rendering can use up to 2400px width for more detail, while the animated intro is capped at 1600px. Reduced motion skips straight to the same clear photograph. Replay restarts the intro. Offscreen and hidden documents suspend work; unavailable or lost WebGL contexts use the static fallback.
-
-
-`FocusText` preserves readable semantic text in HTML. Words move from a 7px blur to sharp as their heading enters reading position, driven by passive scroll events and one scheduled animation frame. Scrolling back reverses the effect. No scrambled or matrix characters are used. Reduced motion shows the clear image and sharp text immediately; without JavaScript the image and text remain visible.
-
-## Assets
-
-- Original user-supplied SVG symbol, wordmark and five separate lens files remain unchanged in `public/brand`.
-- `public/media/mountain-still.webp` is the user-supplied Siguniang photograph from `lin2015-siguniang-mountain-8568913.jpg.zip`, optimized from 6000 × 4000 to 2400 × 1600. The image configuration lives in `src/lib/still-image.ts`. The image uses a darker uniform teal treatment, with no horizontal fade. The original Trickfilm teal (#5ec3ba) is the accent for buttons and emphasis against near-black imagery.
-- Previous optimized video files remain in `public/media` for a later iteration. The current homepage does not request or decode them.
-- Local portfolio screenshots and fonts avoid remote dependencies.
-
-## Portfolio
-
-The user supplied these five sites as their work. Homepage screenshots were captured on 2026-11-14, reviewed, and optimized into local WebP files under `public/work`:
-
-- https://gowermodernlaw.com/
-- https://nvfc.ca/
-- https://www.streamworksdesigns.com/
-- https://accesstojusticebc.ca/
-- https://www.stratacouncil.ca/
-
-Websites and Logo design now have separate, always-visible sections. The logo section follows the website gallery without requiring a tab selection. The website gallery links to the five actual sites; the identity gallery includes all 18 user-supplied images from `logos.zip`, including supplied variants. These assets are optimized as WebP without redesign, recoloring or cropping, and use `object-fit: contain`.
-
-Both horizontal galleries loop continuously in either direction using matching leading/trailing copies and a scroll-end reset that preserves the visual offset. Duplicate slides are inert and hidden from assistive technology. Left/right controls, native horizontal touch/trackpad scrolling, and keyboard arrows move between smaller previews; Home/End reach the first/last original item. The website previews are capped at 520px and identity artwork is exactly half the website preview stage height at each viewport. The centered project appears in its original colors, with neighboring sites in monochrome green. Selection follows the actual scroll position. It describes the organizations without inventing results or detailed delivery scope. Illustrative service concepts are explicitly labelled and separate from this real portfolio.
-
-## Design and interaction
-
-The current direction uses a pixel-to-clear hero, a clear static endpoint and scroll-driven text focus. The fixed navigation has no background; it floats over the full-height hero and switches text colour as the section beneath it changes. LocalPixel was inspected as a quality reference for hierarchy, restrained motion, readable business language, and consistency; its assets and code are not reused.
-
-The service explorer supports click, arrow keys, Home/End, and direct service links. Selected work remains server-rendered and accessible without JavaScript. Transitions are brief and disabled for reduced motion. Navigation omits unavailable Insights content. Browser captures are saved under `docs` for review, including a recording of the rendered field at `public/media/hero-motion-preview.mp4`.
-
-## Remaining work
-
-- Confirm a contact email or destination. The CTA currently reaches an honest contact placeholder; no form integration is claimed.
-- Confirm detailed project scope before writing case studies or publishing quantified results.
-- Physical iOS/Android and Safari/Firefox verification. Chromium checks exercise a simulated mobile viewport; they do not establish performance on real mobile GPUs.
+Vercel detects Next.js automatically. This change is developed on `feat/agentic-redesign` for pull-request review and a Vercel preview; merge through the repository's established production branch when approved. No environment variables are required. Domain/DNS configuration is separate from this implementation.

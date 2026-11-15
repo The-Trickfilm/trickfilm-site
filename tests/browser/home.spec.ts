@@ -1,197 +1,160 @@
-import { test, expect, type Page } from "@playwright/test";
-async function loadVisibleImages(page: Page) {
-  for (const img of await page.locator("img:visible").all()) {
-    if (
-      await img.evaluate(
-        (el) =>
-          !!el.closest("[inert]") ||
-          (!!el.closest("#logos") &&
-            el.closest(".project-card")?.getAttribute("data-project-index") !==
-              "0"),
-      )
-    )
-      continue;
-    if (await img.evaluate((el) => !!el.closest(".service-art"))) {
-      await img.evaluate((el) =>
-        window.scrollTo({
-          top: el.getBoundingClientRect().top + scrollY - 100,
-          behavior: "instant",
-        }),
-      );
-    } else await img.scrollIntoViewIfNeeded();
-    await expect
-      .poll(() =>
-        img.evaluate(
-          (el: HTMLImageElement) => el.complete && el.naturalWidth > 0,
-        ),
-      )
-      .toBe(true);
+import { test, expect } from "@playwright/test";
+test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Good ideas.Beautifully executed.",
+  );
+  await expect(
+    page.locator('a[href="mailto:jeremy@trickfilm.com"]').first(),
+  ).toBeAttached();
+  const cards = page.locator(".project-panel");
+  await expect(cards).toHaveCount(6);
+  const routes = await cards.evaluateAll((a) =>
+    a.map((el) => el.getAttribute("href")!),
+  );
+  for (const route of routes) {
+    const response = await page.request.get(route);
+    expect(response.status()).toBe(200);
+    expect(await response.text()).toContain("View");
   }
-  await page.locator("#work .work-gallery").evaluate((root) => {
-    const card = root.querySelector<HTMLElement>("[data-original=true]")!;
-    root.scrollTo({
-      left: card.offsetLeft - (root.clientWidth - card.offsetWidth) / 2,
-      behavior: "instant",
+  const first = page.locator(".identity-card").first();
+  await first.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  const title = await dialog.locator("#identity-dialog-title").textContent();
+  await page.getByRole("button", { name: "Next logo", exact: true }).click();
+  await expect(dialog.locator("#identity-dialog-title")).not.toHaveText(title!);
+  await page.keyboard.press("ArrowLeft");
+  await expect(dialog.locator("#identity-dialog-title")).toHaveText(title!);
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(first).toBeFocused();
+  await page.locator("summary").click();
+  await expect(page.locator(".identity-card:visible")).toHaveCount(18);
+  expect(errors).toEqual([]);
+  await page.goto("/work/not-a-project");
+  await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    "noindex",
+  );
+});
+for (const width of [390, 768, 1440])
+  test(`responsive layout ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/");
+    await expect(page.locator(".hero-wordmark img")).toBeVisible();
+    await page.locator("#contact").scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: `test-results/home-${width}.png`,
+      fullPage: true,
     });
   });
-  await expect(
-    page.locator("#work .project-card[data-original=true]").first(),
-  ).toHaveAttribute("aria-current", "true");
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  await expect(page.locator(".pixel-mountain")).toHaveAttribute(
-    "data-phase",
-    "clear",
-  );
-}
+test("content works without JavaScript and with reduced motion", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    reducedMotion: "reduce",
+  });
+  const page = await context.newPage();
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await page.locator("summary").click();
+  await expect(page.locator(".identity-card:visible")).toHaveCount(18);
+  expect(
+    await page.locator(".identity-card").first().getAttribute("href"),
+  ).toMatch(/\.webp$/);
+  await context.close();
+});
 
-test("mobile fits viewport and reduced motion avoids video download", async ({
+test("desktop project surfaces overlap and release after the final project", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const cards = page.locator(".project-stack .project-panel");
+  const start = await cards
+    .first()
+    .evaluate((el) => el.getBoundingClientRect().top + scrollY);
+  await page.evaluate(
+    (y) => scrollTo({ top: y + 280, behavior: "instant" }),
+    start,
+  );
+  await expect
+    .poll(async () => Math.round((await cards.first().boundingBox())!.y))
+    .toBe(24);
+  const secondStart = await cards
+    .nth(1)
+    .evaluate((el) => el.getBoundingClientRect().top + scrollY);
+  await page.evaluate(
+    (y) => scrollTo({ top: y - 160, behavior: "instant" }),
+    secondStart,
+  );
+  const secondBox = (await cards.nth(1).boundingBox())!;
+  expect(secondBox.y).toBeLessThan(200);
+  expect(secondBox.y).toBeGreaterThan(24);
+  const covering = await page.evaluate(() =>
+    document
+      .elementFromPoint(innerWidth / 2, 300)
+      ?.closest(".project-panel")
+      ?.getAttribute("href"),
+  );
+  expect(covering).toContain("gower-modern-law");
+  await page.locator("#branding").scrollIntoViewIfNeeded();
+  expect((await cards.last().boundingBox())!.y).toBeLessThan(24);
+  await expect(
+    page.getByRole("link", { name: "Trickfilm home", exact: true }),
+  ).toBeInViewport();
+  await page.getByRole("link", { name: "Trickfilm home", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+});
+
+test("motion preference disables stacking and all decorative animation", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  let videoRequests = 0;
-  page.on("request", (r) => {
-    if (r.url().endsWith(".mp4")) videoRequests++;
-  });
-  await page.goto("/");
-  await expect(page.locator(".pixel-mountain canvas")).toHaveCSS(
-    "opacity",
-    "1",
-  );
-  expect(videoRequests).toBe(0);
-  await expect(
-    page.getByRole("button", { name: "Replay image focus animation" }),
-  ).toHaveCount(0);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
-    390,
-  );
-  await loadVisibleImages(page);
-  await page.screenshot({ path: "/workspace/work/mobile.png", fullPage: true });
-});
-test("services menu links to the selected service", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
-  await page.locator(".services-menu summary").click();
-  await page.getByRole("link", { name: "AI consulting", exact: true }).click();
-  await expect(page.locator("#service-04")).toBeInViewport();
-  await expect(page.locator("#service-04")).toHaveAttribute(
-    "aria-selected",
-    "true",
-  );
-  await expect(page.locator("#services").getByRole("tabpanel")).toContainText(
-    "Find the useful in the possible.",
-  );
+  expect(
+    await page
+      .locator(".project-stack .project-panel")
+      .first()
+      .evaluate((el) => getComputedStyle(el).position),
+  ).toBe("relative");
+  await page.locator("#services").scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () =>
+        document.getAnimations().filter((a) => a.playState === "running")
+          .length,
+    ),
+  ).toBe(0);
 });
 
-test("service explorer responds to clicks and keyboard without moving focus unexpectedly", async ({
-  page,
-}) => {
+test("all project pages fit a mobile viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  const tabs = page.locator("#services").getByRole("tab");
-  await tabs.nth(1).click();
-  await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
-  await expect(page.locator("#services").getByRole("tabpanel")).toContainText(
-    "Give good people their time back.",
-  );
-  await tabs.nth(1).press("ArrowDown");
-  await expect(tabs.nth(2)).toBeFocused();
-  await expect(page.locator("#services").getByRole("tabpanel")).toContainText(
-    "A better fit for the way you work.",
-  );
-  await page
-    .locator("#services")
-    .getByRole("tabpanel")
-    .screenshot({ path: "/workspace/work/services-panel.png" });
-});
-
-test("selected work shows all five supplied sites with loaded local screenshots", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await page.getByRole("link", { name: "See our work", exact: true }).click();
-  await expect(page.locator("#work")).toBeInViewport();
-  const cards = page.locator("#work .project-card[data-original=true]");
-  await expect(cards).toHaveCount(5);
-  const urls = [
-    "https://gowermodernlaw.com/",
-    "https://nvfc.ca/",
-    "https://www.streamworksdesigns.com/",
-    "https://accesstojusticebc.ca/",
-    "https://www.stratacouncil.ca/",
-  ];
-  for (let i = 0; i < urls.length; i++) {
-    await expect(cards.nth(i)).toHaveAttribute("href", urls[i]);
-    await expect(cards.nth(i)).toHaveAttribute("target", "_blank");
-    await cards.nth(i).scrollIntoViewIfNeeded();
-    await expect
-      .poll(() =>
-        cards
-          .nth(i)
-          .locator("img")
-          .evaluate(
-            (image: HTMLImageElement) =>
-              image.complete && image.naturalWidth > 0,
-          ),
-      )
-      .toBe(true);
+  const routes = await page
+    .locator(".project-panel")
+    .evaluateAll((els) => els.map((el) => el.getAttribute("href")!));
+  for (const route of routes) {
+    await page.goto(route);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+      route,
+    ).toBe(true);
+    const back = page.getByRole("link", { name: "Back to work", exact: false });
+    await expect(back).toBeInViewport();
   }
-  await page
-    .locator("#work")
-    .screenshot({ path: "/workspace/work/selected-work.png" });
-});
-
-test("gallery arrows center the full-color project and keep neighbours monochrome", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
-  await page.locator("#work").scrollIntoViewIfNeeded();
-  const cards = page.locator(
-    "#work .work-gallery .project-card[data-original=true]",
-  );
-  await expect(cards.first()).toHaveAttribute("aria-current", "true");
-  await expect(cards.first().locator("img")).toHaveCSS("filter", "none");
-  await expect(cards.nth(1).locator("img")).not.toHaveCSS("filter", "none");
-  await expect(
-    page.locator("#work").getByRole("button", { name: "Previous project" }),
-  ).toBeEnabled();
-  await page
-    .locator("#work")
-    .getByRole("button", { name: "Next project" })
-    .click();
-  await expect
-    .poll(() => cards.nth(1).getAttribute("aria-current"))
-    .toBe("true");
-  await expect(cards.nth(1).locator("img")).toHaveCSS("filter", "none");
-  await expect(cards.first().locator("img")).not.toHaveCSS("filter", "none");
-  await page
-    .locator("#work")
-    .getByRole("button", { name: "Previous project" })
-    .click();
-  await expect
-    .poll(() => cards.first().getAttribute("aria-current"))
-    .toBe("true");
-  await cards.first().evaluate((el) => el.focus({ preventScroll: true }));
-  const scrollY = await page.evaluate(() => window.scrollY);
-  await cards.first().press("ArrowRight");
-  await expect(cards.nth(1)).toBeFocused();
-  await expect
-    .poll(() => cards.nth(1).getAttribute("aria-current"))
-    .toBe("true");
-  expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(scrollY, 0);
-  await cards.nth(1).press("End");
-  await expect
-    .poll(() => cards.nth(4).getAttribute("aria-current"))
-    .toBe("true");
-  await expect(
-    page.locator("#work").getByRole("button", { name: "Next project" }),
-  ).toBeEnabled();
-  await cards.nth(4).press("Home");
-  await expect
-    .poll(() => cards.first().getAttribute("aria-current"))
-    .toBe("true");
-  await page.locator("#work").screenshot({
-    path: "/workspace/work/work-gallery.png",
-    style: ".header,.skip{visibility:hidden!important}",
-  });
 });

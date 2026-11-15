@@ -6,13 +6,7 @@ export default defineConfig({
     browserName: "chromium",
     launchOptions: {
       executablePath: "/usr/bin/chromium",
-      args: [
-        "--no-sandbox",
-        "--enable-webgl",
-        "--use-gl=angle",
-        "--use-angle=swiftshader",
-        "--enable-unsafe-swiftshader",
-      ],
+      args: ["--no-sandbox"],
     },
   },
   webServer: process.env.PLAYWRIGHT_BASE_URL

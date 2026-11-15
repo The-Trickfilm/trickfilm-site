@@ -1,0 +1,68 @@
+export const websiteProjects = [
+  {
+    slug: "streamworks-designs",
+    name: "Streamworks Designs",
+    image: "streamworks",
+    sector: "Water features & landscape design",
+    domain: "streamworksdesigns.com",
+    url: "https://www.streamworksdesigns.com/",
+    tone: "charcoal",
+    description:
+      "A website for Streamworks Designs and its water features and landscape work.",
+  },
+  {
+    slug: "gower-modern-law",
+    name: "Gower Modern Law",
+    image: "gower",
+    sector: "Legal services",
+    domain: "gowermodernlaw.com",
+    url: "https://gowermodernlaw.com/",
+    tone: "teal",
+    description: "An online presence for Gower Modern Law.",
+  },
+  {
+    slug: "north-vancouver-fc",
+    name: "North Vancouver FC",
+    image: "nvfc",
+    sector: "Community sport",
+    domain: "nvfc.ca",
+    url: "https://nvfc.ca/",
+    tone: "paper",
+    description: "A community football club, brought together online.",
+  },
+  {
+    slug: "access-to-justice-bc",
+    name: "Access to Justice BC",
+    image: "a2j",
+    sector: "Access to justice",
+    domain: "accesstojusticebc.ca",
+    url: "https://accesstojusticebc.ca/",
+    tone: "charcoal",
+    description: "A website for Access to Justice BC.",
+  },
+  {
+    slug: "stratacouncil",
+    name: "StrataCouncil.ca",
+    image: "stratacouncil",
+    sector: "Strata council resources",
+    domain: "stratacouncil.ca",
+    url: "https://www.stratacouncil.ca/",
+    tone: "teal",
+    description:
+      "The public website for StrataCouncil.ca, a Trickfilm product.",
+  },
+] as const;
+export const applicationProject = {
+  slug: "stratacouncil-platform",
+  name: "StrataCouncil.ca",
+  image: "stratacouncil",
+  sector: "Council training, meetings & records",
+  domain: "stratacouncil.ca",
+  url: "https://www.stratacouncil.ca/",
+  tone: "paper",
+  description:
+    "A Trickfilm product bringing council training, meeting tools, and institutional memory together.",
+} as const;
+export const projects = [...websiteProjects, applicationProject];
+export type Project = (typeof projects)[number];
+export const CONTACT_EMAIL = "jeremy@trickfilm.com";
