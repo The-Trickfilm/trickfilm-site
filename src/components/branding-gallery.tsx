@@ -169,14 +169,14 @@ export function BrandingGallery() {
           e.preventDefault();
           open(index);
         }}
-        aria-label={`View ${project.name} logo`}
+        aria-label={`View ${project.name} identity`}
       >
         <div className="identity-image">
           <Image
             src={project.src}
             width={project.width}
             height={project.height}
-            alt={`${project.name} logo design`}
+            alt={`${project.name} brand identity`}
             sizes="(max-width: 700px) 42vw, (max-width: 1100px) 28vw, 18vw"
           />
         </div>
@@ -301,7 +301,7 @@ export function BrandingGallery() {
                 src={selected.src}
                 width={selected.width}
                 height={selected.height}
-                alt={`${selected.name} logo design`}
+                alt={`${selected.name} brand identity`}
                 sizes="90vw"
               />
             </div>

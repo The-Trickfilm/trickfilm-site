@@ -86,10 +86,81 @@ export const processProject = {
   description:
     "A process map connecting data sources, analysis, and reporting in one end-to-end workflow.",
 } as const;
-export const creativeProjects = [applicationProject, processProject];
+export const talentProject = {
+  slug: "talent-creative-hr",
+  name: "Talent Creative HR",
+  image: "solutions/talent-creative-hr-process",
+  sector: "HR process & employee retention",
+  domain: "Process artwork",
+  url: "/work/solutions/talent-creative-hr-process.webp",
+  tone: "paper",
+  category: "Process design",
+  description:
+    "HR process and employee-retention stages, presented as two complementary views.",
+  previews: [
+    {
+      src: "/work/solutions/talent-creative-hr-process.webp",
+      width: 1095,
+      height: 1095,
+      alt: "Talent Creative HR circular process map covering sourcing, alignment, development, and reward.",
+      contain: true,
+    },
+    {
+      src: "/work/solutions/talent-creative-hr-stages.webp",
+      width: 2552,
+      height: 1897,
+      alt: "Employee-retention stages: research and benchmarking, team involvement, program design and implementation, company-wide communication, and evaluation and iteration.",
+      contain: true,
+    },
+  ],
+} as const;
+export const thunderbirdProject = {
+  slug: "thunderbird-entertainment",
+  name: "Thunderbird Entertainment",
+  image: "solutions/thunderbird-investor-deck",
+  sector: "Investor communications",
+  domain: "Presentation artwork",
+  url: "/work/solutions/thunderbird-investor-deck.webp",
+  tone: "charcoal",
+  category: "Presentation design",
+  description: "Corporate presentation artwork for Thunderbird Entertainment.",
+  previews: [
+    {
+      src: "/work/solutions/thunderbird-investor-deck.webp",
+      width: 1280,
+      height: 720,
+      alt: "Thunderbird Entertainment corporate presentation cover with a red city skyline.",
+      contain: true,
+    },
+  ],
+} as const;
+export const creativeProjects = [
+  applicationProject,
+  processProject,
+  talentProject,
+  thunderbirdProject,
+];
 export const projects = [...websiteProjects, ...creativeProjects];
 export type Project = (typeof projects)[number];
-export function projectPreview(project: Project) {
+export type ProjectFrame = {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  contain: boolean;
+};
+export function projectFrames(project: Project): readonly ProjectFrame[] {
+  return "previews" in project ? project.previews : [projectPreview(project)];
+}
+export function projectCategory(project: Project) {
+  return "category" in project
+    ? project.category
+    : project.slug === "stratacouncil-platform"
+      ? "Application"
+      : "Website design";
+}
+export function projectPreview(project: Project): ProjectFrame {
+  if ("previews" in project) return project.previews[0];
   if (project.slug === "business-process-design")
     return {
       src: project.url,

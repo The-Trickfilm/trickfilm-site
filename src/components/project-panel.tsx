@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
-import { projectPreview, type Project } from "@/lib/projects";
+import { projectCategory, type Project } from "@/lib/projects";
+import { LaptopPreview } from "./laptop-preview";
 import { Arrow } from "./arrow";
 export function ProjectPanel({
   project,
@@ -9,14 +9,17 @@ export function ProjectPanel({
   project: Project;
   creative?: boolean;
 }) {
-  const preview = projectPreview(project);
   const process = project.slug === "business-process-design";
   return (
-    <Link
-      href={`/work/${project.slug}`}
+    <article
       className={`project-panel tone-${project.tone}`}
-      aria-label={`View ${project.name} ${creative ? "creative" : "website"} project`}
+      data-project-href={`/work/${project.slug}`}
     >
+      <Link
+        className="project-card-link"
+        href={`/work/${project.slug}`}
+        aria-label={`View ${project.name} ${creative ? "creative" : "website"} project`}
+      />
       <div className="project-info" data-reveal>
         <p className="eyebrow">
           ({creative ? "Creative solutions" : "Web design"})
@@ -41,13 +44,7 @@ export function ProjectPanel({
         <dl className="project-facts">
           <div>
             <dt>Category:</dt>
-            <dd>
-              {process
-                ? "Business process design"
-                : creative
-                  ? "Application"
-                  : "Website design"}
-            </dd>
+            <dd>{projectCategory(project)}</dd>
           </div>
           {!process && (
             <div>
@@ -62,26 +59,8 @@ export function ProjectPanel({
         </dl>
       </div>
       <div className="project-visual" data-reveal>
-        <div className="laptop">
-          <div className="laptop-lid">
-            <span className="camera" />
-            <div
-              className={`laptop-display${preview.contain ? " diagram-display" : ""}`}
-            >
-              <Image
-                src={preview.src}
-                width={preview.width}
-                height={preview.height}
-                sizes="(max-width: 700px) 82vw, 58vw"
-                alt={preview.alt}
-              />
-            </div>
-          </div>
-          <div className="laptop-base">
-            <span />
-          </div>
-        </div>
+        <LaptopPreview project={project} />
       </div>
-    </Link>
+    </article>
   );
 }

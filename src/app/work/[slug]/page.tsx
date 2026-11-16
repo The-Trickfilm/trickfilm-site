@@ -2,7 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { projects, projectPreview, CONTACT_EMAIL } from "@/lib/projects";
+import {
+  projects,
+  creativeProjects,
+  projectFrames,
+  projectCategory,
+  CONTACT_EMAIL,
+} from "@/lib/projects";
+import { LaptopPreview } from "@/components/laptop-preview";
 import { Arrow } from "@/components/arrow";
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -31,8 +38,7 @@ export default async function ProjectPage({
     next = projects[(index + 1) % projects.length],
     application = project.slug === "stratacouncil-platform",
     process = project.slug === "business-process-design",
-    creative = application || process,
-    preview = projectPreview(project);
+    creative = creativeProjects.some((p) => p.slug === project.slug);
   return (
     <>
       <a className="skip-link" href="#main">
@@ -64,13 +70,7 @@ export default async function ProjectPage({
             </div>
             <div>
               <dt>Category</dt>
-              <dd>
-                {process
-                  ? "Business process design"
-                  : application
-                    ? "Application"
-                    : "Website"}
-              </dd>
+              <dd>{projectCategory(project)}</dd>
             </div>
             <div>
               <dt>Focus</dt>
@@ -79,26 +79,7 @@ export default async function ProjectPage({
           </dl>
         </section>
         <div className={`case-stage tone-${project.tone}`}>
-          <div className="laptop">
-            <div className="laptop-lid">
-              <span className="camera" />
-              <div
-                className={`laptop-display${preview.contain ? " diagram-display" : ""}`}
-              >
-                <Image
-                  src={preview.src}
-                  width={preview.width}
-                  height={preview.height}
-                  alt={preview.alt}
-                  priority
-                  sizes="(max-width: 700px) 80vw, 75vw"
-                />
-              </div>
-            </div>
-            <div className="laptop-base">
-              <span />
-            </div>
-          </div>
+          <LaptopPreview project={project} priority />
         </div>
         <section className="case-description">
           <h2>{application ? "A Trickfilm product." : "A closer look."}</h2>
@@ -114,10 +95,27 @@ export default async function ProjectPage({
                 ? "View full-size diagram"
                 : application
                   ? "Explore the product"
-                  : "Visit the website"}{" "}
+                  : creative
+                    ? "View full-size artwork"
+                    : "Visit the website"}{" "}
               <Arrow />
               <span className="sr-only">(opens in a new tab)</span>
             </a>
+            {projectFrames(project)
+              .slice(1)
+              .map((frame, i) => (
+                <a
+                  key={frame.src}
+                  className="text-link case-artwork-link"
+                  href={frame.src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View full-size artwork {i + 2}
+                  <Arrow />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+              ))}
           </div>
         </section>
         <Link className="case-next" href={`/work/${next.slug}`}>

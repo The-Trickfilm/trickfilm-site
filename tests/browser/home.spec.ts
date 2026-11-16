@@ -10,9 +10,9 @@ test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
     page.locator('a[href="mailto:jeremy@trickfilm.com"]').first(),
   ).toBeAttached();
   const cards = page.locator(".project-panel");
-  await expect(cards).toHaveCount(8);
+  await expect(cards).toHaveCount(10);
   const routes = await cards.evaluateAll((a) =>
-    a.map((el) => el.getAttribute("href")!),
+    a.map((el) => el.getAttribute("data-project-href")!),
   );
   for (const route of routes) {
     const response = await page.request.get(route);
@@ -32,7 +32,7 @@ test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(first).toBeFocused();
-  await expect(page.locator("[data-original] .identity-card")).toHaveCount(18);
+  await expect(page.locator("[data-original] .identity-card")).toHaveCount(21);
   expect(errors).toEqual([]);
   await page.goto("/work/not-a-project");
   await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
@@ -73,7 +73,7 @@ test("content works without JavaScript and with reduced motion", async ({
   const page = await context.newPage();
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.locator("[data-original] .identity-card")).toHaveCount(18);
+  await expect(page.locator("[data-original] .identity-card")).toHaveCount(21);
   await expect(page.locator("[data-clone]").first()).not.toBeVisible();
   expect(
     await page.locator(".identity-card").first().getAttribute("href"),
@@ -111,7 +111,7 @@ test("desktop project surfaces overlap and release after the final project", asy
     document
       .elementFromPoint(innerWidth / 2, 300)
       ?.closest(".project-panel")
-      ?.getAttribute("href"),
+      ?.getAttribute("data-project-href"),
   );
   expect(covering).toContain("north-vancouver-fc");
   await page.locator("#branding").scrollIntoViewIfNeeded();
@@ -150,7 +150,9 @@ test("all project pages fit a mobile viewport", async ({ page }) => {
   await page.goto("/");
   const routes = await page
     .locator(".project-panel")
-    .evaluateAll((els) => els.map((el) => el.getAttribute("href")!));
+    .evaluateAll((els) =>
+      els.map((el) => el.getAttribute("data-project-href")!),
+    );
   for (const route of routes) {
     await page.goto(route);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -358,7 +360,7 @@ test("reduced-motion carousel is manual and still previews all logos", async ({
   await page.keyboard.press("Enter");
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("ArrowLeft");
-  await expect(page.locator(".dialog-controls > p")).toHaveText("18 / 18");
+  await expect(page.locator(".dialog-controls > p")).toHaveText("21 / 21");
   await page.keyboard.press("Escape");
   await expect(first).toBeFocused();
 });
@@ -445,7 +447,7 @@ test("service flower follows scroll while the numeral stays upright", async ({
   expect(
     await first.evaluate((el) => el.getBoundingClientRect().height),
   ).toBeLessThan(550);
-  expect(await page.locator(".flower-accent").count()).toBe(9);
+  expect(await page.locator(".flower-accent").count()).toBe(11);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect
     .poll(() =>
@@ -595,11 +597,16 @@ test("Koan charcoal card and full business process diagram are available", async
   await page.goto("/");
   const websites = page.locator("#work .project-panel");
   await expect(websites.nth(4)).toHaveClass(/tone-charcoal/);
-  await expect(websites.nth(4)).toHaveAttribute("href", "/work/koan-analytics");
+  await expect(websites.nth(4)).toHaveAttribute(
+    "data-project-href",
+    "/work/koan-analytics",
+  );
   await expect(page.locator("#services img")).toHaveCount(0);
-  const diagram = page.locator("#applications .project-panel").last();
+  const diagram = page.locator(
+    '#applications .project-panel[data-project-href="/work/business-process-design"]',
+  );
   await expect(diagram).toHaveAttribute(
-    "href",
+    "data-project-href",
     "/work/business-process-design",
   );
   await expect(diagram.locator(".eyebrow")).toHaveText("(Creative solutions)");
@@ -623,7 +630,7 @@ test("creative solutions stack like web cards with matching landscape heights", 
   await page.goto("/");
   const websites = page.locator("#work .project-panel");
   const solutions = page.locator("#applications .project-panel");
-  await expect(solutions).toHaveCount(2);
+  await expect(solutions).toHaveCount(4);
   const targetHeight = (await solutions.first().boundingBox())!.height;
   expect(targetHeight).toBeLessThan(700);
   for (const card of [...(await websites.all()), ...(await solutions.all())]) {
@@ -654,11 +661,79 @@ test("creative solutions stack like web cards with matching landscape heights", 
       document
         .elementFromPoint(innerWidth / 2, 300)
         ?.closest(".project-panel")
-        ?.getAttribute("href"),
+        ?.getAttribute("data-project-href"),
     ),
-  ).toBe("/work/business-process-design");
+  ).toBe("/work/thunderbird-entertainment");
   await page.locator("#services").scrollIntoViewIfNeeded();
   expect((await solutions.last().boundingBox())!.y).toBeLessThan(24);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(solutions.first()).toHaveCSS("position", "relative");
+});
+
+test("Talent Creative HR alternates every three seconds and supports pause and reduced motion", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const card = page.locator('[data-project-href="/work/talent-creative-hr"]');
+  const screen = card.locator(".screen-slideshow");
+  await screen.scrollIntoViewIfNeeded();
+  const active = () => screen.locator('[data-preview-active="true"] img');
+  await expect(active()).toHaveAttribute("alt", /circular process/);
+  await page.waitForTimeout(2400);
+  await expect(active()).toHaveAttribute("alt", /circular process/);
+  await expect(active()).toHaveAttribute("alt", /Employee-retention stages/, {
+    timeout: 1800,
+  });
+  await expect(active()).toHaveAttribute("alt", /circular process/, {
+    timeout: 3500,
+  });
+  await card
+    .getByRole("button", { name: "Pause Talent Creative HR preview" })
+    .click();
+  const before = await active().getAttribute("alt");
+  await page.waitForTimeout(3200);
+  expect(await active().getAttribute("alt")).toBe(before);
+  await card
+    .getByRole("button", { name: "Next Talent Creative HR image" })
+    .click();
+  expect(await active().getAttribute("alt")).not.toBe(before);
+  await expect(page).toHaveURL(/\/$/);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/work/talent-creative-hr");
+  const detail = page.locator(".screen-slideshow");
+  await detail.scrollIntoViewIfNeeded();
+  await expect(detail.getByRole("button", { name: /Pause/ })).toHaveCount(0);
+  await page.waitForTimeout(3200);
+  await expect(
+    detail.locator('[data-preview-active="true"] img'),
+  ).toHaveAttribute("alt", /circular process/);
+  await detail
+    .getByRole("button", { name: "Next Talent Creative HR image" })
+    .click();
+  await expect(
+    detail.locator('[data-preview-active="true"] img'),
+  ).toHaveAttribute("alt", /Employee-retention stages/);
+});
+
+test("new supplied identities open in the existing carousel preview", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  for (const name of ["HRsignal", "Beat Bugs", "All Well & Good"]) {
+    const card = page
+      .locator("[data-original] .identity-card")
+      .filter({ hasText: name });
+    await card.click();
+    await expect(page.locator("#identity-dialog-title")).toHaveText(name);
+    await expect
+      .poll(() =>
+        page
+          .locator(".dialog-image img")
+          .evaluate((i) => (i as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
+    await page.keyboard.press("Escape");
+  }
 });

@@ -392,7 +392,7 @@ summary:focus-visible {
 .project-panel:hover {
   box-shadow: 0 0 0 2px #00000010;
 }
-.project-panel:focus-visible {
+.project-panel:focus-within {
   outline: 3px solid #277b76;
   outline-offset: 5px;
 }
@@ -1112,7 +1112,7 @@ fieldset:disabled .contact-submit {
   .project-stack .project-panel:last-child {
     margin-bottom: 0;
   }
-  .project-stack .project-panel:focus-visible {
+  .project-stack .project-panel:focus-within {
     z-index: 10;
   }
 }
@@ -2082,4 +2082,68 @@ fieldset:disabled .contact-submit {
     padding-top: 96px;
     padding-bottom: 48px;
   }
+}
+
+/* Card navigation and slideshow controls are siblings, never nested links. */
+.project-card-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+.project-card-link:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: -6px;
+}
+.preview-frame {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+.preview-frame[data-preview-active="true"] {
+  opacity: 1;
+}
+.preview-controls {
+  position: absolute;
+  top: calc(100% + 26px);
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  font-size: 12px;
+}
+.preview-controls button {
+  border: 1px solid currentColor;
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  background: var(--paper, #eaece7);
+  color: #252525;
+}
+.preview-controls button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.preview-controls span {
+  margin-right: 4px;
+}
+.case-artwork-link {
+  margin-top: 16px;
+}
+@media (max-width: 900px) {
+  .laptop:has(.preview-controls) {
+    margin-bottom: 42px;
+  }
+}
+
+/* Keep controls above the card link while the artwork itself stays clickable. */
+.project-visual:has(.preview-controls) {
+  z-index: 2;
+  pointer-events: none;
+}
+.preview-controls {
+  pointer-events: auto;
 }
