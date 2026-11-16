@@ -422,6 +422,22 @@ summary:focus-visible {
   min-width: 0;
 }
 .identity-viewport {
+  --edge-fade: clamp(16px, 4vw, 56px);
+  /* Reveal the white section beneath the rail, without covering its controls. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--edge-fade),
+    #000 calc(100% - var(--edge-fade)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--edge-fade),
+    #000 calc(100% - var(--edge-fade)),
+    transparent
+  );
   container-type: inline-size;
   overflow-x: auto;
   overflow-y: hidden;
