@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ServiceNumber } from "./service-number";
 
@@ -8,7 +7,6 @@ type Service = {
   name: string;
   copy: string;
   items: string[];
-  diagram?: string;
 };
 
 export function ServicesScroll({ services }: { services: Service[] }) {
@@ -119,36 +117,6 @@ export function ServicesScroll({ services }: { services: Service[] }) {
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-              {service.diagram && (
-                <a
-                  className="service-process"
-                  href={service.diagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Open business process diagram at full size"
-                >
-                  <div className="laptop">
-                    <div className="laptop-lid">
-                      <span className="camera" />
-                      <div className="laptop-display">
-                        <Image
-                          src={service.diagram}
-                          width={1401}
-                          height={851}
-                          sizes="(max-width: 700px) 75vw, 480px"
-                          alt="Business process map connecting data sources, ingestion, segmentation, analysis, and reporting."
-                        />
-                      </div>
-                    </div>
-                    <div className="laptop-base">
-                      <span />
-                    </div>
-                  </div>
-                  <span className="service-process-link">
-                    View full-size diagram
-                  </span>
-                </a>
-              )}
             </div>
           </article>
         ))}

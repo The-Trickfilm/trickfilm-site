@@ -74,6 +74,42 @@ export const applicationProject = {
   description:
     "A Trickfilm product bringing council training, meeting tools, and institutional memory together.",
 } as const;
-export const projects = [...websiteProjects, applicationProject];
+export const processProject = {
+  slug: "business-process-design",
+  name: "Business Process Design",
+  image: "processes/business-process",
+  sector: "Data ingestion, analysis & reporting",
+  domain: "Process diagram",
+  url: "/work/processes/business-process.png",
+  tone: "teal",
+  category: "Business process design",
+  description:
+    "A process map connecting data sources, analysis, and reporting in one end-to-end workflow.",
+} as const;
+export const creativeProjects = [applicationProject, processProject];
+export const projects = [...websiteProjects, ...creativeProjects];
 export type Project = (typeof projects)[number];
+export function projectPreview(project: Project) {
+  if (project.slug === "business-process-design")
+    return {
+      src: project.url,
+      width: 1401,
+      height: 851,
+      alt: "Business process map connecting data sources, ingestion, segmentation, analysis, and reporting.",
+      contain: true,
+    };
+  return {
+    src:
+      project.slug === "stratacouncil-platform"
+        ? "/work/applications/stratacouncil-meetings.webp"
+        : `/work/${project.image}.webp`,
+    width: 1200,
+    height: 833,
+    alt:
+      project.slug === "stratacouncil-platform"
+        ? "Public StrataCouncil.ca meeting-tools preview"
+        : `${project.name} website preview`,
+    contain: false,
+  };
+}
 export const CONTACT_EMAIL = "jeremy@trickfilm.com";

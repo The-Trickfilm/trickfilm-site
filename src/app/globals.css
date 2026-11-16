@@ -1745,8 +1745,8 @@ fieldset:disabled .contact-submit {
   gap: var(--grid-gap);
 }
 .project-stack .project-panel {
-  height: calc(100svh - var(--section-pad) * 2);
-  min-height: 540px;
+  height: max(520px, calc(var(--frame-width) / 2.1));
+  min-height: 520px;
   max-height: none;
   aspect-ratio: auto;
   top: var(--section-pad);
@@ -1783,10 +1783,12 @@ fieldset:disabled .contact-submit {
   padding-block: 0;
   margin-bottom: 0;
 }
-.application-section .project-panel {
-  height: auto;
-  min-height: 520px;
-  aspect-ratio: 2.1;
+.application-section > .project-stack {
+  padding-block: 0;
+}
+.diagram-display img {
+  object-fit: contain;
+  object-position: center;
 }
 .services {
   padding-block: 0;
@@ -2080,31 +2082,4 @@ fieldset:disabled .contact-submit {
     padding-top: 96px;
     padding-bottom: 48px;
   }
-}
-
-/* Keep the supplied process map intact inside its laptop screen. */
-.service-process {
-  display: block;
-  max-width: 480px;
-  margin: 32px auto 0;
-  padding-inline: 24px;
-}
-.service-process .laptop {
-  transform: none;
-}
-.service-process .laptop-display img {
-  object-fit: contain;
-  object-position: center;
-}
-.service-process-link {
-  display: block;
-  margin-top: 24px;
-  text-align: center;
-  font-size: 13px;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.service-process:focus-visible {
-  outline: 2px solid var(--teal, #5ec3ba);
-  outline-offset: 6px;
 }

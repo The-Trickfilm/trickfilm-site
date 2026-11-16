@@ -10,7 +10,7 @@ test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
     page.locator('a[href="mailto:jeremy@trickfilm.com"]').first(),
   ).toBeAttached();
   const cards = page.locator(".project-panel");
-  await expect(cards).toHaveCount(7);
+  await expect(cards).toHaveCount(8);
   const routes = await cards.evaluateAll((a) =>
     a.map((el) => el.getAttribute("href")!),
   );
@@ -86,7 +86,7 @@ test("desktop project surfaces overlap and release after the final project", asy
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
-  const cards = page.locator(".project-stack .project-panel");
+  const cards = page.locator("#work .project-stack .project-panel");
   const start = await cards
     .first()
     .evaluate((el) => el.getBoundingClientRect().top + scrollY);
@@ -445,7 +445,7 @@ test("service flower follows scroll while the numeral stays upright", async ({
   expect(
     await first.evaluate((el) => el.getBoundingClientRect().height),
   ).toBeLessThan(550);
-  expect(await page.locator(".flower-accent").count()).toBe(8);
+  expect(await page.locator(".flower-accent").count()).toBe(9);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect
     .poll(() =>
@@ -596,19 +596,69 @@ test("Koan charcoal card and full business process diagram are available", async
   const websites = page.locator("#work .project-panel");
   await expect(websites.nth(4)).toHaveClass(/tone-charcoal/);
   await expect(websites.nth(4)).toHaveAttribute("href", "/work/koan-analytics");
-  const diagram = page.locator(".service-process");
-  await diagram.scrollIntoViewIfNeeded();
+  await expect(page.locator("#services img")).toHaveCount(0);
+  const diagram = page.locator("#applications .project-panel").last();
   await expect(diagram).toHaveAttribute(
     "href",
-    "/work/processes/business-process.png",
+    "/work/business-process-design",
   );
+  await expect(diagram.locator(".eyebrow")).toHaveText("(Creative solutions)");
+  await diagram.scrollIntoViewIfNeeded();
   const img = diagram.locator("img");
   await expect(img).toBeVisible();
   await expect(img).toHaveCSS("object-fit", "contain");
   await expect
     .poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth))
     .toBeGreaterThan(0);
+  await page.goto("/work/business-process-design");
+  await expect(
+    page.getByRole("link", { name: /View full-size diagram/ }),
+  ).toHaveAttribute("href", "/work/processes/business-process.png");
+});
+
+test("creative solutions stack like web cards with matching landscape heights", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const websites = page.locator("#work .project-panel");
+  const solutions = page.locator("#applications .project-panel");
+  await expect(solutions).toHaveCount(2);
+  const targetHeight = (await solutions.first().boundingBox())!.height;
+  expect(targetHeight).toBeLessThan(700);
+  for (const card of [...(await websites.all()), ...(await solutions.all())]) {
+    expect(
+      Math.abs((await card.boundingBox())!.height - targetHeight),
+    ).toBeLessThan(2);
+    await expect(card).toHaveCSS("position", "sticky");
+  }
+  const start = await solutions
+    .first()
+    .evaluate((el) => el.getBoundingClientRect().top + scrollY);
+  await page.evaluate(
+    (y) => scrollTo({ top: y + 200, behavior: "instant" }),
+    start,
+  );
+  await expect
+    .poll(async () => Math.round((await solutions.first().boundingBox())!.y))
+    .toBe(64);
+  const secondStart = await solutions
+    .last()
+    .evaluate((el) => el.getBoundingClientRect().top + scrollY);
+  await page.evaluate(
+    (y) => scrollTo({ top: y - 160, behavior: "instant" }),
+    secondStart,
+  );
   expect(
-    (await page.request.get("/work/processes/business-process.png")).status(),
-  ).toBe(200);
+    await page.evaluate(() =>
+      document
+        .elementFromPoint(innerWidth / 2, 300)
+        ?.closest(".project-panel")
+        ?.getAttribute("href"),
+    ),
+  ).toBe("/work/business-process-design");
+  await page.locator("#services").scrollIntoViewIfNeeded();
+  expect((await solutions.last().boundingBox())!.y).toBeLessThan(24);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(solutions.first()).toHaveCSS("position", "relative");
 });
