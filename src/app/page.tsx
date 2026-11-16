@@ -37,6 +37,7 @@ const services = [
   },
   {
     name: "Business Process Design",
+    diagram: "/work/processes/business-process.png",
     copy: "A clearer way of working, built around your people, your tools, and your business.",
     items: ["Process mapping", "Workflow planning", "Business systems"],
   },

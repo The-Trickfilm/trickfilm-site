@@ -10,7 +10,7 @@ test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
     page.locator('a[href="mailto:jeremy@trickfilm.com"]').first(),
   ).toBeAttached();
   const cards = page.locator(".project-panel");
-  await expect(cards).toHaveCount(6);
+  await expect(cards).toHaveCount(7);
   const routes = await cards.evaluateAll((a) =>
     a.map((el) => el.getAttribute("href")!),
   );
@@ -445,7 +445,7 @@ test("service flower follows scroll while the numeral stays upright", async ({
   expect(
     await first.evaluate((el) => el.getBoundingClientRect().height),
   ).toBeLessThan(550);
-  expect(await page.locator(".flower-accent").count()).toBe(7);
+  expect(await page.locator(".flower-accent").count()).toBe(8);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect
     .poll(() =>
@@ -587,4 +587,28 @@ test("page frames share a contained grid and full-height main sections", async (
   expect(
     (await page.locator(".contact-form").boundingBox())!.width,
   ).toBeLessThanOrEqual(480);
+});
+
+test("Koan paper card and full business process diagram are available", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const websites = page.locator("#work .project-panel");
+  await expect(websites.nth(4)).toHaveClass(/tone-paper/);
+  await expect(websites.nth(4)).toHaveAttribute("href", "/work/koan-analytics");
+  const diagram = page.locator(".service-process");
+  await diagram.scrollIntoViewIfNeeded();
+  await expect(diagram).toHaveAttribute(
+    "href",
+    "/work/processes/business-process.png",
+  );
+  const img = diagram.locator("img");
+  await expect(img).toBeVisible();
+  await expect(img).toHaveCSS("object-fit", "contain");
+  await expect
+    .poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+    .toBeGreaterThan(0);
+  expect(
+    (await page.request.get("/work/processes/business-process.png")).status(),
+  ).toBe(200);
 });

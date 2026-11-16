@@ -57,3 +57,7 @@ The numeral is SVG text positioned using the loaded font's visible ink bounds, r
 The page frame is capped at 1280px; its padded inner grid is capped at 1080px. Hero, portfolio, section introductions, services, About, contact, and project detail pages share the same horizontal guides and column ratio. Contact fields are capped at 480px, with smaller inputs/textarea and a compact separate footer. Main section frames use a minimum of one viewport; work and services remain natural scrolling sequences, and mobile content can grow without clipping.
 
 Service opacity and active numbering use the actual flower center as the alignment target. The pending five-service implementation and numeral centering are included on this branch; an unmerged preview does not alter the production site.
+
+## Additional portfolio assets
+
+Koan Analytics uses a locally optimized screenshot of its public homepage, captured for this portfolio. Its paper card sits immediately before StrataCouncil.ca. The Business Process Design laptop uses the exact PNG supplied in `RAAVDiagram_ABR_ v2.png.zip`, without cropping or recreating the diagram; its link opens the full-resolution image.
