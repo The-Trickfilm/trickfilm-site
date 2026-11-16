@@ -19,20 +19,16 @@ test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
     expect(response.status()).toBe(200);
     expect(await response.text()).toContain("View");
   }
-  const first = page.locator("[data-original] .identity-card").first();
-  await page.locator(".identity-viewport").hover();
-  await first.click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-  const title = await dialog.locator("#identity-dialog-title").textContent();
-  await page.getByRole("button", { name: "Next logo", exact: true }).click();
-  await expect(dialog.locator("#identity-dialog-title")).not.toHaveText(title!);
-  await page.keyboard.press("ArrowLeft");
-  await expect(dialog.locator("#identity-dialog-title")).toHaveText(title!);
-  await page.keyboard.press("Escape");
-  await expect(dialog).not.toBeVisible();
-  await expect(first).toBeFocused();
-  await expect(page.locator("[data-original] .identity-card")).toHaveCount(21);
+  const carousel = page.locator(".identity-carousel");
+  await expect(carousel.locator("[data-original] .identity-card")).toHaveCount(
+    19,
+  );
+  await expect(
+    carousel.locator(".identity-card a, a.identity-card"),
+  ).toHaveCount(0);
+  await carousel.locator("[data-original] .identity-card").first().click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page).toHaveURL(/\/$/);
   expect(errors).toEqual([]);
   await page.goto("/work/not-a-project");
   await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
@@ -73,11 +69,9 @@ test("content works without JavaScript and with reduced motion", async ({
   const page = await context.newPage();
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.locator("[data-original] .identity-card")).toHaveCount(21);
+  await expect(page.locator("[data-original] .identity-card")).toHaveCount(19);
   await expect(page.locator("[data-clone]").first()).not.toBeVisible();
-  expect(
-    await page.locator(".identity-card").first().getAttribute("href"),
-  ).toMatch(/\.webp$/);
+  await expect(page.locator(".identity-carousel a")).toHaveCount(0);
   await context.close();
 });
 
@@ -316,13 +310,11 @@ test("logo carousel shows five desktop cards, wraps both ways, and pauses", asyn
       ),
     )
     .toBeLessThan(2);
-  expect(
-    await page
-      .locator("[data-clone] a")
-      .evaluateAll((els) =>
-        els.every((el) => (el as HTMLElement).tabIndex === -1),
-      ),
-  ).toBe(true);
+  await expect(
+    page.locator(
+      "[data-clone] a, [data-clone] button, [data-clone] [tabindex]",
+    ),
+  ).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect
     .poll(async () =>
@@ -338,7 +330,7 @@ test("logo carousel shows five desktop cards, wraps both ways, and pauses", asyn
     .toBe(0);
 });
 
-test("reduced-motion carousel is manual and still previews all logos", async ({
+test("reduced-motion carousel is manual and logos remain view-only", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -355,14 +347,10 @@ test("reduced-motion carousel is manual and still previews all logos", async ({
   await expect
     .poll(() => rail.evaluate((el) => el.scrollLeft))
     .toBeGreaterThan(before + 50);
-  const first = page.locator("[data-original] .identity-card").first();
-  await first.focus();
-  await page.keyboard.press("Enter");
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await page.keyboard.press("ArrowLeft");
-  await expect(page.locator(".dialog-controls > p")).toHaveText("21 / 21");
-  await page.keyboard.press("Escape");
-  await expect(first).toBeFocused();
+  await rail.focus();
+  await expect(rail).toBeFocused();
+  await expect(page.locator(".identity-carousel a")).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
 test("automatic logo motion crosses the loop seam and stops on hover", async ({
@@ -716,26 +704,42 @@ test("Talent Creative HR alternates every three seconds and supports pause and r
   ).toHaveAttribute("alt", /Employee-retention stages/);
 });
 
-test("new supplied identities open in the existing carousel preview", async ({
+test("supplied identities are visible artwork without links or preview dialogs", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  const originals = page.locator("[data-original]");
   for (const name of ["Talent Creative HR", "Beat Bugs", "All Well & Good"]) {
-    const card = page
-      .locator("[data-original] .identity-card")
-      .filter({ hasText: name });
-    await card.click();
-    await expect(page.locator("#identity-dialog-title")).toHaveText(name);
+    const card = originals.locator(".identity-card").filter({ hasText: name });
+    await card.scrollIntoViewIfNeeded();
     await expect
       .poll(() =>
-        page
-          .locator(".dialog-image img")
+        card
+          .locator("img")
           .evaluate((i) => (i as HTMLImageElement).naturalWidth),
       )
       .toBeGreaterThan(0);
-    await page.keyboard.press("Escape");
   }
+  await expect(
+    originals.getByRole("heading", {
+      name: "Houndz Unleashed — character",
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await expect(
+    originals.getByRole("heading", { name: "XDI — application", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    originals.getByRole("heading", { name: "Houndz Unleashed", exact: true }),
+  ).toHaveCount(1);
+  await expect(
+    originals.getByRole("heading", { name: "XDI", exact: true }),
+  ).toHaveCount(1);
+  await expect(
+    page.locator(".identity-carousel a, .identity-caption svg"),
+  ).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
 test("shared homepage links explicitly use the hero screenshot for browsers and crawlers", async ({
@@ -860,4 +864,45 @@ test("presentation plays all nine slides in a two-second loop on charcoal", asyn
   await expect(active()).toHaveAttribute("alt", /slide 2:/);
   await page.waitForTimeout(2200);
   await expect(active()).toHaveAttribute("alt", /slide 2:/);
+});
+
+test("Quality Engineering kit is styled, responsive, and downloads its draft files", async ({
+  page,
+}) => {
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/brand/quality-engineering");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Confidence.In every build.",
+    );
+    const cover = page.locator("main > section").first();
+    await expect(cover).toHaveCSS("background-color", "rgb(16, 24, 39)");
+    const image = cover.locator("img");
+    await expect(image).toBeVisible();
+    expect(
+      (await image.boundingBox())!.width / (await image.boundingBox())!.height,
+    ).toBeCloseTo(2.6, 1);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await expect(page.locator("main > section")).toHaveCount(6);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /noindex/,
+    );
+  }
+  const pdf = await page.request.get(
+    "/brand-kits/quality-engineering/quality-engineering-guidelines.pdf",
+  );
+  expect(pdf.status()).toBe(200);
+  expect((await pdf.body()).subarray(0, 4).toString()).toBe("%PDF");
+  const zip = await page.request.get(
+    "/brand-kits/quality-engineering/quality-engineering-kit.zip",
+  );
+  expect(zip.status()).toBe(200);
+  expect((await zip.body()).subarray(0, 2).toString()).toBe("PK");
+  await page.goto("/");
+  await expect(page.locator(".identity-carousel a")).toHaveCount(0);
 });
