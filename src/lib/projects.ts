@@ -41,6 +41,17 @@ export const websiteProjects = [
     description: "A website for Access to Justice BC.",
   },
   {
+    slug: "koan-analytics",
+    name: "Koan Analytics",
+    image: "koan",
+    sector: "Enterprise analytics",
+    domain: "koananalytics.com",
+    url: "https://koananalytics.com/",
+    tone: "paper",
+    description:
+      "A website for Koan Analytics and its enterprise analytics platform.",
+  },
+  {
     slug: "stratacouncil",
     name: "StrataCouncil.ca",
     image: "stratacouncil",

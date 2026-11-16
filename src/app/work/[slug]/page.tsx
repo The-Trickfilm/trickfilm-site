@@ -51,7 +51,7 @@ export default async function ProjectPage({
       <main id="main">
         <section className="case-hero">
           <p className="eyebrow">
-            ({application ? "Creative technology" : "Selected websites"})
+            ({application ? "Creative technology" : "Web design"})
           </p>
           <h1>{project.name}</h1>
           <dl className="case-facts">

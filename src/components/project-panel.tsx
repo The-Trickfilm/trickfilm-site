@@ -17,7 +17,7 @@ export function ProjectPanel({
     >
       <div className="project-info" data-reveal>
         <p className="eyebrow">
-          ({application ? "Creative technology" : "Work"})
+          ({application ? "Creative technology" : "Web design"})
         </p>
         <h3>
           {project.name === "StrataCouncil.ca" ? (

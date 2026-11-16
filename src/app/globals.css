@@ -2081,3 +2081,30 @@ fieldset:disabled .contact-submit {
     padding-bottom: 48px;
   }
 }
+
+/* Keep the supplied process map intact inside its laptop screen. */
+.service-process {
+  display: block;
+  max-width: 480px;
+  margin: 32px auto 0;
+  padding-inline: 24px;
+}
+.service-process .laptop {
+  transform: none;
+}
+.service-process .laptop-display img {
+  object-fit: contain;
+  object-position: center;
+}
+.service-process-link {
+  display: block;
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.service-process:focus-visible {
+  outline: 2px solid var(--teal, #5ec3ba);
+  outline-offset: 6px;
+}
