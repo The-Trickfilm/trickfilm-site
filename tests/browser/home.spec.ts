@@ -737,3 +737,57 @@ test("new supplied identities open in the existing carousel preview", async ({
     await page.keyboard.press("Escape");
   }
 });
+
+test("shared homepage links explicitly use the hero screenshot for browsers and crawlers", async ({
+  page,
+}) => {
+  const imageURL =
+    "https://trickfilm-site.vercel.app/share/trickfilm-hero-v1.jpg";
+  await page.goto("/");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    imageURL,
+  );
+  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute(
+    "content",
+    "1200",
+  );
+  await expect(
+    page.locator('meta[property="og:image:height"]'),
+  ).toHaveAttribute("content", "900");
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+    "content",
+    imageURL,
+  );
+  for (const agent of [
+    "facebookexternalhit/1.1",
+    "Twitterbot/1.0",
+    "Mozilla/5.0 AppleWebKit/605.1.15 Safari/605.1.15",
+  ]) {
+    const response = await page.request.get("/", {
+      headers: { "User-Agent": agent },
+    });
+    expect(response.status()).toBe(200);
+    const head = (await response.text()).split("</head>")[0];
+    expect(head).toContain(imageURL);
+    expect(head).not.toContain("/work/gower.webp");
+  }
+  const image = await page.request.get(new URL(imageURL).pathname);
+  expect(image.status()).toBe(200);
+  expect(image.headers()["content-type"]).toContain("image/jpeg");
+  await page.goto(new URL(imageURL).pathname);
+  await expect
+    .poll(() =>
+      page.locator("img").evaluate((i) => (i as HTMLImageElement).naturalWidth),
+    )
+    .toBe(1200);
+  expect(
+    await page
+      .locator("img")
+      .evaluate((i) => (i as HTMLImageElement).naturalHeight),
+  ).toBe(900);
+});

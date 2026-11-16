@@ -13,6 +13,13 @@ const ui = localFont({
   display: "swap",
   weight: "100 900",
 });
+// Use the public deployment for share-image fetches while trickfilm.com redirects elsewhere.
+const shareImage = {
+  url: "https://trickfilm-site.vercel.app/share/trickfilm-hero-v1.jpg",
+  width: 1200,
+  height: 900,
+  alt: "Trickfilm homepage hero: Good ideas. Beautifully executed. Original turquoise Trickfilm logo.",
+};
 export const metadata: Metadata = {
   metadataBase: new URL("https://trickfilm.com"),
   title: {
@@ -27,6 +34,14 @@ export const metadata: Metadata = {
     description:
       "Independent creative studio. Design, websites, applications, and automation.",
     type: "website",
+    images: [shareImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Trickfilm — Good ideas. Beautifully executed.",
+    description:
+      "Independent creative studio. Design, websites, applications, and automation.",
+    images: [{ url: shareImage.url, alt: shareImage.alt }],
   },
 };
 export default function RootLayout({
