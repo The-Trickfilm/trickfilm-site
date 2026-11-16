@@ -15,17 +15,22 @@ export function ProjectPanel({
       className={`project-panel tone-${project.tone}`}
       data-project-href={`/work/${project.slug}`}
     >
-      <Link
-        className="project-card-link"
-        href={`/work/${project.slug}`}
-        aria-label={`View ${project.name} ${creative ? "creative" : "website"} project`}
-      />
+      {!creative && (
+        <Link
+          className="project-card-link"
+          href={`/work/${project.slug}`}
+          aria-label={`View ${project.name} website project`}
+        />
+      )}
+
       <div className="project-info" data-reveal>
         <p className="eyebrow">
           ({creative ? "Creative solutions" : "Web design"})
         </p>
         <h3>
-          {project.name === "StrataCouncil.ca" ? (
+          {creative && "service" in project ? (
+            project.service
+          ) : project.name === "StrataCouncil.ca" ? (
             <>
               <span className="project-name-part">Strata</span>
               <wbr />
@@ -35,12 +40,14 @@ export function ProjectPanel({
             project.name
           )}
         </h3>
-        <span className="project-cta">
-          <span className="flower-accent">
-            <Arrow />
+        {!creative && (
+          <span className="project-cta">
+            <span className="flower-accent">
+              <Arrow />
+            </span>
+            <span>View project</span>
           </span>
-          <span>View project</span>
-        </span>
+        )}
         <dl className="project-facts">
           <div>
             <dt>Category:</dt>

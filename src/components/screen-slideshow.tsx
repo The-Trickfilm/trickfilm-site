@@ -16,10 +16,14 @@ export function ScreenSlideshow({
   frames,
   name,
   priority = false,
+  intervalMs = 3000,
+  darkBackground = false,
 }: {
   frames: readonly ProjectFrame[];
   name: string;
   priority?: boolean;
+  intervalMs?: number;
+  darkBackground?: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0),
@@ -49,10 +53,10 @@ export function ScreenSlideshow({
     if (paused || !visible || hidden || reducedMotion) return;
     const interval = setInterval(
       () => setActive((i) => (i + 1) % frames.length),
-      3000,
+      intervalMs,
     );
     return () => clearInterval(interval);
-  }, [paused, visible, hidden, reducedMotion, frames.length]);
+  }, [paused, visible, hidden, reducedMotion, frames.length, intervalMs]);
   return (
     <div
       ref={root}
@@ -60,7 +64,9 @@ export function ScreenSlideshow({
       role="group"
       aria-label={`${name} artwork preview`}
     >
-      <div className="laptop-display diagram-display">
+      <div
+        className={`laptop-display diagram-display${darkBackground ? " presentation-display" : ""}`}
+      >
         {frames.map((frame, i) => (
           <span
             key={frame.src}
@@ -75,7 +81,9 @@ export function ScreenSlideshow({
               alt={frame.alt}
               sizes="(max-width: 700px) 82vw, 58vw"
               priority={priority && i === 0}
-              loading={priority && i === 0 ? undefined : "eager"}
+              loading={
+                priority && i === 0 ? undefined : visible ? "eager" : "lazy"
+              }
             />
           </span>
         ))}

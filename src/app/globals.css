@@ -2163,3 +2163,8 @@ fieldset:disabled .contact-submit {
 .preview-controls {
   pointer-events: auto;
 }
+
+/* Preserve complete presentation slides without white letterboxing. */
+.presentation-display {
+  background: #252525;
+}

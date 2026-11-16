@@ -73,3 +73,7 @@ Koan Analytics uses a locally optimized screenshot of its public “We Build End
 ## Shared-link preview
 
 Open Graph and Twitter metadata explicitly use `public/share/trickfilm-hero-v1.jpg`, a 1200×900 screenshot of the actual homepage hero with fonts and logo loaded. No portfolio card is included. The image uses an absolute URL on the public production Vercel hostname because trickfilm.com currently redirects to StrataCouncil. When the custom domain points to this app, that host can be updated. Messaging apps cache previews independently; changing metadata does not replace an existing message's cached thumbnail.
+
+## Creative Solutions service cards
+
+Creative Solutions card headings name the service: Applications & Automation, Business Process Design (two examples), and Presentation Design. Company names remain in the client facts. These cards have no project links or View project CTA; website cards keep theirs. The supplied nine-slide Thunderbird deck plays in numeric order in a repeating two-second slideshow. Slides stay fully visible against charcoal letterboxing. The HR loop retains its three-second interval; both offer pause/manual navigation and respect reduced motion.
