@@ -37,7 +37,7 @@ export const websiteProjects = [
     sector: "Access to justice",
     domain: "accesstojusticebc.ca",
     url: "https://accesstojusticebc.ca/",
-    tone: "charcoal",
+    tone: "paper",
     description: "A website for Access to Justice BC.",
   },
   {
