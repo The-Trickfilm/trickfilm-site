@@ -1,23 +1,25 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Project } from "@/lib/projects";
+import { projectPreview, type Project } from "@/lib/projects";
 import { Arrow } from "./arrow";
 export function ProjectPanel({
   project,
-  application = false,
+  creative = false,
 }: {
   project: Project;
-  application?: boolean;
+  creative?: boolean;
 }) {
+  const preview = projectPreview(project);
+  const process = project.slug === "business-process-design";
   return (
     <Link
       href={`/work/${project.slug}`}
       className={`project-panel tone-${project.tone}`}
-      aria-label={`View ${project.name} ${application ? "application" : "website"} project`}
+      aria-label={`View ${project.name} ${creative ? "creative" : "website"} project`}
     >
       <div className="project-info" data-reveal>
         <p className="eyebrow">
-          ({application ? "Creative technology" : "Web design"})
+          ({creative ? "Creative solutions" : "Web design"})
         </p>
         <h3>
           {project.name === "StrataCouncil.ca" ? (
@@ -39,12 +41,20 @@ export function ProjectPanel({
         <dl className="project-facts">
           <div>
             <dt>Category:</dt>
-            <dd>{application ? "Application" : "Website design"}</dd>
+            <dd>
+              {process
+                ? "Business process design"
+                : creative
+                  ? "Application"
+                  : "Website design"}
+            </dd>
           </div>
-          <div>
-            <dt>Client:</dt>
-            <dd>{project.name}</dd>
-          </div>
+          {!process && (
+            <div>
+              <dt>Client:</dt>
+              <dd>{project.name}</dd>
+            </div>
+          )}
           <div>
             <dt>Focus:</dt>
             <dd>{project.sector}</dd>
@@ -55,21 +65,15 @@ export function ProjectPanel({
         <div className="laptop">
           <div className="laptop-lid">
             <span className="camera" />
-            <div className="laptop-display">
+            <div
+              className={`laptop-display${preview.contain ? " diagram-display" : ""}`}
+            >
               <Image
-                src={
-                  application
-                    ? "/work/applications/stratacouncil-meetings.webp"
-                    : `/work/${project.image}.webp`
-                }
-                width={1200}
-                height={833}
+                src={preview.src}
+                width={preview.width}
+                height={preview.height}
                 sizes="(max-width: 700px) 82vw, 58vw"
-                alt={
-                  application
-                    ? "Public StrataCouncil.ca meeting-tools preview"
-                    : `${project.name} homepage`
-                }
+                alt={preview.alt}
               />
             </div>
           </div>

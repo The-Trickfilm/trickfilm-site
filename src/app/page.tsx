@@ -1,7 +1,7 @@
 import Image from "next/image";
 import {
   websiteProjects,
-  applicationProject,
+  creativeProjects,
   CONTACT_EMAIL,
 } from "@/lib/projects";
 import { ProjectPanel } from "@/components/project-panel";
@@ -37,7 +37,6 @@ const services = [
   },
   {
     name: "Business Process Design",
-    diagram: "/work/processes/business-process.png",
     copy: "A clearer way of working, built around your people, your tools, and your business.",
     items: ["Process mapping", "Workflow planning", "Business systems"],
   },
@@ -137,7 +136,7 @@ export default function Home() {
           aria-labelledby="applications-heading"
         >
           <div className="section-introduction section-content" data-reveal>
-            <p className="eyebrow">(Creative technology)</p>
+            <p className="eyebrow">(Creative solutions)</p>
             <div>
               <h2 id="applications-heading">
                 Ideas that
@@ -147,7 +146,11 @@ export default function Home() {
               <p>Applications, connected workflows, and useful tools.</p>
             </div>
           </div>
-          <ProjectPanel project={applicationProject} application />
+          <div className="project-stack">
+            {creativeProjects.map((project) => (
+              <ProjectPanel key={project.slug} project={project} creative />
+            ))}
+          </div>
         </section>
         <section
           id="services"
@@ -214,7 +217,7 @@ export default function Home() {
         <div className="footer-links">
           <a href="#work">Websites</a>
           <a href="#branding">Brand/Identity</a>
-          <a href="#applications">Creative technology</a>
+          <a href="#applications">Creative solutions</a>
           <a href="#services">Services</a>
           <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
         </div>

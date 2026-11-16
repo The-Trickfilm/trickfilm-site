@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { projects, CONTACT_EMAIL } from "@/lib/projects";
+import { projects, projectPreview, CONTACT_EMAIL } from "@/lib/projects";
 import { Arrow } from "@/components/arrow";
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -29,7 +29,10 @@ export default async function ProjectPage({
   if (index < 0) notFound();
   const project = projects[index],
     next = projects[(index + 1) % projects.length],
-    application = project.slug === "stratacouncil-platform";
+    application = project.slug === "stratacouncil-platform",
+    process = project.slug === "business-process-design",
+    creative = application || process,
+    preview = projectPreview(project);
   return (
     <>
       <a className="skip-link" href="#main">
@@ -44,14 +47,14 @@ export default async function ProjectPage({
             alt="Trickfilm"
           />
         </Link>
-        <Link href={application ? "/#applications" : "/#work"}>
+        <Link href={creative ? "/#applications" : "/#work"}>
           ← Back to work
         </Link>
       </header>
       <main id="main">
         <section className="case-hero">
           <p className="eyebrow">
-            ({application ? "Creative technology" : "Web design"})
+            ({creative ? "Creative solutions" : "Web design"})
           </p>
           <h1>{project.name}</h1>
           <dl className="case-facts">
@@ -61,7 +64,13 @@ export default async function ProjectPage({
             </div>
             <div>
               <dt>Category</dt>
-              <dd>{application ? "Application" : "Website"}</dd>
+              <dd>
+                {process
+                  ? "Business process design"
+                  : application
+                    ? "Application"
+                    : "Website"}
+              </dd>
             </div>
             <div>
               <dt>Focus</dt>
@@ -73,20 +82,14 @@ export default async function ProjectPage({
           <div className="laptop">
             <div className="laptop-lid">
               <span className="camera" />
-              <div className="laptop-display">
+              <div
+                className={`laptop-display${preview.contain ? " diagram-display" : ""}`}
+              >
                 <Image
-                  src={
-                    application
-                      ? "/work/applications/stratacouncil-meetings.webp"
-                      : `/work/${project.image}.webp`
-                  }
-                  width={1200}
-                  height={833}
-                  alt={
-                    application
-                      ? "Public StrataCouncil.ca meeting-tools preview"
-                      : `${project.name} homepage`
-                  }
+                  src={preview.src}
+                  width={preview.width}
+                  height={preview.height}
+                  alt={preview.alt}
                   priority
                   sizes="(max-width: 700px) 80vw, 75vw"
                 />
@@ -107,7 +110,11 @@ export default async function ProjectPage({
               target="_blank"
               rel="noopener noreferrer"
             >
-              {application ? "Explore the product" : "Visit the website"}{" "}
+              {process
+                ? "View full-size diagram"
+                : application
+                  ? "Explore the product"
+                  : "Visit the website"}{" "}
               <Arrow />
               <span className="sr-only">(opens in a new tab)</span>
             </a>

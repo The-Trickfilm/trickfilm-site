@@ -48,7 +48,9 @@ The logo rail repeats the supplied catalog on either side of the accessible orig
 
 ## Services focus treatment
 
-Services are Web design, Branding, Graphic Design, Workflow Automation, and Business Process Design. The section title stays in the desktop visual column; every service uses the same heading style. Copy opacity follows distance from the viewport center in either scroll direction. Reduced-motion and no-JavaScript views retain fully visible copy.
+Services are Web design, Branding, Graphic Design, Workflow Automation, and Business Process Design. Creative Solutions includes StrataCouncil.ca and the supplied Business Process Design diagram. Both portfolio groups share the same landscape card dimensions and native sticky stacking; mobile and reduced-motion views remain in normal flow. The Services list is text-only.
+
+The section title stays in the desktop visual column; every service uses the same heading style. Copy opacity follows distance from the viewport center in either scroll direction. Reduced-motion and no-JavaScript views retain fully visible copy.
 
 The numeral is SVG text positioned using the loaded font's visible ink bounds, removing font-bearing and line-box offsets. The flower's original path and color are preserved in `flower-centered.svg`; only the viewBox adds a square presentation frame centered on its alpha centroid, so rotation stays centered on the upright number. `flower.svg` remains the unchanged upload.
 
@@ -60,4 +62,4 @@ Service opacity and active numbering use the actual flower center as the alignme
 
 ## Additional portfolio assets
 
-Koan Analytics uses a locally optimized screenshot of its public “We Build End-To-End Analytic Platforms” page, captured for this portfolio. Its charcoal card sits immediately before StrataCouncil.ca. The Business Process Design laptop uses the exact PNG supplied in `RAAVDiagram_ABR_ v2.png.zip`, without cropping or recreating the diagram; its link opens the full-resolution image.
+Koan Analytics uses a locally optimized screenshot of its public “We Build End-To-End Analytic Platforms” page, captured for this portfolio. Its charcoal card sits immediately before StrataCouncil.ca. The Creative Solutions Business Process Design card uses the exact PNG supplied in `RAAVDiagram_ABR_ v2.png.zip`, without cropping or recreating the diagram; its detail page links to the full-resolution image.
