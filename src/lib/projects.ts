@@ -46,8 +46,8 @@ export const websiteProjects = [
     image: "koan",
     sector: "Enterprise analytics",
     domain: "koananalytics.com",
-    url: "https://koananalytics.com/",
-    tone: "paper",
+    url: "https://koananalytics.com/we-build-end-to-end-analytic-platforms/",
+    tone: "charcoal",
     description:
       "A website for Koan Analytics and its enterprise analytics platform.",
   },

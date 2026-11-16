@@ -60,4 +60,4 @@ Service opacity and active numbering use the actual flower center as the alignme
 
 ## Additional portfolio assets
 
-Koan Analytics uses a locally optimized screenshot of its public homepage, captured for this portfolio. Its paper card sits immediately before StrataCouncil.ca. The Business Process Design laptop uses the exact PNG supplied in `RAAVDiagram_ABR_ v2.png.zip`, without cropping or recreating the diagram; its link opens the full-resolution image.
+Koan Analytics uses a locally optimized screenshot of its public “We Build End-To-End Analytic Platforms” page, captured for this portfolio. Its charcoal card sits immediately before StrataCouncil.ca. The Business Process Design laptop uses the exact PNG supplied in `RAAVDiagram_ABR_ v2.png.zip`, without cropping or recreating the diagram; its link opens the full-resolution image.

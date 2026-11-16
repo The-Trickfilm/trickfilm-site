@@ -589,12 +589,12 @@ test("page frames share a contained grid and full-height main sections", async (
   ).toBeLessThanOrEqual(480);
 });
 
-test("Koan paper card and full business process diagram are available", async ({
+test("Koan charcoal card and full business process diagram are available", async ({
   page,
 }) => {
   await page.goto("/");
   const websites = page.locator("#work .project-panel");
-  await expect(websites.nth(4)).toHaveClass(/tone-paper/);
+  await expect(websites.nth(4)).toHaveClass(/tone-charcoal/);
   await expect(websites.nth(4)).toHaveAttribute("href", "/work/koan-analytics");
   const diagram = page.locator(".service-process");
   await diagram.scrollIntoViewIfNeeded();
