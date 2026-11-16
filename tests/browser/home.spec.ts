@@ -447,7 +447,7 @@ test("service flower follows scroll while the numeral stays upright", async ({
   expect(
     await first.evaluate((el) => el.getBoundingClientRect().height),
   ).toBeLessThan(550);
-  expect(await page.locator(".flower-accent").count()).toBe(11);
+  expect(await page.locator(".flower-accent").count()).toBe(7);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect
     .poll(() =>
@@ -790,4 +790,74 @@ test("shared homepage links explicitly use the hero screenshot for browsers and 
       .locator("img")
       .evaluate((i) => (i as HTMLImageElement).naturalHeight),
   ).toBe(900);
+});
+
+test("creative cards lead with services and do not link to project pages", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const cards = page.locator("#applications .project-panel");
+  await expect(cards.locator("h3")).toHaveText([
+    "Applications & Automation",
+    "Business Process Design",
+    "Business Process Design",
+    "Presentation Design",
+  ]);
+  await expect(cards.locator("a")).toHaveCount(0);
+  await expect(cards.locator(".project-cta")).toHaveCount(0);
+  await expect(page.locator("#work .project-card-link")).toHaveCount(6);
+  await expect(cards.nth(2).locator(".project-facts")).toContainText(
+    "Talent Creative HR",
+  );
+});
+
+test("presentation plays all nine slides in a two-second loop on charcoal", async ({
+  page,
+}) => {
+  test.setTimeout(45000);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const card = page.locator(
+    '[data-project-href="/work/thunderbird-entertainment"]',
+  );
+  const screen = card.locator(".screen-slideshow");
+  await screen.scrollIntoViewIfNeeded();
+  await expect(screen.locator(".preview-frame")).toHaveCount(9);
+  await expect(screen.locator(".laptop-display")).toHaveCSS(
+    "background-color",
+    "rgb(37, 37, 37)",
+  );
+  const active = () => screen.locator('[data-preview-active="true"] img');
+  await expect(active()).toHaveAttribute("alt", /slide 1:/);
+  await page.waitForTimeout(1400);
+  await expect(active()).toHaveAttribute("alt", /slide 1:/);
+  for (let slide = 2; slide <= 9; slide++) {
+    await expect(active()).toHaveAttribute(
+      "alt",
+      new RegExp(`slide ${slide}:`),
+      { timeout: 2600 },
+    );
+    await expect(active()).toHaveCSS("object-fit", "contain");
+    await expect
+      .poll(() =>
+        active().evaluate((i) => (i as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
+  }
+  await expect(active()).toHaveAttribute("alt", /slide 1:/, { timeout: 2600 });
+  await card
+    .getByRole("button", { name: "Pause Thunderbird Entertainment preview" })
+    .click();
+  await page.waitForTimeout(2200);
+  await expect(active()).toHaveAttribute("alt", /slide 1:/);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(
+    card.getByRole("button", { name: /Play .* preview/ }),
+  ).toHaveCount(0);
+  await card
+    .getByRole("button", { name: "Next Thunderbird Entertainment image" })
+    .click();
+  await expect(active()).toHaveAttribute("alt", /slide 2:/);
+  await page.waitForTimeout(2200);
+  await expect(active()).toHaveAttribute("alt", /slide 2:/);
 });

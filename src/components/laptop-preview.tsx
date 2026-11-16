@@ -20,6 +20,10 @@ export function LaptopPreview({
             frames={frames}
             name={project.name}
             priority={priority}
+            intervalMs={
+              "slideIntervalMs" in project ? project.slideIntervalMs : 3000
+            }
+            darkBackground={project.slug === "thunderbird-entertainment"}
           />
         ) : (
           <div
