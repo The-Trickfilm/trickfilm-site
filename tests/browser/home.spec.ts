@@ -721,7 +721,7 @@ test("new supplied identities open in the existing carousel preview", async ({
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  for (const name of ["HRsignal", "Beat Bugs", "All Well & Good"]) {
+  for (const name of ["Talent Creative HR", "Beat Bugs", "All Well & Good"]) {
     const card = page
       .locator("[data-original] .identity-card")
       .filter({ hasText: name });

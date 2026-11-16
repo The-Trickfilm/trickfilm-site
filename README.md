@@ -67,3 +67,5 @@ Koan Analytics uses a locally optimized screenshot of its public “We Build End
 ## Additional supplied artwork
 
 `Archive 2.zip` supplies HRsignal, Beat Bugs, and All Well & Good for the Brand/Identity carousel (21 total). `Archive.zip` supplies Talent Creative HR's process map and employee-retention stages plus the Thunderbird Entertainment corporate presentation cover. Local WebP derivatives preserve the complete artwork; Creative Solutions now has four cards. Talent Creative HR shares one laptop screen, switching images every three seconds while visible, with Pause/Play and Next controls. Autoplay stops offscreen, in hidden tabs, and for reduced motion. Both full-size HR images remain linked from its detail page. No additional slides, client outcomes, or integration claims are invented.
+
+`Archive 3.zip` replaces the earlier HRsignal and All Well & Good identity artwork with the supplied square and landscape versions. The former HRsignal carousel entry is now titled Talent Creative HR. New asset filenames avoid reusing cached thumbnails; carousel size remains 21.

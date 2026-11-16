@@ -144,11 +144,11 @@ export const logoProjects = [
     height: 554,
   },
   {
-    name: "HRsignal",
+    name: "Talent Creative HR",
     sector: "Brand/Identity",
-    image: "hrsignal",
-    src: "/work/logos/hrsignal.webp",
-    width: 900,
+    image: "talent-creative-hr",
+    src: "/work/logos/talent-creative-hr.webp",
+    width: 1200,
     height: 1200,
   },
   {
@@ -163,8 +163,8 @@ export const logoProjects = [
     name: "All Well & Good",
     sector: "Brand/Identity",
     image: "all-well-and-good",
-    src: "/work/logos/all-well-and-good.webp",
+    src: "/work/logos/all-well-and-good-identity.webp",
     width: 907,
-    height: 886,
+    height: 616,
   },
 ] as const;
