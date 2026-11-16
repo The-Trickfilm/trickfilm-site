@@ -118,7 +118,7 @@ export default function Home() {
           aria-labelledby="branding-heading"
         >
           <div className="section-introduction" data-reveal>
-            <p className="eyebrow">(Identity)</p>
+            <p className="eyebrow">(Brand/Identity)</p>
             <div>
               <h2 id="branding-heading">
                 Made to be
@@ -212,7 +212,7 @@ export default function Home() {
       <footer className="footer home-footer">
         <div className="footer-links">
           <a href="#work">Websites</a>
-          <a href="#branding">Identity</a>
+          <a href="#branding">Brand/Identity</a>
           <a href="#applications">Creative technology</a>
           <a href="#services">Services</a>
           <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
