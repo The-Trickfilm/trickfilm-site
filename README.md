@@ -11,7 +11,7 @@ Validation: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, th
 ## Content and assets
 
 - `src/lib/projects.ts`: five supplied website projects and StrataCouncil.ca application; confirmed contact jeremy@trickfilm.com.
-- `src/lib/logo-projects.ts`: 18 supplied logo images, including variants. A seamless horizontal carousel shows about five at once on desktop, three on tablet, and two on mobile. All 18 open in an accessible native dialog with arrow keys and Escape.
+- `src/lib/logo-projects.ts`: 21 supplied identity images, including variants. A seamless horizontal carousel shows about five at once on desktop, three on tablet, and two on mobile. All 21 open in an accessible native dialog with arrow keys and Escape.
 - `public/brand`: original Trickfilm SVG artwork, unchanged.
 - `public/work`: existing website screenshots and supplied logo exports, retained.
 - `public/work/applications`: captures of StrataCouncil.ca's public product previews. Its public footer identifies it as a Trickfilm product. These are not authenticated application screenshots.
@@ -36,7 +36,7 @@ Success is returned only after Mailtrap acknowledges acceptance. Missing configu
 
 ## Services scrolling
 
-On large screens, the service label and number stay in a sticky left column while the three descriptions scroll naturally at right. An IntersectionObserver changes the decorative number at the viewport midpoint, including on reverse scrolling. Mobile, short screens, and reduced-motion users receive an ordinary list. No wheel interception or automatic scrolling.
+On large screens, the service label and number stay in a sticky left column while the five descriptions scroll naturally at right. A scroll update changes the decorative number at the flower’s alignment point, including on reverse scrolling. Mobile, short screens, and reduced-motion users receive an ordinary list. No wheel interception or automatic scrolling.
 
 ## Logo carousel
 
@@ -58,8 +58,12 @@ The numeral is SVG text positioned using the loaded font's visible ink bounds, r
 
 The page frame is capped at 1280px; its padded inner grid is capped at 1080px. Hero, portfolio, section introductions, services, About, contact, and project detail pages share the same horizontal guides and column ratio. Contact fields are capped at 480px, with smaller inputs/textarea and a compact separate footer. Main section frames use a minimum of one viewport; work and services remain natural scrolling sequences, and mobile content can grow without clipping.
 
-Service opacity and active numbering use the actual flower center as the alignment target. The pending five-service implementation and numeral centering are included on this branch; an unmerged preview does not alter the production site.
+Service opacity and active numbering use the actual flower center as the alignment target. All five services and upright, centered numerals are present.
 
 ## Additional portfolio assets
 
 Koan Analytics uses a locally optimized screenshot of its public “We Build End-To-End Analytic Platforms” page, captured for this portfolio. Its charcoal card sits immediately before StrataCouncil.ca. The Creative Solutions Business Process Design card uses the exact PNG supplied in `RAAVDiagram_ABR_ v2.png.zip`, without cropping or recreating the diagram; its detail page links to the full-resolution image.
+
+## Additional supplied artwork
+
+`Archive 2.zip` supplies HRsignal, Beat Bugs, and All Well & Good for the Brand/Identity carousel (21 total). `Archive.zip` supplies Talent Creative HR's process map and employee-retention stages plus the Thunderbird Entertainment corporate presentation cover. Local WebP derivatives preserve the complete artwork; Creative Solutions now has four cards. Talent Creative HR shares one laptop screen, switching images every three seconds while visible, with Pause/Play and Next controls. Autoplay stops offscreen, in hidden tabs, and for reduced motion. Both full-size HR images remain linked from its detail page. No additional slides, client outcomes, or integration claims are invented.

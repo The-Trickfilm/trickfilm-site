@@ -143,4 +143,28 @@ export const logoProjects = [
     width: 1200,
     height: 554,
   },
+  {
+    name: "HRsignal",
+    sector: "Brand/Identity",
+    image: "hrsignal",
+    src: "/work/logos/hrsignal.webp",
+    width: 900,
+    height: 1200,
+  },
+  {
+    name: "Beat Bugs",
+    sector: "Brand/Identity",
+    image: "beat-bugs",
+    src: "/work/logos/beat-bugs.webp",
+    width: 1200,
+    height: 766,
+  },
+  {
+    name: "All Well & Good",
+    sector: "Brand/Identity",
+    image: "all-well-and-good",
+    src: "/work/logos/all-well-and-good.webp",
+    width: 907,
+    height: 886,
+  },
 ] as const;
