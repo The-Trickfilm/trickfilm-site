@@ -89,3 +89,5 @@ The first brand-kit pilot is Quality Engineering, a video-game QA/testing and to
 Identity card surfaces grow toward the horizontal rail centre (up to 1.075×) and shrink toward its edges (0.88×). Layout-width figures remain unchanged for predictable native scrolling and seamless loop rebasing. Cached centre positions are remeasured on resize; scroll events batch scale updates in requestAnimationFrame without React renders.
 
 Both portfolio stacks ease from 0.94× into their normal full-size frame as they enter the viewport (0.97× on mobile). Their top origin preserves sticky positioning; reversing scroll reverses the effect. Reduced motion and no-JavaScript views retain normal-sized content. These changes are based on the production branch and exclude the closed identity-exploration PR.
+
+Identity surfaces also follow a gentle, monotonic horizontal projection: spacing opens around the centre and compresses near the edges, reinforcing the perceived depth of the magnification. The underlying figures retain fixed widths and gaps for stable touch scrolling, looping and resizing. Reduced motion disables this translation as well as scaling.
