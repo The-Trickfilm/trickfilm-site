@@ -1007,6 +1007,12 @@ test("both portfolio stacks magnify on entry, reverse, and keep their sticky anc
     expect(await scale()).toBeGreaterThanOrEqual(0.94);
     expect((await card.boundingBox())!.y).toBeCloseTo(900, 0);
     await page.evaluate(
+      (y) => scrollTo({ top: y - 545, behavior: "instant" }),
+      top,
+    );
+    await expect.poll(scale).toBeGreaterThan(1.02);
+    expect(await scale()).toBeLessThanOrEqual(1.0251);
+    await page.evaluate(
       (y) => scrollTo({ top: y - 350, behavior: "instant" }),
       top,
     );
@@ -1014,6 +1020,11 @@ test("both portfolio stacks magnify on entry, reverse, and keep their sticky anc
     expect(await card.evaluate((el) => (el as HTMLElement).offsetHeight)).toBe(
       layoutHeight,
     );
+    await page.evaluate(
+      (y) => scrollTo({ top: y - 545, behavior: "instant" }),
+      top,
+    );
+    await expect.poll(scale).toBeGreaterThan(1.02);
     await page.evaluate(
       (y) => scrollTo({ top: y - 900, behavior: "instant" }),
       top,
@@ -1084,7 +1095,7 @@ test("logo spacing opens at the centre, compresses at the edges, and stays rever
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(originals.nth(2).locator(".identity-card-surface")).toHaveCSS(
     "translate",
-    "none",
+    "0px",
   );
   await expect(originals.nth(2).locator(".identity-card-surface")).toHaveCSS(
     "scale",
@@ -1096,4 +1107,68 @@ test("logo spacing opens at the centre, compresses at the edges, and stays rever
       return Math.max(...g) - Math.min(...g);
     })
     .toBeLessThan(0.2);
+});
+
+test("logo perspective mirrors the sides and remains square-on across the centre band", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const rail = page.locator(".identity-viewport");
+  await rail.scrollIntoViewIfNeeded();
+  await page
+    .getByRole("button", { name: "Pause logo carousel", exact: true })
+    .click();
+  const cards = page.locator("[data-original] .identity-card");
+  const angle = (index: number) =>
+    cards
+      .nth(index)
+      .evaluate((el) =>
+        parseFloat(
+          (el as HTMLElement).style.getPropertyValue("--identity-yaw"),
+        ),
+      );
+  await expect.poll(() => angle(0)).toBeLessThan(-12);
+  await expect.poll(() => angle(4)).toBeGreaterThan(12);
+  await expect.poll(() => angle(2)).toBe(0);
+  // Sample actual projected corners: the inner edge is taller on each side.
+  const client = await page.context().newCDPSession(page);
+  const document = await client.send("DOM.getDocument");
+  for (const [index, right] of [
+    [1, false],
+    [5, true],
+  ] as const) {
+    const node = await client.send("DOM.querySelector", {
+      nodeId: document.root.nodeId,
+      selector: `[data-original] .identity-card:nth-child(${index}) .identity-card-surface`,
+    });
+    const { model } = await client.send("DOM.getBoxModel", {
+      nodeId: node.nodeId,
+    });
+    const [tlx, tly, trx, try_, brx, bry, blx, bly] = model.border;
+    const leftHeight = Math.hypot(blx - tlx, bly - tly),
+      rightHeight = Math.hypot(brx - trx, bry - try_);
+    expect(
+      right ? leftHeight - rightHeight : rightHeight - leftHeight,
+    ).toBeGreaterThan(4);
+  }
+  const start = await rail.evaluate((el) => el.scrollLeft);
+  await rail.evaluate((el) => {
+    el.scrollLeft += 25;
+  });
+  await expect.poll(() => angle(2)).toBe(0);
+  await rail.evaluate((el, x) => {
+    el.scrollLeft = x + 150;
+  }, start);
+  await expect.poll(() => angle(2)).toBeLessThan(-1);
+  await rail.evaluate((el, x) => {
+    el.scrollLeft = x;
+  }, start);
+  await expect.poll(() => angle(2)).toBe(0);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(cards.nth(2).locator(".identity-card-surface")).toHaveCSS(
+    "transform",
+    "none",
+  );
+  await client.detach();
 });
