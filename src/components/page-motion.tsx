@@ -19,19 +19,20 @@ export function PageMotion() {
         card,
         top: card.getBoundingClientRect().top,
         height: card.offsetHeight,
+        anchor: parseFloat(getComputedStyle(card).top) || 0,
       }));
-      positions.forEach(({ card, top, height }) => {
+      positions.forEach(({ card, top, height, anchor }) => {
         if (preference.matches || top >= viewport || top + height <= 0) {
           card.style.removeProperty("--entry-scale");
           return;
         }
         const progress = Math.max(
           0,
-          Math.min(1, (viewport - top) / (viewport * 0.65)),
+          Math.min(1, (viewport - top) / Math.max(1, viewport - anchor)),
         );
         // Swell during approach, then settle exactly to the normal card size.
-        const approaching = progress <= 0.7;
-        const phase = approaching ? progress / 0.7 : (progress - 0.7) / 0.3;
+        const approaching = progress <= 0.5;
+        const phase = approaching ? progress / 0.5 : (progress - 0.5) / 0.5;
         const eased = phase * phase * (3 - 2 * phase);
         const scale = (
           approaching

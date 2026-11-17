@@ -94,12 +94,14 @@ export function BrandingGallery() {
           item.scale = 1;
           item.shift = 0;
           item.yaw = 0;
+          item.card.style.removeProperty("z-index");
           return;
         }
         const distance = Math.abs(item.center - center);
         if (distance > rail.clientWidth / 2 + item.width) return;
         const proximity = Math.max(0, 1 - distance / radius);
         const focus = proximity * proximity * (3 - 2 * proximity);
+        item.card.style.zIndex = String(Math.round(focus * 100));
         const scale = 0.88 + focus * 0.195;
         // A monotonic projection opens the middle and compresses the periphery.
         // Move the inner surface only, keeping native scroll widths unchanged.
@@ -116,11 +118,17 @@ export function BrandingGallery() {
           item.yaw = yaw;
         }
         const spread = 0.08;
+        const compression = 0.155;
         const normalized = distance / reach;
+        const beyond = Math.max(0, distance - reach);
+        const edgeSlope = 1 + spread - 3 * compression;
+        // Relax compression beyond the rail so entering cards do not bunch up.
         const projected =
           distance <= reach
-            ? distance * (1 + spread * (1 - normalized * normalized))
-            : reach + (distance - reach) * (1 - 2 * spread);
+            ? distance * (1 + spread - compression * normalized * normalized)
+            : reach * (1 + spread - compression) +
+              0.8 * beyond +
+              (edgeSlope - 0.8) * 60 * (1 - Math.exp(-beyond / 60));
         const shift = Math.sign(item.center - center) * (projected - distance);
         if (Math.abs(shift - item.shift) > 0.02) {
           item.card.style.setProperty(

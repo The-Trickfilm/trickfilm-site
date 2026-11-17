@@ -1007,13 +1007,23 @@ test("both portfolio stacks magnify on entry, reverse, and keep their sticky anc
     expect(await scale()).toBeGreaterThanOrEqual(0.94);
     expect((await card.boundingBox())!.y).toBeCloseTo(900, 0);
     await page.evaluate(
-      (y) => scrollTo({ top: y - 545, behavior: "instant" }),
+      (y) => scrollTo({ top: y - 766, behavior: "instant" }),
+      top,
+    );
+    await expect.poll(scale).toBeCloseTo(0.9825, 3);
+    await page.evaluate(
+      (y) => scrollTo({ top: y - 532, behavior: "instant" }),
       top,
     );
     await expect.poll(scale).toBeGreaterThan(1.02);
     expect(await scale()).toBeLessThanOrEqual(1.0251);
     await page.evaluate(
-      (y) => scrollTo({ top: y - 350, behavior: "instant" }),
+      (y) => scrollTo({ top: y - 298, behavior: "instant" }),
+      top,
+    );
+    await expect.poll(scale).toBeCloseTo(1.0125, 3);
+    await page.evaluate(
+      (y) => scrollTo({ top: y - 64, behavior: "instant" }),
       top,
     );
     await expect.poll(scale).toBe(1);
@@ -1021,7 +1031,7 @@ test("both portfolio stacks magnify on entry, reverse, and keep their sticky anc
       layoutHeight,
     );
     await page.evaluate(
-      (y) => scrollTo({ top: y - 545, behavior: "instant" }),
+      (y) => scrollTo({ top: y - 532, behavior: "instant" }),
       top,
     );
     await expect.poll(scale).toBeGreaterThan(1.02);
@@ -1049,6 +1059,7 @@ test("logo spacing opens at the centre, compresses at the edges, and stays rever
   await page.goto("/");
   const rail = page.locator(".identity-viewport");
   await rail.scrollIntoViewIfNeeded();
+  await expect(rail).toHaveCSS("mask-image", /112px/);
   await page
     .getByRole("button", { name: "Pause logo carousel", exact: true })
     .click();
@@ -1073,14 +1084,15 @@ test("logo spacing opens at the centre, compresses at the edges, and stays rever
     })
     .toBeGreaterThan(6);
   const before = await gaps();
-  expect(Math.min(...before)).toBeGreaterThan(4);
+  expect(Math.min(...before)).toBeLessThan(0);
+  expect(Math.min(...before)).toBeGreaterThan(-20);
   await rail.evaluate((el, w) => {
     el.scrollLeft += w / 2 + 10;
   }, width);
   await expect
     .poll(async () => Math.abs((await gaps())[1] - before[1]))
     .toBeGreaterThan(1);
-  expect(Math.min(...(await gaps()))).toBeGreaterThan(3);
+  expect(Math.min(...(await gaps()))).toBeGreaterThan(-30);
   await rail.evaluate((el, x) => {
     el.scrollLeft = x;
   }, start);
@@ -1171,4 +1183,34 @@ test("logo perspective mirrors the sides and remains square-on across the centre
     "none",
   );
   await client.detach();
+});
+
+test("final cards reach and hold the shared top anchor before their stacks release", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  for (const section of ["#work", "#applications"]) {
+    const card = page.locator(`${section} .project-panel`).last();
+    const top = await card.evaluate(
+      (el) => el.getBoundingClientRect().top + scrollY,
+    );
+    for (const extra of [0, 120]) {
+      await page.evaluate(
+        (y) => scrollTo({ top: y, behavior: "instant" }),
+        top - 64 + extra,
+      );
+      await expect
+        .poll(async () => Math.round((await card.boundingBox())!.y))
+        .toBe(64);
+      await expect(card).toHaveCSS("scale", "1");
+    }
+    await page.evaluate(
+      (y) => scrollTo({ top: y + 600, behavior: "instant" }),
+      top,
+    );
+    await expect
+      .poll(async () => (await card.boundingBox())!.y)
+      .toBeLessThan(64);
+  }
 });
