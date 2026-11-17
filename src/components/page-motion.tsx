@@ -11,7 +11,9 @@ export function PageMotion() {
     const updateScale = () => {
       frame = 0;
       const viewport = window.innerHeight;
-      const minimum = window.innerWidth > 900 ? 0.94 : 0.97;
+      const desktop = window.innerWidth > 900;
+      const minimum = desktop ? 0.94 : 0.97;
+      const peak = desktop ? 1.025 : 1.012;
       // The top transform origin keeps these reads independent of their own scale.
       const positions = cards.map((card) => ({
         card,
@@ -27,8 +29,15 @@ export function PageMotion() {
           0,
           Math.min(1, (viewport - top) / (viewport * 0.65)),
         );
-        const eased = progress * progress * (3 - 2 * progress);
-        const scale = (minimum + (1 - minimum) * eased).toFixed(4);
+        // Swell during approach, then settle exactly to the normal card size.
+        const approaching = progress <= 0.7;
+        const phase = approaching ? progress / 0.7 : (progress - 0.7) / 0.3;
+        const eased = phase * phase * (3 - 2 * phase);
+        const scale = (
+          approaching
+            ? minimum + (peak - minimum) * eased
+            : peak + (1 - peak) * eased
+        ).toFixed(4);
         if (card.style.getPropertyValue("--entry-scale") !== scale)
           card.style.setProperty("--entry-scale", scale);
       });

@@ -91,3 +91,7 @@ Identity card surfaces grow toward the horizontal rail centre (up to 1.075×) an
 Both portfolio stacks ease from 0.94× into their normal full-size frame as they enter the viewport (0.97× on mobile). Their top origin preserves sticky positioning; reversing scroll reverses the effect. Reduced motion and no-JavaScript views retain normal-sized content. These changes are based on the production branch and exclude the closed identity-exploration PR.
 
 Identity surfaces also follow a gentle, monotonic horizontal projection: spacing opens around the centre and compresses near the edges, reinforcing the perceived depth of the magnification. The underlying figures retain fixed widths and gaps for stable touch scrolling, looping and resizing. Reduced motion disables this translation as well as scaling.
+
+Logo surfaces turn outward up to 14° around the Y axis toward each edge, mirrored left/right. A central straight-on band holds zero rotation while a card is near the middle. Perspective is applied only to the inner surfaces, preserving stable layout measurements and loop geometry. Reduced motion removes rotation, translation and scale.
+
+Portfolio entry now rises from the smaller initial size to a gentle 1.025× peak (1.012× on mobile), then eases back to exactly 1× before the final sticky position. Both phases are derived from scroll position, with zero slope at the peak and settling point, so reversing scroll retraces the effect.

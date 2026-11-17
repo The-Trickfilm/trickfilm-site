@@ -79,6 +79,7 @@ export function BrandingGallery() {
       width: number;
       scale: number;
       shift: number;
+      yaw: number;
     }[] = [];
     let frame = 0;
     const update = () => {
@@ -89,8 +90,10 @@ export function BrandingGallery() {
         if (media.matches) {
           item.card.style.removeProperty("--identity-scale");
           item.card.style.removeProperty("--identity-shift");
+          item.card.style.removeProperty("--identity-yaw");
           item.scale = 1;
           item.shift = 0;
+          item.yaw = 0;
           return;
         }
         const distance = Math.abs(item.center - center);
@@ -104,6 +107,14 @@ export function BrandingGallery() {
           (rail.clientWidth - item.width) / 2,
           item.width + 20,
         );
+        // Keep a square-on band at the centre, then turn each side away from us.
+        const turn = Math.max(0, (Math.min(distance / reach, 1) - 0.12) / 0.88);
+        const yaw =
+          Math.sign(item.center - center) * 14 * turn * turn * (3 - 2 * turn);
+        if (Math.abs(yaw - item.yaw) > 0.01) {
+          item.card.style.setProperty("--identity-yaw", `${yaw.toFixed(3)}deg`);
+          item.yaw = yaw;
+        }
         const spread = 0.08;
         const normalized = distance / reach;
         const projected =
@@ -141,6 +152,7 @@ export function BrandingGallery() {
         width: card.offsetWidth,
         scale: -1,
         shift: Infinity,
+        yaw: Infinity,
       }));
       schedule();
     };
