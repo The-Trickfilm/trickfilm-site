@@ -1030,3 +1030,70 @@ test("both portfolio stacks magnify on entry, reverse, and keep their sticky anc
     "none",
   );
 });
+
+test("logo spacing opens at the centre, compresses at the edges, and stays reversible", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const rail = page.locator(".identity-viewport");
+  await rail.scrollIntoViewIfNeeded();
+  await page
+    .getByRole("button", { name: "Pause logo carousel", exact: true })
+    .click();
+  const originals = page.locator("[data-original] .identity-card");
+  const start = await rail.evaluate((el) => el.scrollLeft);
+  const width = await originals
+    .first()
+    .evaluate((el) => el.getBoundingClientRect().width);
+  const gaps = () =>
+    originals.evaluateAll((cards) => {
+      const boxes = cards
+        .slice(0, 5)
+        .map((card) =>
+          card.querySelector(".identity-card-surface")!.getBoundingClientRect(),
+        );
+      return boxes.slice(1).map((box, i) => box.left - boxes[i].right);
+    });
+  await expect
+    .poll(async () => {
+      const g = await gaps();
+      return (g[1] + g[2]) / 2 - (g[0] + g[3]) / 2;
+    })
+    .toBeGreaterThan(6);
+  const before = await gaps();
+  expect(Math.min(...before)).toBeGreaterThan(4);
+  await rail.evaluate((el, w) => {
+    el.scrollLeft += w / 2 + 10;
+  }, width);
+  await expect
+    .poll(async () => Math.abs((await gaps())[1] - before[1]))
+    .toBeGreaterThan(1);
+  expect(Math.min(...(await gaps()))).toBeGreaterThan(3);
+  await rail.evaluate((el, x) => {
+    el.scrollLeft = x;
+  }, start);
+  await expect
+    .poll(async () =>
+      Math.max(...(await gaps()).map((gap, i) => Math.abs(gap - before[i]))),
+    )
+    .toBeLessThan(0.2);
+  expect(
+    await originals.first().evaluate((el) => el.getBoundingClientRect().width),
+  ).toBeCloseTo(width, 2);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(originals.nth(2).locator(".identity-card-surface")).toHaveCSS(
+    "translate",
+    "none",
+  );
+  await expect(originals.nth(2).locator(".identity-card-surface")).toHaveCSS(
+    "scale",
+    "none",
+  );
+  await expect
+    .poll(async () => {
+      const g = await gaps();
+      return Math.max(...g) - Math.min(...g);
+    })
+    .toBeLessThan(0.2);
+});

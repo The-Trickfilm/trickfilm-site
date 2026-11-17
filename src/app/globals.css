@@ -2085,6 +2085,7 @@ fieldset:disabled .contact-submit {
 
 /* Magnification follows the rail centre and viewport entry without changing layout. */
 .identity-card-surface {
+  translate: var(--identity-shift, 0px) 0;
   scale: var(--identity-scale, 1);
   transform-origin: center;
 }
@@ -2096,5 +2097,8 @@ fieldset:disabled .contact-submit {
   .identity-card-surface,
   .project-stack .project-panel {
     scale: none;
+  }
+  .identity-card-surface {
+    translate: none;
   }
 }

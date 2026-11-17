@@ -78,6 +78,7 @@ export function BrandingGallery() {
       center: number;
       width: number;
       scale: number;
+      shift: number;
     }[] = [];
     let frame = 0;
     const update = () => {
@@ -87,7 +88,9 @@ export function BrandingGallery() {
       items.forEach((item) => {
         if (media.matches) {
           item.card.style.removeProperty("--identity-scale");
+          item.card.style.removeProperty("--identity-shift");
           item.scale = 1;
+          item.shift = 0;
           return;
         }
         const distance = Math.abs(item.center - center);
@@ -95,6 +98,26 @@ export function BrandingGallery() {
         const proximity = Math.max(0, 1 - distance / radius);
         const focus = proximity * proximity * (3 - 2 * proximity);
         const scale = 0.88 + focus * 0.195;
+        // A monotonic projection opens the middle and compresses the periphery.
+        // Move the inner surface only, keeping native scroll widths unchanged.
+        const reach = Math.max(
+          (rail.clientWidth - item.width) / 2,
+          item.width + 20,
+        );
+        const spread = 0.08;
+        const normalized = distance / reach;
+        const projected =
+          distance <= reach
+            ? distance * (1 + spread * (1 - normalized * normalized))
+            : reach + (distance - reach) * (1 - 2 * spread);
+        const shift = Math.sign(item.center - center) * (projected - distance);
+        if (Math.abs(shift - item.shift) > 0.02) {
+          item.card.style.setProperty(
+            "--identity-shift",
+            `${shift.toFixed(3)}px`,
+          );
+          item.shift = shift;
+        }
         if (Math.abs(scale - item.scale) > 0.0002) {
           item.card.style.setProperty("--identity-scale", scale.toFixed(4));
           item.scale = scale;
@@ -117,6 +140,7 @@ export function BrandingGallery() {
           card.offsetWidth / 2,
         width: card.offsetWidth,
         scale: -1,
+        shift: Infinity,
       }));
       schedule();
     };
