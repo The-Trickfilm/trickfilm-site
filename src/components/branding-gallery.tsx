@@ -68,6 +68,71 @@ export function BrandingGallery() {
     };
   }, []);
 
+  // Cache layout centres on resize; scrolling only updates compositor scale values.
+  useEffect(() => {
+    const rail = viewport.current!,
+      strip = track.current!;
+    const media = matchMedia("(prefers-reduced-motion: reduce)");
+    let items: {
+      card: HTMLElement;
+      center: number;
+      width: number;
+      scale: number;
+    }[] = [];
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const center = rail.scrollLeft + rail.clientWidth / 2;
+      const radius = rail.clientWidth * 0.55;
+      items.forEach((item) => {
+        if (media.matches) {
+          item.card.style.removeProperty("--identity-scale");
+          item.scale = 1;
+          return;
+        }
+        const distance = Math.abs(item.center - center);
+        if (distance > rail.clientWidth / 2 + item.width) return;
+        const proximity = Math.max(0, 1 - distance / radius);
+        const focus = proximity * proximity * (3 - 2 * proximity);
+        const scale = 0.88 + focus * 0.195;
+        if (Math.abs(scale - item.scale) > 0.0002) {
+          item.card.style.setProperty("--identity-scale", scale.toFixed(4));
+          item.scale = scale;
+        }
+      });
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const measure = () => {
+      const left = rail.getBoundingClientRect().left;
+      items = Array.from(
+        strip.querySelectorAll<HTMLElement>(".identity-card"),
+      ).map((card) => ({
+        card,
+        center:
+          card.getBoundingClientRect().left -
+          left +
+          rail.scrollLeft +
+          card.offsetWidth / 2,
+        width: card.offsetWidth,
+        scale: -1,
+      }));
+      schedule();
+    };
+    const resize = new ResizeObserver(measure);
+    resize.observe(rail);
+    measure();
+    rail.addEventListener("scroll", schedule, { passive: true });
+    media.addEventListener("change", schedule);
+    return () => {
+      resize.disconnect();
+      rail.removeEventListener("scroll", schedule);
+      media.removeEventListener("change", schedule);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
   useEffect(() => {
     if (!visible || paused || hovered || focused || reducedMotion) return;
     const rail = viewport.current!;
@@ -128,18 +193,20 @@ export function BrandingGallery() {
   function card(project: (typeof identities)[number]) {
     return (
       <figure className="identity-card" key={project.image}>
-        <div className="identity-image">
-          <Image
-            src={project.src}
-            width={project.width}
-            height={project.height}
-            alt={`${project.name} brand identity`}
-            sizes="(max-width: 700px) 42vw, (max-width: 1100px) 28vw, 18vw"
-          />
+        <div className="identity-card-surface">
+          <div className="identity-image">
+            <Image
+              src={project.src}
+              width={project.width}
+              height={project.height}
+              alt={`${project.name} brand identity`}
+              sizes="(max-width: 700px) 42vw, (max-width: 1100px) 28vw, 18vw"
+            />
+          </div>
+          <figcaption className="identity-caption">
+            <h3>{project.name}</h3>
+          </figcaption>
         </div>
-        <figcaption className="identity-caption">
-          <h3>{project.name}</h3>
-        </figcaption>
       </figure>
     );
   }

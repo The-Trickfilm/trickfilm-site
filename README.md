@@ -83,3 +83,9 @@ Creative Solutions card headings name the service: Applications & Automation, Bu
 The redundant Houndz Unleashed character and XDI application variants are removed from the carousel (19 remaining). Cards are figures with captions; no arrows, links, click handlers or modal previews remain. Autoplay, pause, arrows, touch/native scrolling, reduced motion and edge fades remain.
 
 The first brand-kit pilot is Quality Engineering, a video-game QA/testing and tools organization. Its direct review route is `/brand/quality-engineering`; no carousel card links to it. Supplied artwork is unchanged. Palette, supporting typography, graphics and application studies are proposed. Print matches and flat vector variants await master artwork and approval. See `docs/brand-kit-scope.md`.
+
+## Scroll magnification
+
+Identity card surfaces grow toward the horizontal rail centre (up to 1.075×) and shrink toward its edges (0.88×). Layout-width figures remain unchanged for predictable native scrolling and seamless loop rebasing. Cached centre positions are remeasured on resize; scroll events batch scale updates in requestAnimationFrame without React renders.
+
+Both portfolio stacks ease from 0.94× into their normal full-size frame as they enter the viewport (0.97× on mobile). Their top origin preserves sticky positioning; reversing scroll reverses the effect. Reduced motion and no-JavaScript views retain normal-sized content. These changes are based on the production branch and exclude the closed identity-exploration PR.
