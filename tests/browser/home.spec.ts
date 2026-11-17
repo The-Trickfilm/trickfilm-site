@@ -873,21 +873,25 @@ test("Quality Engineering kit is styled, responsive, and downloads its draft fil
     await page.setViewportSize({ width, height: 1000 });
     await page.goto("/brand/quality-engineering");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Confidence.In every build.",
+      "Quality Engineering.",
     );
-    const cover = page.locator("main > section").first();
-    await expect(cover).toHaveCSS("background-color", "rgb(16, 24, 39)");
-    const image = cover.locator("img");
+    await expect(page.locator("main").locator("..")).toHaveCSS(
+      "background-color",
+      "rgb(9, 19, 38)",
+    );
+    const image = page.locator("main > figure img");
     await expect(image).toBeVisible();
     expect(
       (await image.boundingBox())!.width / (await image.boundingBox())!.height,
-    ).toBeCloseTo(2.6, 1);
+    ).toBeCloseTo(2 / 3, 1);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await expect(page.locator("main > section")).toHaveCount(6);
+    await expect(
+      page.getByRole("heading", { name: "Built from the mark." }),
+    ).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
       "content",
       /noindex/,

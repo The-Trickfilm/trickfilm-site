@@ -1,7 +1,7 @@
-# Quality Engineering — identity pilot 01
+# Quality Engineering — identity exploration 02
 
-Working draft by Trickfilm. The supplied symbol and lockup PNGs are unchanged originals. No new logo has been approved or represented as a production vector master. The draft proposes a digital palette, Inter Tight/Inter typography, a supporting coverage pattern, three supporting icons, and illustrative applications for a video-game QA and testing organization.
+A visual identity-family concept by Trickfilm, based on the supplied symbol and wordmark. The presentation shows proposed flat/color interpretations, horizontal and stacked lockups, a circular Game QA badge, symbol-derived repeat pattern, cap embroidery, lanyard and die-cut sticker applications.
 
-Do not redraw or retype the supplied wordmark. Existing silver/white lockup and blue symbol are the starting artwork. Flat black/white/reversed marks, small-size exports, alternate lockups and production print specifications require original vector artwork and approval.
+The showcase and product mock-ups are AI-assisted concept visualizations, not production master artwork. Some symbol and lettering details are interpretations and require refinement against the original vectors. Supplied-symbol.png and supplied-lockup.png remain the unchanged source references. Do not use the mock-ups as manufacture-ready or approved artwork.
 
-CMYK depends on the output profile; no Pantone match is claimed. Interface names and layouts are illustrative design studies, not a working software product or client results.
+Included: high-resolution concept board, visual presentation PDF, source PNGs, proposed palette, and the supporting font files/licenses retained from the pilot.

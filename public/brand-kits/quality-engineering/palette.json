@@ -1,51 +1,22 @@
 {
-  "status": "Proposed digital palette; not approved print specifications",
+  "status": "Proposed concept palette, exploration 02",
   "colors": [
     {
-      "name": "Midnight",
-      "hex": "#101827",
-      "rgb": [
-        16,
-        24,
-        39
-      ]
+      "name": "Cobalt",
+      "hex": "#1744DB"
     },
     {
-      "name": "Engineering blue",
-      "hex": "#163A8F",
-      "rgb": [
-        22,
-        58,
-        143
-      ]
+      "name": "Cyan",
+      "hex": "#20BCEB"
     },
     {
-      "name": "Signal cyan",
-      "hex": "#20B4E8",
-      "rgb": [
-        32,
-        180,
-        232
-      ]
-    },
-    {
-      "name": "Mist",
-      "hex": "#DCE4EF",
-      "rgb": [
-        220,
-        228,
-        239
-      ]
+      "name": "Ink",
+      "hex": "#091326"
     },
     {
       "name": "White",
-      "hex": "#FFFFFF",
-      "rgb": [
-        255,
-        255,
-        255
-      ]
+      "hex": "#FFFFFF"
     }
   ],
-  "print": "CMYK requires an agreed output profile and proof; Pantone must be selected against physical swatches."
+  "print": "Select profiled CMYK and physical Pantone matches after direction approval."
 }
