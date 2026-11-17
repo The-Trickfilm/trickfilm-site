@@ -1214,3 +1214,42 @@ test("final cards reach and hold the shared top anchor before their stacks relea
       .toBeLessThan(64);
   }
 });
+
+for (const viewport of [
+  { width: 1440, height: 1000 },
+  { width: 2048, height: 1226 },
+]) {
+  test(`covered cards stay behind the final surface throughout stack exit at ${viewport.width}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    for (const section of ["#work", "#applications"]) {
+      const cards = page.locator(`${section} .project-panel`);
+      const last = cards.last();
+      const start = await last.evaluate(
+        (el) => el.getBoundingClientRect().top + scrollY,
+      );
+      const anchor = await last.evaluate((el) =>
+        parseFloat(getComputedStyle(el).top),
+      );
+      for (const extra of [120, 240, 360, 480, 600, 360, 120]) {
+        await page.evaluate(
+          (y) => scrollTo({ top: y, behavior: "instant" }),
+          start - anchor + extra,
+        );
+        await expect
+          .poll(() =>
+            cards.evaluateAll((els) => {
+              const boxes = els.map((el) => el.getBoundingClientRect());
+              const front = boxes[boxes.length - 1];
+              return Math.max(
+                ...boxes.map((box) => Math.abs(box.top - front.top)),
+              );
+            }),
+          )
+          .toBeLessThan(1);
+      }
+    }
+  });
+}
