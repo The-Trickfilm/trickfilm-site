@@ -505,7 +505,7 @@ summary:focus-visible {
   padding-inline: 16px;
   font-size: 14px;
 }
-.identity-carousel .identity-card:focus-visible .identity-image {
+.identity-viewport:focus-visible {
   outline: 2px solid #277b76;
   outline-offset: -4px;
 }
@@ -516,10 +516,6 @@ summary:focus-visible {
 }
 .identity-carousel .identity-caption h3 {
   font-size: 14px;
-}
-.identity-carousel .identity-caption svg {
-  width: 12px;
-  height: 12px;
 }
 .identity-card {
   min-width: 0;
@@ -541,9 +537,6 @@ summary:focus-visible {
   object-fit: contain;
   transition: transform 0.4s;
 }
-.identity-card:hover img {
-  transform: scale(1.025);
-}
 .identity-caption {
   display: flex;
   gap: 15px;
@@ -556,70 +549,6 @@ summary:focus-visible {
   line-height: 1.2;
   font-weight: 500;
   letter-spacing: -0.025em;
-}
-.identity-caption svg {
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
-}
-.identity-dialog {
-  position: fixed;
-  inset: 0;
-  width: min(1100px, calc(100% - 48px));
-  max-height: 92svh;
-  border: 0;
-  padding: 32px;
-  background: #fff;
-  border-radius: 24px;
-  color: var(--ink);
-  overflow: auto;
-}
-.identity-dialog::backdrop {
-  background: #161616cc;
-  backdrop-filter: blur(5px);
-}
-.dialog-header,
-.dialog-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-.dialog-header {
-  font-size: 20px;
-}
-.dialog-header button {
-  background: none;
-  border: 0;
-  font-size: 14px;
-  padding: 12px;
-}
-.dialog-image {
-  height: min(65svh, 650px);
-  display: grid;
-  place-items: center;
-  margin: 20px 0;
-}
-.dialog-image img {
-  max-height: 100%;
-  max-width: 100%;
-  width: auto;
-  object-fit: contain;
-}
-.dialog-controls {
-  font-size: 14px;
-}
-.dialog-controls > div {
-  display: flex;
-  gap: 12px;
-}
-.dialog-controls button {
-  width: 44px;
-  height: 44px;
-  background: var(--teal);
-  border: 0;
-  border-radius: 50%;
-  font-size: 20px;
 }
 .application-section > .section-content {
   padding-top: 40px;
@@ -1481,21 +1410,6 @@ fieldset:disabled .contact-submit {
   }
   .identity-caption h3 {
     font-size: 15px;
-  }
-  .identity-caption svg {
-    width: 12px;
-    height: 12px;
-  }
-  .identity-dialog {
-    width: calc(100% - 24px);
-    padding: 20px;
-    border-radius: 18px;
-  }
-  .dialog-header {
-    font-size: 17px;
-  }
-  .dialog-image {
-    height: 58svh;
   }
   .application-section > .section-content {
     padding-top: 20px;

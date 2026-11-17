@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { logoProjects } from "@/lib/logo-projects";
-import { Arrow } from "./arrow";
 const featured = [
   "koan",
   "xdi",
@@ -24,8 +23,6 @@ const getReducedMotion = () =>
   matchMedia("(prefers-reduced-motion: reduce)").matches;
 const serverReducedMotion = () => true;
 export function BrandingGallery() {
-  const [active, setActive] = useState<number | null>(null),
-    dialog = useRef<HTMLDialogElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const period = useRef(0);
@@ -72,15 +69,7 @@ export function BrandingGallery() {
   }, []);
 
   useEffect(() => {
-    if (
-      !visible ||
-      paused ||
-      hovered ||
-      focused ||
-      active !== null ||
-      reducedMotion
-    )
-      return;
+    if (!visible || paused || hovered || focused || reducedMotion) return;
     const rail = viewport.current!;
     let frame = 0,
       previous = 0,
@@ -100,7 +89,7 @@ export function BrandingGallery() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [visible, paused, hovered, focused, active, reducedMotion]);
+  }, [visible, paused, hovered, focused, reducedMotion]);
 
   function wrap() {
     const rail = viewport.current!,
@@ -136,41 +125,9 @@ export function BrandingGallery() {
     };
     navigationFrame.current = requestAnimationFrame(move);
   }
-  useEffect(() => {
-    if (active === null) return;
-    const previous = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = previous;
-    };
-  }, [active]);
-  function close() {
-    dialog.current?.close();
-    setActive(null);
-  }
-  function open(index: number) {
-    setActive(index);
-    dialog.current?.showModal();
-  }
-  function card(
-    project: (typeof identities)[number],
-    index: number,
-    clone = false,
-  ) {
+  function card(project: (typeof identities)[number]) {
     return (
-      <a
-        className="identity-card"
-        key={project.image}
-        href={project.src}
-        tabIndex={clone ? -1 : 0}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => {
-          e.preventDefault();
-          open(index);
-        }}
-        aria-label={`View ${project.name} identity`}
-      >
+      <figure className="identity-card" key={project.image}>
         <div className="identity-image">
           <Image
             src={project.src}
@@ -180,164 +137,85 @@ export function BrandingGallery() {
             sizes="(max-width: 700px) 42vw, (max-width: 1100px) 28vw, 18vw"
           />
         </div>
-        <div className="identity-caption">
+        <figcaption className="identity-caption">
           <h3>{project.name}</h3>
-          <Arrow />
-        </div>
-      </a>
+        </figcaption>
+      </figure>
     );
   }
-  const selected = active === null ? null : identities[active];
   return (
-    <>
+    <div
+      className="identity-carousel"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Selected logo designs"
+    >
       <div
-        className="identity-carousel"
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="Selected logo designs"
+        className="identity-viewport"
+        ref={viewport}
+        tabIndex={0}
+        role="group"
+        aria-label="Scrollable brand identities"
+        onScroll={wrap}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocusCapture={() => setFocused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget))
+            setFocused(false);
+        }}
+        onPointerDown={() => {
+          cancelAnimationFrame(navigationFrame.current);
+          manualUntil.current = performance.now() + 3500;
+        }}
+        onWheel={() => {
+          cancelAnimationFrame(navigationFrame.current);
+          manualUntil.current = performance.now() + 3500;
+        }}
       >
-        <div
-          className="identity-viewport"
-          ref={viewport}
-          onScroll={wrap}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          onFocusCapture={() => setFocused(true)}
-          onBlurCapture={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget))
-              setFocused(false);
-          }}
-          onPointerDown={() => {
-            cancelAnimationFrame(navigationFrame.current);
-            manualUntil.current = performance.now() + 3500;
-          }}
-          onWheel={() => {
-            cancelAnimationFrame(navigationFrame.current);
-            manualUntil.current = performance.now() + 3500;
-          }}
-        >
-          <div className="identity-track" ref={track}>
-            <div className="identity-set" data-clone aria-hidden="true">
-              {identities.map((p, i) => card(p, i, true))}
-            </div>
-            <div className="identity-set" data-original>
-              {identities.map((p, i) => card(p, i))}
-            </div>
-            <div className="identity-set" data-clone aria-hidden="true">
-              {identities.map((p, i) => card(p, i, true))}
-            </div>
+        <div className="identity-track" ref={track}>
+          <div className="identity-set" data-clone aria-hidden="true">
+            {identities.map((p) => card(p))}
           </div>
-        </div>
-        <div className="identity-carousel-controls">
-          <p>
-            Selected identities <span>({identities.length})</span>
-          </p>
-          <div>
-            {!reducedMotion && (
-              <button
-                type="button"
-                className="carousel-pause"
-                aria-label={
-                  paused ? "Play logo carousel" : "Pause logo carousel"
-                }
-                onClick={() => setPaused(!paused)}
-              >
-                {paused ? "Play" : "Pause"}
-              </button>
-            )}
-            <button
-              type="button"
-              aria-label="Scroll logos left"
-              onClick={() => nudge(-1)}
-            >
-              ←
-            </button>
-            <button
-              type="button"
-              aria-label="Scroll logos right"
-              onClick={() => nudge(1)}
-            >
-              →
-            </button>
+          <div className="identity-set" data-original>
+            {identities.map((p) => card(p))}
+          </div>
+          <div className="identity-set" data-clone aria-hidden="true">
+            {identities.map((p) => card(p))}
           </div>
         </div>
       </div>
-      <dialog
-        ref={dialog}
-        className="identity-dialog"
-        aria-labelledby="identity-dialog-title"
-        onCancel={() => setActive(null)}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) close();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowRight") {
-            e.preventDefault();
-            setActive((i) => ((i ?? 0) + 1) % identities.length);
-          }
-          if (e.key === "ArrowLeft") {
-            e.preventDefault();
-            setActive(
-              (i) => ((i ?? 0) - 1 + identities.length) % identities.length,
-            );
-          }
-        }}
-      >
-        <div className="dialog-content">
-          <div className="dialog-header">
-            <p id="identity-dialog-title">{selected?.name}</p>
+      <div className="identity-carousel-controls">
+        <p>
+          Selected identities <span>({identities.length})</span>
+        </p>
+        <div>
+          {!reducedMotion && (
             <button
               type="button"
-              autoFocus
-              onClick={close}
-              aria-label="Close logo preview"
+              className="carousel-pause"
+              aria-label={paused ? "Play logo carousel" : "Pause logo carousel"}
+              onClick={() => setPaused(!paused)}
             >
-              Close ×
+              {paused ? "Play" : "Pause"}
             </button>
-          </div>
-          {selected && (
-            <div className="dialog-image">
-              <Image
-                src={selected.src}
-                width={selected.width}
-                height={selected.height}
-                alt={`${selected.name} brand identity`}
-                sizes="90vw"
-              />
-            </div>
           )}
-          <div className="dialog-controls">
-            <p>
-              {active === null
-                ? ""
-                : `${String(active + 1).padStart(2, "0")} / ${identities.length}`}
-            </p>
-            <div>
-              <button
-                type="button"
-                aria-label="Previous logo"
-                onClick={() =>
-                  setActive(
-                    (i) =>
-                      ((i ?? 0) - 1 + identities.length) % identities.length,
-                  )
-                }
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                aria-label="Next logo"
-                onClick={() =>
-                  setActive((i) => ((i ?? 0) + 1) % identities.length)
-                }
-              >
-                →
-              </button>
-            </div>
-          </div>
+          <button
+            type="button"
+            aria-label="Scroll logos left"
+            onClick={() => nudge(-1)}
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            aria-label="Scroll logos right"
+            onClick={() => nudge(1)}
+          >
+            →
+          </button>
         </div>
-      </dialog>
-    </>
+      </div>
+    </div>
   );
 }

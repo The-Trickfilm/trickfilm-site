@@ -11,7 +11,7 @@ Validation: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, th
 ## Content and assets
 
 - `src/lib/projects.ts`: five supplied website projects and StrataCouncil.ca application; confirmed contact jeremy@trickfilm.com.
-- `src/lib/logo-projects.ts`: 21 supplied identity images, including variants. A seamless horizontal carousel shows about five at once on desktop, three on tablet, and two on mobile. All 21 open in an accessible native dialog with arrow keys and Escape.
+- `src/lib/logo-projects.ts`: 19 supplied identity images, including variants. A seamless horizontal carousel shows about five at once on desktop, three on tablet, and two on mobile. The images are view-only, with no links or modal previews.
 - `public/brand`: original Trickfilm SVG artwork, unchanged.
 - `public/work`: existing website screenshots and supplied logo exports, retained.
 - `public/work/applications`: captures of StrataCouncil.ca's public product previews. Its public footer identifies it as a Trickfilm product. These are not authenticated application screenshots.
@@ -22,7 +22,7 @@ Project pages deliberately omit unsupported results, durations, testimonials, an
 
 Agentic (https://agentic.framer.website/) is the visual reference: oversized navigation, compact introduction, prominent wordmark, rounded full-width portfolio panels, restrained typography and motion. Original implementation, actual Trickfilm assets, and original CSS laptop frames; no proprietary template assets or source copied. Prior mountain/pixel/lens implementation is removed and remains available in Git history.
 
-Content remains visible without JavaScript. Reduced motion disables entrance animations, rotating accents, and desktop panel stacking. Small or short screens use normal project flow. Without JavaScript, the logos remain a native horizontally scrolling list with direct image links.
+Content remains visible without JavaScript. Reduced motion disables entrance animations, rotating accents, and desktop panel stacking. Small or short screens use normal project flow. Without JavaScript, the logos remain a native horizontally scrolling list without image links.
 
 ## Deployment
 
@@ -40,7 +40,7 @@ On large screens, the service label and number stay in a sticky left column whil
 
 ## Logo carousel
 
-The logo rail repeats the supplied catalog on either side of the accessible original set, rebasing native scroll position at matching boundaries. Clones are hidden from assistive technology and removed from keyboard tab order. Gentle autoplay pauses on hover, keyboard focus, preview opening, or the explicit Pause control; it runs only while the carousel is visible. Reduced motion disables autoplay. Arrow controls, native horizontal trackpad scrolling, and touch swipes remain available. Card widths show five desktop / three tablet / two mobile logos, and resizing preserves progress through the loop.
+The logo rail repeats the supplied catalog on either side of the accessible original set, rebasing native scroll position at matching boundaries. Clones are hidden from assistive technology and removed from keyboard tab order. Gentle autoplay pauses on hover, keyboard focus, or the explicit Pause control; it runs only while the carousel is visible. Reduced motion disables autoplay. Arrow controls, native horizontal trackpad scrolling, and touch swipes remain available. Card widths show five desktop / three tablet / two mobile logos, and resizing preserves progress through the loop.
 
 ## Flower accents
 
@@ -77,3 +77,9 @@ Open Graph and Twitter metadata explicitly use `public/share/trickfilm-hero-v1.j
 ## Creative Solutions service cards
 
 Creative Solutions card headings name the service: Applications & Automation, Business Process Design (two examples), and Presentation Design. Company names remain in the client facts. These cards have no project links or View project CTA; website cards keep theirs. The supplied nine-slide Thunderbird deck plays in numeric order in a repeating two-second slideshow. Slides stay fully visible against charcoal letterboxing. The HR loop retains its three-second interval; both offer pause/manual navigation and respect reduced motion.
+
+## View-only identity catalog and kit pilot
+
+The redundant Houndz Unleashed character and XDI application variants are removed from the carousel (19 remaining). Cards are figures with captions; no arrows, links, click handlers or modal previews remain. Autoplay, pause, arrows, touch/native scrolling, reduced motion and edge fades remain.
+
+The first brand-kit pilot is Quality Engineering, a video-game QA/testing and tools organization. Its direct review route is `/brand/quality-engineering`; no carousel card links to it. Supplied artwork is unchanged. Palette, supporting typography, graphics and application studies are proposed. Print matches and flat vector variants await master artwork and approval. See `docs/brand-kit-scope.md`.

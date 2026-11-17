@@ -18,7 +18,14 @@ test("portfolio links and supplied assets are complete", () => {
   }
   assert.equal(websiteProjects.at(-2)?.slug, "koan-analytics");
   assert.equal(websiteProjects.at(-2)?.tone, "charcoal");
-  assert.equal(logoProjects.length, 21);
+  assert.equal(logoProjects.length, 19);
+  assert.ok(
+    !logoProjects.some((p) =>
+      ["houndz-character", "xdi-application"].includes(p.image),
+    ),
+  );
+  assert.ok(logoProjects.some((p) => p.image === "houndz-unleashed"));
+  assert.ok(logoProjects.some((p) => p.image === "xdi"));
   for (const p of logoProjects) assert.ok(existsSync(`public${p.src}`));
   assert.equal(CONTACT_EMAIL, "jeremy@trickfilm.com");
 });

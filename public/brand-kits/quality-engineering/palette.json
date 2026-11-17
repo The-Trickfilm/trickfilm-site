@@ -1,0 +1,51 @@
+{
+  "status": "Proposed digital palette; not approved print specifications",
+  "colors": [
+    {
+      "name": "Midnight",
+      "hex": "#101827",
+      "rgb": [
+        16,
+        24,
+        39
+      ]
+    },
+    {
+      "name": "Engineering blue",
+      "hex": "#163A8F",
+      "rgb": [
+        22,
+        58,
+        143
+      ]
+    },
+    {
+      "name": "Signal cyan",
+      "hex": "#20B4E8",
+      "rgb": [
+        32,
+        180,
+        232
+      ]
+    },
+    {
+      "name": "Mist",
+      "hex": "#DCE4EF",
+      "rgb": [
+        220,
+        228,
+        239
+      ]
+    },
+    {
+      "name": "White",
+      "hex": "#FFFFFF",
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    }
+  ],
+  "print": "CMYK requires an agreed output profile and proof; Pantone must be selected against physical swatches."
+}
