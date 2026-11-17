@@ -2108,6 +2108,10 @@ fieldset:disabled .contact-submit {
 
 /* Give the final surface room to reach and hold the shared sticky anchor. */
 @media (min-width: 901px) and (min-height: 740px) and (prefers-reduced-motion: no-preference) {
+  /* Sticky containment includes margins: every surface needs the same exit boundary. */
+  .project-stack > article.project-panel:last-child {
+    margin-bottom: calc(var(--section-pad) * 2);
+  }
   .project-stack::after {
     content: "";
     display: block;

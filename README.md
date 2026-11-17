@@ -97,3 +97,5 @@ Logo surfaces turn outward up to 14° around the Y axis toward each edge, mirror
 Portfolio entry now rises from the smaller initial size to a gentle 1.025× peak (1.012× on mobile), then eases back to exactly 1× before the final sticky position. Both phases are derived from scroll position, with zero slope at the peak and settling point, so reversing scroll retraces the effect.
 
 Depth refinement: logo cards overlap slightly at the far edges while keeping the centre flat and open; edge fades are twice as wide. Portfolio scaling peaks halfway between entering the viewport and the sticky top anchor, then settles over the remaining half. A trailing scroll runway lets the last card in each stack reach and hold that same anchor before the stack releases.
+
+Stack exit: every sticky project surface, including the last one, uses the same bottom margin so covered cards remain aligned behind the front card as the stack releases. Mobile and reduced-motion layouts keep their existing spacing.
