@@ -422,7 +422,7 @@ summary:focus-visible {
   min-width: 0;
 }
 .identity-viewport {
-  --edge-fade: clamp(16px, 4vw, 56px);
+  --edge-fade: clamp(32px, 8vw, 112px);
   /* Reveal the white section beneath the rail, without covering its controls. */
   -webkit-mask-image: linear-gradient(
     to right,
@@ -518,6 +518,7 @@ summary:focus-visible {
   font-size: 14px;
 }
 .identity-card {
+  position: relative;
   min-width: 0;
   display: block;
 }
@@ -2103,4 +2104,20 @@ fieldset:disabled .contact-submit {
     translate: 0px;
     transform: none;
   }
+}
+
+/* Give the final surface room to reach and hold the shared sticky anchor. */
+@media (min-width: 901px) and (min-height: 740px) and (prefers-reduced-motion: no-preference) {
+  .project-stack::after {
+    content: "";
+    display: block;
+    height: max(
+      160px,
+      calc(100svh - max(520px, var(--frame-width) / 2.1) - var(--section-pad))
+    );
+  }
+}
+
+.identity-carousel .identity-caption {
+  padding-right: 40px;
 }

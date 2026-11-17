@@ -95,3 +95,5 @@ Identity surfaces also follow a gentle, monotonic horizontal projection: spacing
 Logo surfaces turn outward up to 14° around the Y axis toward each edge, mirrored left/right. A central straight-on band holds zero rotation while a card is near the middle. Perspective is applied only to the inner surfaces, preserving stable layout measurements and loop geometry. Reduced motion removes rotation, translation and scale.
 
 Portfolio entry now rises from the smaller initial size to a gentle 1.025× peak (1.012× on mobile), then eases back to exactly 1× before the final sticky position. Both phases are derived from scroll position, with zero slope at the peak and settling point, so reversing scroll retraces the effect.
+
+Depth refinement: logo cards overlap slightly at the far edges while keeping the centre flat and open; edge fades are twice as wide. Portfolio scaling peaks halfway between entering the viewport and the sticky top anchor, then settles over the remaining half. A trailing scroll runway lets the last card in each stack reach and hold that same anchor before the stack releases.
