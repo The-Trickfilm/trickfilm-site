@@ -2082,3 +2082,19 @@ fieldset:disabled .contact-submit {
 .presentation-display {
   background: #252525;
 }
+
+/* Magnification follows the rail centre and viewport entry without changing layout. */
+.identity-card-surface {
+  scale: var(--identity-scale, 1);
+  transform-origin: center;
+}
+.project-stack .project-panel {
+  scale: var(--entry-scale, 1);
+  transform-origin: center top;
+}
+@media (prefers-reduced-motion: reduce) {
+  .identity-card-surface,
+  .project-stack .project-panel {
+    scale: none;
+  }
+}

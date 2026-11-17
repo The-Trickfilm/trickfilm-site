@@ -906,3 +906,127 @@ test("Quality Engineering kit is styled, responsive, and downloads its draft fil
   await page.goto("/");
   await expect(page.locator(".identity-carousel a")).toHaveCount(0);
 });
+
+test("identity cards magnify at the rail centre and reverse without changing layout", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const rail = page.locator(".identity-viewport");
+  await rail.scrollIntoViewIfNeeded();
+  await page
+    .getByRole("button", { name: "Pause logo carousel", exact: true })
+    .click();
+  const originals = page.locator("[data-original] .identity-card");
+  const centre = originals.nth(2);
+  const scale = () =>
+    centre
+      .locator(".identity-card-surface")
+      .evaluate((el) => parseFloat(getComputedStyle(el).scale));
+  const originalWidth = await centre.evaluate(
+    (el) => el.getBoundingClientRect().width,
+  );
+  await expect.poll(scale).toBeGreaterThan(1.06);
+  expect(
+    await originals
+      .first()
+      .locator(".identity-card-surface")
+      .evaluate((el) => parseFloat(getComputedStyle(el).scale)),
+  ).toBeLessThan(0.94);
+  const start = await rail.evaluate((el) => el.scrollLeft);
+  await rail.evaluate((el, width) => {
+    el.scrollLeft += 2 * (width + 20);
+  }, originalWidth);
+  await expect.poll(scale).toBeLessThan(0.94);
+  expect(
+    await centre.evaluate((el) => el.getBoundingClientRect().width),
+  ).toBeCloseTo(originalWidth, 2);
+  await rail.evaluate((el, x) => {
+    el.scrollLeft = x;
+  }, start);
+  await expect.poll(scale).toBeGreaterThan(1.06);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(
+    () =>
+      new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve(null))),
+      ),
+  );
+  await rail.evaluate((el) => {
+    const card = el.querySelector(
+      "[data-original] .identity-card:nth-child(3)",
+    )!;
+    el.scrollLeft +=
+      card.getBoundingClientRect().left -
+      el.getBoundingClientRect().left +
+      card.getBoundingClientRect().width / 2 -
+      el.clientWidth / 2;
+  });
+  await expect.poll(scale).toBeGreaterThan(1.06);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  const surface = (await centre
+      .locator(".identity-card-surface")
+      .boundingBox())!,
+    viewport = (await rail.boundingBox())!;
+  expect(surface.y).toBeGreaterThanOrEqual(viewport.y);
+  expect(surface.y + surface.height).toBeLessThanOrEqual(
+    viewport.y + viewport.height + 1,
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(centre.locator(".identity-card-surface")).toHaveCSS(
+    "scale",
+    "none",
+  );
+  await expect(page.locator(".identity-carousel a")).toHaveCount(0);
+});
+
+test("both portfolio stacks magnify on entry, reverse, and keep their sticky anchors", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  for (const section of ["#work", "#applications"]) {
+    const card = page.locator(`${section} .project-panel`).first();
+    const top = await card.evaluate(
+      (el) => el.getBoundingClientRect().top + scrollY,
+    );
+    const layoutHeight = await card.evaluate(
+      (el) => (el as HTMLElement).offsetHeight,
+    );
+    const scale = () =>
+      card.evaluate((el) => parseFloat(getComputedStyle(el).scale));
+    await page.evaluate(
+      (y) => scrollTo({ top: y - 900, behavior: "instant" }),
+      top,
+    );
+    await expect.poll(scale).toBeLessThan(0.97);
+    expect(await scale()).toBeGreaterThanOrEqual(0.94);
+    expect((await card.boundingBox())!.y).toBeCloseTo(900, 0);
+    await page.evaluate(
+      (y) => scrollTo({ top: y - 350, behavior: "instant" }),
+      top,
+    );
+    await expect.poll(scale).toBe(1);
+    expect(await card.evaluate((el) => (el as HTMLElement).offsetHeight)).toBe(
+      layoutHeight,
+    );
+    await page.evaluate(
+      (y) => scrollTo({ top: y - 900, behavior: "instant" }),
+      top,
+    );
+    await expect.poll(scale).toBeLessThan(0.97);
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator("#work .project-panel").first()).toHaveCSS(
+    "scale",
+    "none",
+  );
+  await expect(page.locator("#applications .project-panel").first()).toHaveCSS(
+    "scale",
+    "none",
+  );
+});
