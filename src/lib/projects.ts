@@ -64,7 +64,7 @@ export const websiteProjects = [
         src: "/work/websites/stratacouncil/homepage-poster.jpg",
         videoSrc: "/work/websites/stratacouncil/homepage-scroll.mp4",
         width: 1200,
-        height: 832,
+        height: 750,
         alt: "StrataCouncil.ca homepage: Build a better strata council",
         contain: true,
       },
