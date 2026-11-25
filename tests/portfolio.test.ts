@@ -13,8 +13,10 @@ test("portfolio links and supplied assets are complete", () => {
   assert.equal(new Set(projects.map((p) => p.slug)).size, 10);
   for (const p of projects) {
     assert.equal(new URL(p.url, "https://trickfilm.com").protocol, "https:");
-    for (const frame of projectFrames(p))
+    for (const frame of projectFrames(p)) {
       assert.ok(existsSync(`public${frame.src}`));
+      if (frame.videoSrc) assert.ok(existsSync(`public${frame.videoSrc}`));
+    }
   }
   assert.equal(websiteProjects.at(-2)?.slug, "koan-analytics");
   assert.equal(websiteProjects.at(-2)?.tone, "charcoal");

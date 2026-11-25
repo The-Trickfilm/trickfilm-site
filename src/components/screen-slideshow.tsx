@@ -12,6 +12,40 @@ function subscribeMotion(callback: () => void) {
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const serverReduced = () => true;
 
+function AnimatedScreen({
+  src,
+  poster,
+  playing,
+}: {
+  src: string;
+  poster: string;
+  playing: boolean;
+}) {
+  const video = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const element = video.current!;
+    if (playing)
+      void element.play().catch(() => {
+        /* Keep the poster when autoplay is unavailable. */
+      });
+    else element.pause();
+    return () => element.pause();
+  }, [playing]);
+  return (
+    <video
+      ref={video}
+      src={src}
+      poster={poster}
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      aria-hidden="true"
+      className="preview-video"
+    />
+  );
+}
+
 export function ScreenSlideshow({
   frames,
   name,
@@ -85,6 +119,13 @@ export function ScreenSlideshow({
                 priority && i === 0 ? undefined : visible ? "eager" : "lazy"
               }
             />
+            {active === i && frame.videoSrc && visible && !reducedMotion && (
+              <AnimatedScreen
+                src={frame.videoSrc}
+                poster={frame.src}
+                playing={!paused && !hidden}
+              />
+            )}
           </span>
         ))}
       </div>

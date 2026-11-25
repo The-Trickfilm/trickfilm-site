@@ -23,7 +23,10 @@ export function LaptopPreview({
             intervalMs={
               "slideIntervalMs" in project ? project.slideIntervalMs : 3000
             }
-            darkBackground={project.slug === "thunderbird-entertainment"}
+            darkBackground={
+              project.slug === "thunderbird-entertainment" ||
+              project.slug === "stratacouncil-platform"
+            }
           />
         ) : (
           <div
