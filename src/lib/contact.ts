@@ -115,29 +115,30 @@ export async function handleContact(
     count: (bucket?.count || 0) + 1,
     expires: bucket?.expires || now + 600000,
   });
-  const token = process.env.MAILTRAP_API_TOKEN,
-    sender = process.env.MAILTRAP_FROM_EMAIL;
+  const token = process.env.RESEND_API_KEY,
+    sender = process.env.RESEND_FROM_EMAIL;
   if (!token || !sender) return reply(request, 503, errorMessage);
   try {
-    const response = await send("https://send.api.mailtrap.io/api/send", {
+    const response = await send("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: { email: sender, name: "Trickfilm website" },
-        to: [{ email: RECIPIENT }],
-        reply_to: { email, name },
+        from: `Trickfilm website <${sender}>`,
+        to: [RECIPIENT],
+        reply_to: email,
         subject: "New Trickfilm project enquiry",
         text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || "Not provided"}\n\n${message}`,
-        category: "Website enquiry",
+        tags: [{ name: "category", value: "website_enquiry" }],
       }),
       signal: AbortSignal.timeout(10000),
     });
     if (!response.ok) return reply(request, 502, errorMessage);
     const accepted = await response.json();
-    if (accepted.success !== true) return reply(request, 502, errorMessage);
+    if (!accepted || typeof accepted.id !== "string" || !accepted.id.trim())
+      return reply(request, 502, errorMessage);
     return reply(
       request,
       200,

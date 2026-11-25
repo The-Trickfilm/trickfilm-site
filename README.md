@@ -16,7 +16,7 @@ Validation: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, th
 - `public/work`: existing website screenshots and supplied logo exports, retained.
 - `public/work/applications`: captures of StrataCouncil.ca's public product previews. Its public footer identifies it as a Trickfilm product. These are not authenticated application screenshots.
 
-Project pages deliberately omit unsupported results, durations, testimonials, and process claims. Dedicated authenticated application screenshots, further application projects, and fuller case-study copy remain editorial follow-ups. The contact form posts to a server route and delivers via Mailtrap when its sending configuration is present. Direct email remains available.
+Project pages deliberately omit unsupported results, durations, testimonials, and process claims. Dedicated authenticated application screenshots, further application projects, and fuller case-study copy remain editorial follow-ups. The contact form posts to a server route and delivers via Resend when its sending configuration is present. Direct email remains available.
 
 ## Design
 
@@ -26,13 +26,21 @@ Content remains visible without JavaScript. Reduced motion disables entrance ani
 
 ## Deployment
 
-Vercel detects Next.js automatically. This change is developed on `feat/agentic-redesign` for pull-request review and a Vercel preview; merge through the repository's established production branch when approved. Page rendering needs no environment variables. Live contact delivery requires `MAILTRAP_API_TOKEN` and `MAILTRAP_FROM_EMAIL` in Vercel; the sender must belong to a verified Mailtrap sending domain. See `.env.example`. Domain/DNS configuration is separate from this implementation.
+Vercel detects Next.js automatically. This change is developed on `feat/agentic-redesign` for pull-request review and a Vercel preview; merge through the repository's established production branch when approved. Page rendering needs no environment variables. Live contact delivery requires `RESEND_API_KEY` and `RESEND_FROM_EMAIL` in Vercel; the sender must belong to a verified Resend sending domain. See `.env.example`. Domain/DNS configuration is separate from this implementation.
 
 ## Contact delivery
 
-POST `/api/contact` validates the form server-side, bounds request size, checks same-origin browser requests, rejects the honeypot, and applies a bounded per-instance throttle (5 attempts / 10 minutes / IP). This throttle is best-effort on serverless infrastructure; a shared Vercel WAF rule is appropriate if traffic requires stronger abuse protection. No message contents or credentials are logged or stored. Mailtrap sends to jeremy@trickfilm.com with the visitor as Reply-To.
+To activate delivery:
+1. Add `trickfilm.com` in Resend Domains and verify its sending DNS records in Cloudflare. Keep existing Google MX/TXT records; use Resend's `send` return-path subdomain and do not enable inbound receiving for the root domain.
+2. Create a Resend API key with sending access to that domain. Enter it directly in Vercel as `RESEND_API_KEY` (sensitive, Production; never `NEXT_PUBLIC_`).
+3. Set `RESEND_FROM_EMAIL=website@trickfilm.com` in Vercel Production. This is a verified-domain sending identity; incoming mail still goes to `jeremy@trickfilm.com` and replies go to the visitor.
+4. Merge the Resend integration PR into the production branch and deploy with those environment variables. Environment changes require a fresh deployment. No Resend SDK dependency is needed; the server calls the HTTPS API directly.
+5. Submit one clearly labelled test enquiry through `https://trickfilm.com/#contact`. Confirm success in the form, acceptance/delivery in Resend, and arrival at Jeremy's inbox (including spam). Acceptance alone does not confirm inbox delivery. Secrets must not be shared in chat, screenshots, or Git.
 
-Success is returned only after Mailtrap acknowledges acceptance. Missing configuration returns 503, delivery failure returns 502, and the form preserves entered text and offers direct email. Provider integration is tested with a mocked transport; live inbox delivery still requires configuration and an end-to-end check. Native HTML submission also returns an accessible confirmation/error page without JavaScript.
+
+POST `/api/contact` validates the form server-side, bounds request size, checks same-origin browser requests, rejects the honeypot, and applies a bounded per-instance throttle (5 attempts / 10 minutes / IP). This throttle is best-effort on serverless infrastructure; a shared Vercel WAF rule is appropriate if traffic requires stronger abuse protection. No message contents or credentials are logged or stored. Resend sends to jeremy@trickfilm.com with the visitor as Reply-To.
+
+Success is returned only after Resend acknowledges acceptance. Missing configuration returns 503, delivery failure returns 502, and the form preserves entered text and offers direct email. Provider integration is tested with a mocked transport; live inbox delivery still requires configuration and an end-to-end check. Native HTML submission also returns an accessible confirmation/error page without JavaScript.
 
 ## Services scrolling
 
