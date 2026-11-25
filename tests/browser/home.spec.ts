@@ -1321,3 +1321,65 @@ test("StrataCouncil product screens animate and cycle every three seconds with p
     ),
   ).toHaveCount(3);
 });
+
+test("StrataCouncil website preview scrolls on a five-second loop and supports pause", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/work/stratacouncil");
+  const screen = page.locator(".screen-slideshow");
+  await screen.scrollIntoViewIfNeeded();
+  const video = screen.locator("video");
+  await expect(video).toHaveAttribute("src", /homepage-scroll\.mp4$/);
+  await expect
+    .poll(() => video.evaluate((v) => (v as HTMLVideoElement).duration))
+    .toBeCloseTo(5, 1);
+  await expect
+    .poll(() => video.evaluate((v) => (v as HTMLVideoElement).currentTime))
+    .toBeGreaterThan(0);
+  expect(
+    await video.evaluate(
+      (v) => (v as HTMLVideoElement).muted && (v as HTMLVideoElement).loop,
+    ),
+  ).toBe(true);
+  await expect(screen.getByRole("button", { name: /Next/ })).toHaveCount(0);
+  await video.evaluate((v) => {
+    (v as HTMLVideoElement).currentTime = 4.7;
+  });
+  await expect
+    .poll(() => video.evaluate((v) => (v as HTMLVideoElement).currentTime))
+    .toBeLessThan(1);
+  await screen
+    .getByRole("button", { name: "Pause StrataCouncil.ca preview" })
+    .click();
+  await expect
+    .poll(() => video.evaluate((v) => (v as HTMLVideoElement).paused))
+    .toBe(true);
+  const stopped = await video.evaluate(
+    (v) => (v as HTMLVideoElement).currentTime,
+  );
+  await page.waitForTimeout(300);
+  expect(
+    await video.evaluate((v) => (v as HTMLVideoElement).currentTime),
+  ).toBeCloseTo(stopped, 1);
+  await screen
+    .getByRole("button", { name: "Play StrataCouncil.ca preview" })
+    .click();
+  await expect
+    .poll(() => video.evaluate((v) => (v as HTMLVideoElement).paused))
+    .toBe(false);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(video).toHaveCount(0);
+  await expect(
+    screen.getByRole("img", { name: /StrataCouncil.ca homepage/ }),
+  ).toBeVisible();
+  await page.goto("/");
+  await expect(
+    page.locator('[data-project-href="/work/stratacouncil"] .preview-frame'),
+  ).toHaveCount(1);
+  await expect(
+    page.locator(
+      '[data-project-href="/work/stratacouncil-platform"] .preview-frame',
+    ),
+  ).toHaveCount(3);
+});

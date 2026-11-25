@@ -15,7 +15,7 @@ export function LaptopPreview({
     <div className="laptop">
       <div className="laptop-lid">
         <span className="camera" />
-        {frames.length > 1 ? (
+        {frames.length > 1 || preview.videoSrc ? (
           <ScreenSlideshow
             frames={frames}
             name={project.name}

@@ -84,7 +84,8 @@ export function ScreenSlideshow({
     };
   }, []);
   useEffect(() => {
-    if (paused || !visible || hidden || reducedMotion) return;
+    if (frames.length < 2 || paused || !visible || hidden || reducedMotion)
+      return;
     const interval = setInterval(
       () => setActive((i) => (i + 1) % frames.length),
       intervalMs,
@@ -129,30 +130,36 @@ export function ScreenSlideshow({
           </span>
         ))}
       </div>
-      <div className="preview-controls">
-        <span aria-live={paused || reducedMotion ? "polite" : "off"}>
-          {active + 1} / {frames.length}
-        </span>
-        {!reducedMotion && (
-          <button
-            type="button"
-            onClick={() => setPaused((p) => !p)}
-            aria-label={`${paused ? "Play" : "Pause"} ${name} preview`}
-          >
-            {paused ? "Play" : "Pause"}
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={() => {
-            setPaused(true);
-            setActive((i) => (i + 1) % frames.length);
-          }}
-          aria-label={`Next ${name} image`}
-        >
-          Next
-        </button>
-      </div>
+      {(frames.length > 1 || !reducedMotion) && (
+        <div className="preview-controls">
+          {frames.length > 1 && (
+            <span aria-live={paused || reducedMotion ? "polite" : "off"}>
+              {active + 1} / {frames.length}
+            </span>
+          )}
+          {!reducedMotion && (
+            <button
+              type="button"
+              onClick={() => setPaused((p) => !p)}
+              aria-label={`${paused ? "Play" : "Pause"} ${name} preview`}
+            >
+              {paused ? "Play" : "Pause"}
+            </button>
+          )}
+          {frames.length > 1 && (
+            <button
+              type="button"
+              onClick={() => {
+                setPaused(true);
+                setActive((i) => (i + 1) % frames.length);
+              }}
+              aria-label={`Next ${name} image`}
+            >
+              Next
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
