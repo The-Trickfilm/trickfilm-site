@@ -29,7 +29,7 @@ test("rejects invalid and cross-origin submissions before delivery", async () =>
   let sent = false;
   const transport: typeof fetch = async () => {
     sent = true;
-    return Response.json({ success: true });
+    return Response.json({ id: "test-message-id" });
   };
   for (const values of [
     { email: "invalid" },
@@ -46,23 +46,61 @@ test("rejects invalid and cross-origin submissions before delivery", async () =>
   assert.equal(sent, false);
 });
 test("delivery succeeds only after provider acceptance; failure is not reported as sent", async () => {
-  const previousToken = process.env.MAILTRAP_API_TOKEN,
-    previousSender = process.env.MAILTRAP_FROM_EMAIL;
+  const previousToken = process.env.RESEND_API_KEY,
+    previousSender = process.env.RESEND_FROM_EMAIL;
   try {
-    delete process.env.MAILTRAP_API_TOKEN;
-    delete process.env.MAILTRAP_FROM_EMAIL;
+    delete process.env.RESEND_API_KEY;
+    delete process.env.RESEND_FROM_EMAIL;
     assert.equal((await handleContact(request())).status, 503);
-    process.env.MAILTRAP_API_TOKEN = "unit-test-token";
-    process.env.MAILTRAP_FROM_EMAIL = "website@trickfilm.com";
+    process.env.RESEND_API_KEY = "unit-test-token";
+    assert.equal((await handleContact(request())).status, 503);
+    process.env.RESEND_FROM_EMAIL = "website@trickfilm.com";
     const transport: typeof fetch = async (url, init) => {
-      assert.equal(url, "https://send.api.mailtrap.io/api/send");
+      assert.equal(url, "https://api.resend.com/emails");
       const payload = JSON.parse(String(init?.body));
-      assert.equal(payload.to[0].email, "jeremy@trickfilm.com");
-      assert.equal(payload.reply_to.email, "visitor@example.com");
+      assert.equal(init?.method, "POST");
+      assert.equal(
+        new Headers(init?.headers).get("Authorization"),
+        "Bearer unit-test-token",
+      );
+      assert.equal(payload.from, "Trickfilm website <website@trickfilm.com>");
+      assert.deepEqual(payload.to, ["jeremy@trickfilm.com"]);
+      assert.equal(payload.reply_to, "visitor@example.com");
       assert.match(payload.text, /new website project/);
-      return Response.json({ success: true });
+      return Response.json({ id: "test-message-id" });
     };
     assert.equal((await handleContact(request(), transport)).status, 200);
+    const nativeRequest = request();
+    nativeRequest.headers.set("Accept", "text/html");
+    const nativeResponse = await handleContact(nativeRequest, transport);
+    assert.equal(nativeResponse.status, 200);
+    assert.match(
+      nativeResponse.headers.get("Content-Type") || "",
+      /text\/html/,
+    );
+    assert.match(await nativeResponse.text(), /your message has been sent/);
+    for (const body of [
+      {},
+      { id: "" },
+      { id: 123 },
+      null,
+      { name: "validation_error", message: "Invalid sender" },
+    ]) {
+      assert.equal(
+        (await handleContact(request(), async () => Response.json(body)))
+          .status,
+        502,
+      );
+    }
+    assert.equal(
+      (
+        await handleContact(
+          request(),
+          async () => new Response("not json", { status: 200 }),
+        )
+      ).status,
+      502,
+    );
     assert.equal(
       (
         await handleContact(
@@ -81,10 +119,10 @@ test("delivery succeeds only after provider acceptance; failure is not reported 
       502,
     );
   } finally {
-    if (previousToken === undefined) delete process.env.MAILTRAP_API_TOKEN;
-    else process.env.MAILTRAP_API_TOKEN = previousToken;
-    if (previousSender === undefined) delete process.env.MAILTRAP_FROM_EMAIL;
-    else process.env.MAILTRAP_FROM_EMAIL = previousSender;
+    if (previousToken === undefined) delete process.env.RESEND_API_KEY;
+    else process.env.RESEND_API_KEY = previousToken;
+    if (previousSender === undefined) delete process.env.RESEND_FROM_EMAIL;
+    else process.env.RESEND_FROM_EMAIL = previousSender;
   }
 });
 test("oversized submissions and repeated attempts are bounded", async () => {
