@@ -24,14 +24,6 @@ export const logoProjects = [
     height: 400,
   },
   {
-    name: "TRI-MAPP",
-    sector: "Logo design",
-    image: "tri-mapp",
-    src: "/work/logos/tri-mapp.webp",
-    width: 600,
-    height: 400,
-  },
-  {
     name: "Fulcrum",
     sector: "Logo design",
     image: "fulcrum",

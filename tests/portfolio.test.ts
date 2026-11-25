@@ -18,10 +18,10 @@ test("portfolio links and supplied assets are complete", () => {
   }
   assert.equal(websiteProjects.at(-2)?.slug, "koan-analytics");
   assert.equal(websiteProjects.at(-2)?.tone, "charcoal");
-  assert.equal(logoProjects.length, 19);
+  assert.equal(logoProjects.length, 18);
   assert.ok(
     !logoProjects.some((p) =>
-      ["houndz-character", "xdi-application"].includes(p.image),
+      ["houndz-character", "xdi-application", "tri-mapp"].includes(p.image),
     ),
   );
   assert.ok(logoProjects.some((p) => p.image === "houndz-unleashed"));

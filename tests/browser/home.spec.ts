@@ -21,7 +21,7 @@ test("portfolio routes, contact, and logo gallery work", async ({ page }) => {
   }
   const carousel = page.locator(".identity-carousel");
   await expect(carousel.locator("[data-original] .identity-card")).toHaveCount(
-    19,
+    18,
   );
   await expect(
     carousel.locator(".identity-card a, a.identity-card"),
@@ -69,7 +69,7 @@ test("content works without JavaScript and with reduced motion", async ({
   const page = await context.newPage();
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.locator("[data-original] .identity-card")).toHaveCount(19);
+  await expect(page.locator("[data-original] .identity-card")).toHaveCount(18);
   await expect(page.locator("[data-clone]").first()).not.toBeVisible();
   await expect(page.locator(".identity-carousel a")).toHaveCount(0);
   await context.close();
