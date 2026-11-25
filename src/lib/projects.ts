@@ -59,6 +59,16 @@ export const websiteProjects = [
     domain: "stratacouncil.ca",
     url: "https://www.stratacouncil.ca/",
     tone: "teal",
+    previews: [
+      {
+        src: "/work/websites/stratacouncil/homepage-poster.jpg",
+        videoSrc: "/work/websites/stratacouncil/homepage-scroll.mp4",
+        width: 1200,
+        height: 750,
+        alt: "StrataCouncil.ca homepage: Build a better strata council",
+        contain: true,
+      },
+    ],
     description:
       "The public website for StrataCouncil.ca, a Trickfilm product.",
   },
