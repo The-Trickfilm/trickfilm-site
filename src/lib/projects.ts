@@ -72,6 +72,35 @@ export const applicationProject = {
   domain: "stratacouncil.ca",
   url: "https://www.stratacouncil.ca/",
   tone: "paper",
+  slideIntervalMs: 3000,
+  previews: [
+    {
+      src: "/work/applications/stratacouncil/stratacouncil-training-poster.jpg",
+      videoSrc: "/work/applications/stratacouncil/stratacouncil-training.mp4",
+      width: 1920,
+      height: 756,
+      alt: "StrataCouncil.ca training: answering a common-property knowledge check",
+      contain: true,
+    },
+    {
+      src: "/work/applications/stratacouncil/stratacouncil-meeting-mode-poster.jpg",
+      videoSrc:
+        "/work/applications/stratacouncil/stratacouncil-meeting-mode.mp4",
+      width: 1920,
+      height: 1016,
+      alt: "StrataCouncil.ca Meeting Mode: a roof repair motion and recorded vote",
+      contain: true,
+    },
+    {
+      src: "/work/applications/stratacouncil/stratacouncil-stratasphere-poster.jpg",
+      videoSrc:
+        "/work/applications/stratacouncil/stratacouncil-stratasphere.mp4",
+      width: 1920,
+      height: 996,
+      alt: "StrataCouncil.ca Stratasphere: a bylaw answer with linked sources",
+      contain: true,
+    },
+  ],
   description:
     "A Trickfilm product bringing council training, meeting tools, and institutional memory together.",
 } as const;
@@ -205,6 +234,7 @@ export const projects = [...websiteProjects, ...creativeProjects];
 export type Project = (typeof projects)[number];
 export type ProjectFrame = {
   src: string;
+  videoSrc?: string;
   width: number;
   height: number;
   alt: string;
@@ -231,16 +261,10 @@ export function projectPreview(project: Project): ProjectFrame {
       contain: true,
     };
   return {
-    src:
-      project.slug === "stratacouncil-platform"
-        ? "/work/applications/stratacouncil-meetings.webp"
-        : `/work/${project.image}.webp`,
+    src: `/work/${project.image}.webp`,
     width: 1200,
     height: 833,
-    alt:
-      project.slug === "stratacouncil-platform"
-        ? "Public StrataCouncil.ca meeting-tools preview"
-        : `${project.name} website preview`,
+    alt: `${project.name} website preview`,
     contain: false,
   };
 }

@@ -1253,3 +1253,71 @@ for (const viewport of [
     }
   });
 }
+
+test("StrataCouncil product screens animate and cycle every three seconds with pause and reduced motion", async ({
+  page,
+}) => {
+  test.setTimeout(40000);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/work/stratacouncil-platform");
+  const screen = page.locator(".screen-slideshow");
+  await screen.scrollIntoViewIfNeeded();
+  const active = () => screen.locator('[data-preview-active="true"]');
+  await expect(screen.locator(".preview-frame")).toHaveCount(3);
+  await expect(active().locator("img")).toHaveAttribute("alt", /training:/);
+  await expect
+    .poll(() =>
+      active()
+        .locator("video")
+        .evaluate((v) => (v as HTMLVideoElement).currentTime),
+    )
+    .toBeGreaterThan(0);
+  await page.waitForTimeout(1800);
+  await expect(active().locator("img")).toHaveAttribute("alt", /training:/);
+  await expect(active().locator("img")).toHaveAttribute(
+    "alt",
+    /Meeting Mode:/,
+    { timeout: 2200 },
+  );
+  await expect(active().locator("img")).toHaveAttribute(
+    "alt",
+    /Stratasphere:/,
+    { timeout: 3500 },
+  );
+  await expect(active().locator("img")).toHaveAttribute("alt", /training:/, {
+    timeout: 3500,
+  });
+  await screen
+    .getByRole("button", { name: "Pause StrataCouncil.ca preview" })
+    .click();
+  const before = await active().locator("img").getAttribute("alt");
+  await expect
+    .poll(() =>
+      active()
+        .locator("video")
+        .evaluate((v) => (v as HTMLVideoElement).paused),
+    )
+    .toBe(true);
+  const time = await active()
+    .locator("video")
+    .evaluate((v) => (v as HTMLVideoElement).currentTime);
+  await page.waitForTimeout(3200);
+  await expect(active().locator("img")).toHaveAttribute("alt", before!);
+  expect(
+    await active()
+      .locator("video")
+      .evaluate((v) => (v as HTMLVideoElement).currentTime),
+  ).toBeCloseTo(time, 1);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(screen.locator("video")).toHaveCount(0);
+  await screen
+    .getByRole("button", { name: "Next StrataCouncil.ca image" })
+    .click();
+  await expect(active().locator("img")).toHaveAttribute("alt", /Meeting Mode:/);
+  await page.goto("/");
+  await expect(
+    page.locator(
+      '[data-project-href="/work/stratacouncil-platform"] .preview-frame',
+    ),
+  ).toHaveCount(3);
+});
