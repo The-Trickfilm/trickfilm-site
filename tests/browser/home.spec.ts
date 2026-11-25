@@ -1322,7 +1322,7 @@ test("StrataCouncil product screens animate and cycle every three seconds with p
   ).toHaveCount(3);
 });
 
-test("StrataCouncil website preview scrolls on a five-second loop and supports pause", async ({
+test("StrataCouncil website preview scrolls on a ten-second loop and supports pause", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -1333,7 +1333,7 @@ test("StrataCouncil website preview scrolls on a five-second loop and supports p
   await expect(video).toHaveAttribute("src", /homepage-scroll\.mp4$/);
   await expect
     .poll(() => video.evaluate((v) => (v as HTMLVideoElement).duration))
-    .toBeCloseTo(5, 1);
+    .toBeCloseTo(10, 1);
   await expect
     .poll(() => video.evaluate((v) => (v as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0);
@@ -1344,7 +1344,7 @@ test("StrataCouncil website preview scrolls on a five-second loop and supports p
   ).toBe(true);
   await expect(screen.getByRole("button", { name: /Next/ })).toHaveCount(0);
   await video.evaluate((v) => {
-    (v as HTMLVideoElement).currentTime = 4.7;
+    (v as HTMLVideoElement).currentTime = 9.7;
   });
   await expect
     .poll(() => video.evaluate((v) => (v as HTMLVideoElement).currentTime))
